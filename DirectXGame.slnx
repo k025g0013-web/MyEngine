@@ -1,0 +1,9 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/ソリューション項目/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Project Path="DirectXGame.vcxproj" Id="89469fc5-0886-49e6-90da-99357c5d3f49" />
+</Solution>
