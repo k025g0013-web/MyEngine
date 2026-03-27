@@ -4,6 +4,10 @@
 #include <string>
 #include <format>
 
+#include <filesystem>
+#include <fstream>
+#include <chrono>
+
 // ウィンドウプロシ―ジャ
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	// メッセージに応じてゲーム固有の処理を行う
@@ -56,7 +60,8 @@ std::string ConvertString(const std::wstring& str) {
 #pragma endregion
 
 // ログ
-void Log(const std::string& message) {
+void Log(std::ostream& os, const std::string& message) {
+	os << message << std::endl;
 	OutputDebugStringA(message.c_str());
 }
 
@@ -65,8 +70,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//===============
 	// ログ
 	//===============
+	// ログをファイル出力
+	std::filesystem::create_directory("logs");	// ログのディレクトリを用意
+
+	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();	// 現在時刻を取得(UTC時刻)
+	std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>		// ログファイルの名前にコンマ何秒はいらないので、削って秒にする
+		nowSeconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
+	std::chrono::zoned_time localTime{ std::chrono::current_zone(), nowSeconds };	// 日本時間(PCの設定時間)に変換
+	std::string dateString = std::format("{:%Y%m%d_%H%M%S}", localTime);			// formatを使って年月日_時分秒の文字列に変換
+	std::string logFilePath = std::string("logs/") + dateString + ".log";			// 時刻を使ってファイル名を決定
+	std::ofstream logStream(logFilePath);											// ファイルを作って書き込み準備
+
 	std::wstring wstringValue = L"testWstring";
-	Log(ConvertString(std::format(L"WSTRING {}\n", wstringValue)));
+	Log(logStream, ConvertString(std::format(L"WSTRING {}\n", wstringValue)));
 
 	//===============
 	// ウィンドウ生成
@@ -94,18 +110,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// ウィンドウの生成
 	HWND hwnd = CreateWindow(
-        wc.lpszClassName,		// 利用するクラス名
-        L"CG2",					// タイトルバーの文字
-        WS_OVERLAPPEDWINDOW,	// よく見るウィンドウスタイル
-        CW_USEDEFAULT,			// 表示X座標(Windowsに任せる)
-        CW_USEDEFAULT,			// 表示Y座標(WindowsOSに任せる)
-        wrc.right - wrc.left,	// ウィンドウX幅
-        wrc.bottom - wrc.top,	// ウィンドウY幅
-        nullptr,				// 親ウィンドウハンドル
-        nullptr,				// メニューハンドル
-        wc.hInstance,			// インスタントハンドル
-        nullptr					// オプション
-    );
+		wc.lpszClassName,		// 利用するクラス名
+		L"CG2",					// タイトルバーの文字
+		WS_OVERLAPPEDWINDOW,	// よく見るウィンドウスタイル
+		CW_USEDEFAULT,			// 表示X座標(Windowsに任せる)
+		CW_USEDEFAULT,			// 表示Y座標(WindowsOSに任せる)
+		wrc.right - wrc.left,	// ウィンドウX幅
+		wrc.bottom - wrc.top,	// ウィンドウY幅
+		nullptr,				// 親ウィンドウハンドル
+		nullptr,				// メニューハンドル
+		wc.hInstance,			// インスタントハンドル
+		nullptr					// オプション
+	);
 
 	// ウィンドウを表示する
 	ShowWindow(hwnd, SW_SHOW);
@@ -122,7 +138,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-		}else{
+		}
+		else {
 			// ゲームの処理
 		}
 	}
