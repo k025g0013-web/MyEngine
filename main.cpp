@@ -14,6 +14,33 @@
 #include <dxgi1_6.h>
 #include <cassert>
 
+#include <dbghelp.h>
+#pragma comment(lib, "Dbghelp.lib")
+#include <strsafe.h>
+
+//	CrashHandleの登録
+static LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception) {
+	// 時刻を取得して、時刻を名前に入れたファイルを作成。Dumpsディレクトリ以下に出力
+	SYSTEMTIME time;
+	GetLocalTime(&time);
+	wchar_t filePath[MAX_PATH] = { 0 };
+	CreateDirectory(L"./Dumps", nullptr);
+	StringCchPrintfW(filePath, MAX_PATH, L"./Dumps/%04d-%02d%02d-%02d%02d.dmp", time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute);
+	HANDLE dumpFileHandle = CreateFile(filePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
+	// processId(このexeのID)とクラッシュ(例外)の発生したthreadIdを取得
+	DWORD processId = GetCurrentProcessId();
+	DWORD threadId = GetCurrentThreadId();
+	// 設定情報を入力
+	MINIDUMP_EXCEPTION_INFORMATION minidumpInformation{ 0 };
+	minidumpInformation.ThreadId = threadId;
+	minidumpInformation.ExceptionPointers = exception;
+	minidumpInformation.ClientPointers = TRUE;
+	// Dumpを出力。MiniDumpNormalは最低限の情報を出力するフラグ
+	MiniDumpWriteDump(GetCurrentProcess(), processId, dumpFileHandle, MiniDumpNormal, &minidumpInformation, nullptr, nullptr);
+	// 他に関連づけられているSEH例外ハンドラがあれば実行。通常はプロセスを終了する
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+
 // ウィンドウプロシ―ジャ
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	// メッセージに応じてゲーム固有の処理を行う
@@ -73,6 +100,12 @@ void Log(std::ostream& os, const std::string& message) {
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//===============
+	// CrashHandler
+	//===============
+	// 誰も捕捉しなかった場合に(UnHandle)、補足する関数を登録
+	SetUnhandledExceptionFilter(ExportDump);
+
+	//===============
 	// ログ
 	//===============
 	// ログをファイル出力
@@ -89,6 +122,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//===============
 	// DirectXの初期化
 	//===============
+#pragma region DirectXの初期化
+
 	IDXGIFactory7* dxgiFactory = nullptr;						// DXGIファクトリーの作成
 	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));	// HRESULTはWindows系のエラーコードであり、関数が成功したかどうかをSUCCEDEDマクロで判断できる
 	assert(SUCCEEDED(hr));										// 初期化の根本的な部分でエラーが出た場合はプログラムが間違っているか、どうにもできない場合が多いのでassertにしておく
@@ -134,6 +169,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// デバイスの生成がうまくいかなかったので起動できない
 	assert(device != nullptr);
 	Log(logStream, "Complete create D3D12Device!!!\n"); // 初期化完了のログを出す
+
+#pragma endregion
 
 	//===============
 	// ウィンドウ生成
