@@ -63,7 +63,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 // ConvertString
 //===============
 #pragma region ConvertString
-// wstring -> string
+// string -> wstring
 std::wstring ConvertString(const std::string& str) {
 	if (str.empty()) {
 		return std::wstring();
@@ -78,7 +78,7 @@ std::wstring ConvertString(const std::string& str) {
 	return result;
 }
 
-// string -> wstring
+// wstring -> string
 std::string ConvertString(const std::wstring& str) {
 	if (str.empty()) {
 		return std::string();
