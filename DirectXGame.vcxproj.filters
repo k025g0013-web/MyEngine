@@ -23,5 +23,6 @@
     <None Include=".gitignore">
       <Filter>ソース ファイル</Filter>
     </None>
+    <None Include="exclusion.dic" />
   </ItemGroup>
 </Project>
