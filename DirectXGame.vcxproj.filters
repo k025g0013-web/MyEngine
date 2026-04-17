@@ -25,4 +25,8 @@
     </None>
     <None Include="exclusion.dic" />
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Object3d.PS.hlsl" />
+    <FxCompile Include="Object3d.VS.hlsl" />
+  </ItemGroup>
 </Project>
