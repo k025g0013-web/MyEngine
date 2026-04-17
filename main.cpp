@@ -112,13 +112,13 @@ void Log(std::ostream& os, const std::string& message) {
 
 
 //===============
-// CompileShader
+// CompileSharder
 //===============
-IDxcBlob* CompileShader(
+IDxcBlob* CompileSharder(
 	// ログ出力先
 	std::ostream& logStream,
 
-	// CompilerするShaderファイルへのパス
+	// Compilerするsharderファイルへのパス
 	const std::wstring& filePath,
 	// Compilerに使用するProfile
 	const wchar_t* profile,
@@ -131,17 +131,17 @@ IDxcBlob* CompileShader(
 	// hlslファイルを読む
 	//===============
 	// これからシェーダーをコンパイルする旨をログに出す
-	Log(logStream, ConvertString(std::format(L"Begin CompileShader, path:{}, profile:{}\n", filePath, profile)));
+	Log(logStream, ConvertString(std::format(L"Begin Compilesharder, path:{}, profile:{}\n", filePath, profile)));
 	// hlslファイルを読む
-	IDxcBlobEncoding* shaderSource = nullptr;
-	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
+	IDxcBlobEncoding* sharderSource = nullptr;
+	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &sharderSource);
 	// 読めなかったら止める
 	assert(SUCCEEDED(hr));
 	// 読み込んだファイルの内容を設定する
-	DxcBuffer shaderSourceBuffer;
-	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
-	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
-	shaderSourceBuffer.Encoding = DXC_CP_UTF8;	// UTF8の文字コードであることを通知
+	DxcBuffer sharderSourceBuffer{};
+	sharderSourceBuffer.Ptr = sharderSource->GetBufferPointer();
+	sharderSourceBuffer.Size = sharderSource->GetBufferSize();
+	sharderSourceBuffer.Encoding = DXC_CP_UTF8;	// UTF8の文字コードであることを通知
 
 	//===============
 	// Compileする
@@ -149,19 +149,19 @@ IDxcBlob* CompileShader(
 	LPCWSTR arguments[] = {
 		filePath.c_str(), // コンパイル対象のhlslファイル名
 		L"-E", L"main",	// エントリーポイントの指定。基本的にmain以外にはしない
-		L"-T", profile,	// ShaderProfileの設定
+		L"-T", profile,	// SharderProfileの設定
 		L"-Zi", L"-Qembed_debug",	// デバッグ用の情報を埋め込む
 		L"-Od",		// 最適化を外しておく
 		L"-Zpr",	// メモリレイアウトは行優先
 	};
-	// 実際にをShaderコンパイルする
-	IDxcResult* shaderResult = nullptr;
+	// 実際にをsharderコンパイルする
+	IDxcResult* sharderResult = nullptr;
 	hr = dxcCompiler->Compile(
-		&shaderSourceBuffer,	// 読み込んだファイル
+		&sharderSourceBuffer,	// 読み込んだファイル
 		arguments,				// コンパイルオプション
 		_countof(arguments),	// コンパイルオプション
 		includeHandler,			// includeが含まれた諸々
-		IID_PPV_ARGS(&shaderResult) // コンパイル結果
+		IID_PPV_ARGS(&sharderResult) // コンパイル結果
 	);
 	// コンパイルエラーではなくdxcが起動できないなど致命的な状況
 	assert(SUCCEEDED(hr));
@@ -170,10 +170,10 @@ IDxcBlob* CompileShader(
 	// 警告・エラーがでていないか確認する
 	//===============
 	// 警告・エラーが出てたらログに出して止める
-	IDxcBlobUtf8* shaderError = nullptr;
-	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
-	if (shaderError != nullptr && shaderError->GetStringPointer() != 0) {
-		Log(logStream, shaderError->GetStringPointer());
+	IDxcBlobUtf8* sharderError = nullptr;
+	sharderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&sharderError), nullptr);
+	if (sharderError != nullptr && sharderError->GetStringLength() != 0) {
+		Log(logStream, sharderError->GetStringPointer());
 		// 警告・エラーダメゼッタイ
 		assert(false);
 	}
@@ -182,16 +182,16 @@ IDxcBlob* CompileShader(
 	// Compile結果を受け取って返す
 	//===============
 	// コンパイル結果から実行用のバイナリ部分を取得
-	IDxcBlob* shaderBlob = nullptr;
-	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
+	IDxcBlob* sharderBlob = nullptr;
+	hr = sharderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&sharderBlob), nullptr);
 	assert(SUCCEEDED(hr));
 	// 成功したログを出す
 	Log(logStream, ConvertString(std::format(L"Compile Succeeded, path:{}, profile:{}\n", filePath, profile)));
 	// もう使わないリソースを解放
-	shaderSource->Release();
-	shaderResult->Release();
+	sharderSource->Release();
+	sharderResult->Release();
 	// 実行用のバイナリを返却
-	return shaderBlob;
+	return sharderBlob;
 }
 
 // Windowsアプリでのエントリーポイント(main関数)
@@ -498,23 +498,23 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
-	// Shaderをコンパイルする
-	IDxcBlob* vertexShaderBlob = CompileShader(logStream, L"Object3d.VS.hlsl",
+	// sharderをコンパイルする
+	IDxcBlob* vertexSharderBlob = CompileSharder(logStream, L"Object3d.VS.hlsl",
 	L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(vertexShaderBlob != nullptr);
+	assert(vertexSharderBlob != nullptr);
 
-	IDxcBlob* pixelShaderBlob = CompileShader(logStream, L"Object3d.PS.hlsl",
+	IDxcBlob* pixelSharderBlob = CompileSharder(logStream, L"Object3d.PS.hlsl",
 	L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(pixelShaderBlob != nullptr);
+	assert(pixelSharderBlob != nullptr);
 
 	// PSO生成
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature;
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;
-	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),
-	vertexShaderBlob->GetBufferSize() };
-	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),
-	pixelShaderBlob->GetBufferSize() };
+	graphicsPipelineStateDesc.VS = { vertexSharderBlob->GetBufferPointer(),
+	vertexSharderBlob->GetBufferSize() };
+	graphicsPipelineStateDesc.PS = { pixelSharderBlob->GetBufferPointer(),
+	pixelSharderBlob->GetBufferSize() };
 	graphicsPipelineStateDesc.BlendState = blendDesc;
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;
 	// 書き込むRTVの情報
@@ -723,8 +723,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		errorBlob->Release();
 	}
 	rootSignature->Release();
-	pixelShaderBlob->Release();
-	vertexShaderBlob->Release();
+	pixelSharderBlob->Release();
+	vertexSharderBlob->Release();
 
 	return 0;
 }
