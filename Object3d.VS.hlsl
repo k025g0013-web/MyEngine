@@ -1,9 +1,9 @@
 struct VertexSharderOutput {
-	float4 position : SV_POSITION;
+	float32_t4 position : SV_POSITION;
 };
 
 struct VertexSharderInput {
-    float4 position : POSITION0;
+    float32_t4  position : POSITION0;
 };
 
 VertexSharderOutput main(VertexSharderInput input) {

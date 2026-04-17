@@ -1,1 +1,5 @@
-dxgi
+wparam, 
+lparam, 
+dxgi,
+hlsl, 
+Descs

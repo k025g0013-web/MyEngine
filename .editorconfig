@@ -1,5 +1,5 @@
 # cpp/hファイルの文字コードを「utf-8」に強制する
-[*.{cpp,h}]
+[*.{cpp,h,hlsl,hlsli}]
 charset = utf-8
 
 # スペルミスをintellisense上での「エラー」として扱う
