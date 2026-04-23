@@ -4,13 +4,11 @@ struct Material {
 
 ConstantBuffer<Material> gMaterial : register(b0);
 
-struct PixelSharderOutput
-{
+struct PixelSharderOutput {
     float32_t4 color : SV_TARGET0;
 };
 
-PixelSharderOutput main()
-{
+PixelSharderOutput main() {
     PixelSharderOutput output;
     output.color = gMaterial.color;
     return output;
