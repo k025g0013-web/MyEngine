@@ -24,12 +24,243 @@
 #include <dxcapi.h>
 #pragma comment(lib, "dxcompiler.lib")
 
+struct Vector3 {
+	float x;
+	float y;
+	float z;
+};
+
 struct Vector4 {
 	float x;
 	float y;
 	float z;
 	float w;
 };
+
+struct Matrix4x4 {
+	float m[4][4];
+};
+
+struct Transform {
+	Vector3 scale;
+	Vector3 rotate;
+	Vector3 translate;
+};
+
+// 単位行列の作成
+Matrix4x4 MakeIdentity4x4() {
+	Matrix4x4 result = {};
+	for (int i = 0; i < 4; i++) {
+		result.m[i][i] = 1;
+	}
+	return result;
+}
+
+
+// 行列の積
+Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2) {
+	Matrix4x4 result = {};
+	for (int row = 0; row < 4; row++) {
+		for (int column = 0; column < 4; column++) {
+			for (int k = 0; k < 4; k++) {
+				result.m[row][column] += m1.m[row][k] * m2.m[k][column];
+			}
+		}
+	}
+	return result;
+}
+
+// 平行移動行列
+Matrix4x4 MakeTranslateMatrix(const Vector3& translate) {
+	Matrix4x4 result = {};
+
+	// 単位行列にする
+	for (int i = 0; i < 4; ++i) {
+		result.m[i][i] = 1.0f;
+	}
+
+	result.m[3][0] = translate.x;
+	result.m[3][1] = translate.y;
+	result.m[3][2] = translate.z;
+
+	return result;
+}
+
+// 拡大縮小行列
+Matrix4x4 MakeScaleMatrix(const Vector3& scale) {
+	Matrix4x4 result = {};
+
+	result.m[0][0] = scale.x;
+	result.m[1][1] = scale.y;
+	result.m[2][2] = scale.z;
+	result.m[3][3] = 1.0f;
+
+	return result;
+}
+
+// x軸回転行列
+Matrix4x4 MakeRotateXMatrix(float radian) {
+	Matrix4x4 result = {};
+
+	result.m[0][0] = 1.0f;
+	result.m[1][1] = std::cos(radian);
+	result.m[1][2] = std::sin(radian);
+
+	result.m[2][1] = -std::sin(radian);
+	result.m[2][2] = std::cos(radian);
+	result.m[3][3] = 1.0f;
+
+	return result;
+};
+
+// y軸回転行列
+Matrix4x4 MakeRotateYMatrix(float radian) {
+	Matrix4x4 result = {};
+
+	result.m[0][0] = std::cos(radian);
+	result.m[0][2] = -std::sin(radian);
+	result.m[1][1] = 1.0f;
+
+	result.m[2][0] = std::sin(radian);
+	result.m[2][2] = std::cos(radian);
+	result.m[3][3] = 1.0f;
+
+	return result;
+};
+
+// z軸回転行列
+Matrix4x4 MakeRotateZMatrix(float radian) {
+	Matrix4x4 result = {};
+
+	result.m[0][0] = std::cos(radian);
+	result.m[0][1] = std::sin(radian);
+	result.m[1][0] = -std::sin(radian);
+
+	result.m[1][1] = std::cos(radian);
+	result.m[2][2] = 1.0f;
+	result.m[3][3] = 1.0f;
+
+	return result;
+};
+
+// アフィン変換
+Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotation, const Vector3& translation) {
+
+	Matrix4x4 s = MakeScaleMatrix(scale);
+
+	Matrix4x4 r = Multiply(Multiply(
+		MakeRotateXMatrix(rotation.x),
+		MakeRotateYMatrix(rotation.y)),
+		MakeRotateZMatrix(rotation.z)
+	);
+
+	Matrix4x4 t = MakeTranslateMatrix(translation);
+
+	return Multiply(Multiply(s, r), t);
+}
+
+// 行列式
+float Det3(
+	float a1, float a2, float a3,
+	float b1, float b2, float b3,
+	float c1, float c2, float c3) {
+
+	return
+		a1 * (b2 * c3 - b3 * c2) -
+		a2 * (b1 * c3 - b3 * c1) +
+		a3 * (b1 * c2 - b2 * c1);
+}
+
+// 逆行列
+Matrix4x4 Inverse(const Matrix4x4& m) {
+	Matrix4x4 result = {};
+
+	// 余因子行列
+	Matrix4x4 cofactor = {};
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			float sub[3][3]{};
+			int r = 0;
+
+			// 元の行列を走査
+			for (int row = 0; row < 4; ++row) {
+				if (row == i) continue;
+				int c = 0;
+
+				for (int col = 0; col < 4; ++col) {
+					if (col == j) continue;
+					sub[r][c] = m.m[row][col];
+					c++;
+				}
+				r++;
+			}
+
+			// 3x3行列式
+			float minor = Det3(
+				sub[0][0], sub[0][1], sub[0][2],
+				sub[1][0], sub[1][1], sub[1][2],
+				sub[2][0], sub[2][1], sub[2][2]
+			);
+
+			// 符号付き余因子
+			float sign;
+			if ((i + j) % 2 == 0) {
+				sign = 1.0f;
+			}
+			else {
+				sign = -1.0f;
+			}
+
+			cofactor.m[i][j] = sign * minor;
+		}
+	}
+
+	// 転置行列
+	Matrix4x4 adjugate = {};
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			adjugate.m[i][j] = cofactor.m[j][i];
+		}
+	}
+
+	// 行列式
+	float det = 0.0f;
+	for (int j = 0; j < 4; ++j) {
+		det += m.m[0][j] * cofactor.m[0][j];
+	}
+
+	// ゼロチェック
+	if (det == 0.0f) {
+		return result;
+	}
+
+	// 逆行列
+	float invDet = 1.0f / det;
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			result.m[i][j] = adjugate.m[i][j] * invDet;
+		}
+	}
+
+	return result;
+}
+
+
+// 透視投影行列
+Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip) {
+	Matrix4x4 result = {};
+
+	float fov = 1.0f / std::tan(fovY / 2.0f);
+
+	result.m[0][0] = fov / aspectRatio;
+	result.m[1][1] = fov;
+	result.m[2][2] = farClip / (farClip - nearClip);
+	result.m[2][3] = 1.0f;
+	result.m[3][2] = (-nearClip * farClip) / (farClip - nearClip);
+
+	return result;
+};
+
 
 //	CrashHandleの登録
 static LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception) {
@@ -112,13 +343,13 @@ void Log(std::ostream& os, const std::string& message) {
 
 
 //===============
-// CompileSharder
+// CompileShader
 //===============
-IDxcBlob* CompileSharder(
+IDxcBlob* CompileShader(
 	// ログ出力先
 	std::ostream& logStream,
 
-	// Compilerするsharderファイルへのパス
+	// Compilerするshaderファイルへのパス
 	const std::wstring& filePath,
 	// Compilerに使用するProfile
 	const wchar_t* profile,
@@ -131,17 +362,17 @@ IDxcBlob* CompileSharder(
 	// hlslファイルを読む
 	//===============
 	// これからシェーダーをコンパイルする旨をログに出す
-	Log(logStream, ConvertString(std::format(L"Begin Compilesharder, path:{}, profile:{}\n", filePath, profile)));
+	Log(logStream, ConvertString(std::format(L"Begin Compileshader, path:{}, profile:{}\n", filePath, profile)));
 	// hlslファイルを読む
-	IDxcBlobEncoding* sharderSource = nullptr;
-	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &sharderSource);
+	IDxcBlobEncoding* shaderSource = nullptr;
+	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 	// 読めなかったら止める
 	assert(SUCCEEDED(hr));
 	// 読み込んだファイルの内容を設定する
-	DxcBuffer sharderSourceBuffer{};
-	sharderSourceBuffer.Ptr = sharderSource->GetBufferPointer();
-	sharderSourceBuffer.Size = sharderSource->GetBufferSize();
-	sharderSourceBuffer.Encoding = DXC_CP_UTF8;	// UTF8の文字コードであることを通知
+	DxcBuffer shaderSourceBuffer{};
+	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
+	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
+	shaderSourceBuffer.Encoding = DXC_CP_UTF8;	// UTF8の文字コードであることを通知
 
 	//===============
 	// Compileする
@@ -149,19 +380,19 @@ IDxcBlob* CompileSharder(
 	LPCWSTR arguments[] = {
 		filePath.c_str(), // コンパイル対象のhlslファイル名
 		L"-E", L"main",	// エントリーポイントの指定。基本的にmain以外にはしない
-		L"-T", profile,	// SharderProfileの設定
+		L"-T", profile,	// ShaderProfileの設定
 		L"-Zi", L"-Qembed_debug",	// デバッグ用の情報を埋め込む
 		L"-Od",		// 最適化を外しておく
 		L"-Zpr",	// メモリレイアウトは行優先
 	};
-	// 実際にをsharderコンパイルする
-	IDxcResult* sharderResult = nullptr;
+	// 実際にをshaderコンパイルする
+	IDxcResult* shaderResult = nullptr;
 	hr = dxcCompiler->Compile(
-		&sharderSourceBuffer,	// 読み込んだファイル
+		&shaderSourceBuffer,	// 読み込んだファイル
 		arguments,				// コンパイルオプション
 		_countof(arguments),	// コンパイルオプション
 		includeHandler,			// includeが含まれた諸々
-		IID_PPV_ARGS(&sharderResult) // コンパイル結果
+		IID_PPV_ARGS(&shaderResult) // コンパイル結果
 	);
 	// コンパイルエラーではなくdxcが起動できないなど致命的な状況
 	assert(SUCCEEDED(hr));
@@ -170,10 +401,10 @@ IDxcBlob* CompileSharder(
 	// 警告・エラーがでていないか確認する
 	//===============
 	// 警告・エラーが出てたらログに出して止める
-	IDxcBlobUtf8* sharderError = nullptr;
-	sharderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&sharderError), nullptr);
-	if (sharderError != nullptr && sharderError->GetStringLength() != 0) {
-		Log(logStream, sharderError->GetStringPointer());
+	IDxcBlobUtf8* shaderError = nullptr;
+	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
+	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
+		Log(logStream, shaderError->GetStringPointer());
 		// 警告・エラーダメゼッタイ
 		assert(false);
 	}
@@ -182,16 +413,16 @@ IDxcBlob* CompileSharder(
 	// Compile結果を受け取って返す
 	//===============
 	// コンパイル結果から実行用のバイナリ部分を取得
-	IDxcBlob* sharderBlob = nullptr;
-	hr = sharderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&sharderBlob), nullptr);
+	IDxcBlob* shaderBlob = nullptr;
+	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
 	assert(SUCCEEDED(hr));
 	// 成功したログを出す
 	Log(logStream, ConvertString(std::format(L"Compile Succeeded, path:{}, profile:{}\n", filePath, profile)));
 	// もう使わないリソースを解放
-	sharderSource->Release();
-	sharderResult->Release();
+	shaderSource->Release();
+	shaderResult->Release();
 	// 実行用のバイナリを返却
-	return sharderBlob;
+	return shaderBlob;
 }
 
 // Resource作成
@@ -489,10 +720,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// RootParameter作成。複数設定できるので配列。今回は結果1つだけなので長さ1の配列
-	D3D12_ROOT_PARAMETER rootParameters[1] = {};
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// CBVを使う
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;	// PixelSharder
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;	// PixelShader
 	rootParameters[0].Descriptor.ShaderRegister = 0;					// レジスタ番号0とバインド
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// CBVを使う
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;// VertexShader
+	rootParameters[1].Descriptor.ShaderRegister = 0;					// レジスタ番号0とバインド
 	descriptionRootSignature.pParameters = rootParameters;				// ルートパラメータ配列へのポインター
 	descriptionRootSignature.NumParameters = _countof(rootParameters);	// 配列の長さ
 
@@ -535,23 +769,23 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
-	// sharderをコンパイルする
-	IDxcBlob* vertexSharderBlob = CompileSharder(logStream, L"Object3d.VS.hlsl",
+	// shaderをコンパイルする
+	IDxcBlob* vertexShaderBlob = CompileShader(logStream, L"Object3d.VS.hlsl",
 	L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(vertexSharderBlob != nullptr);
+	assert(vertexShaderBlob != nullptr);
 
-	IDxcBlob* pixelSharderBlob = CompileSharder(logStream, L"Object3d.PS.hlsl",
+	IDxcBlob* pixelShaderBlob = CompileShader(logStream, L"Object3d.PS.hlsl",
 	L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
-	assert(pixelSharderBlob != nullptr);
+	assert(pixelShaderBlob != nullptr);
 
 	// PSO生成
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature;
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;
-	graphicsPipelineStateDesc.VS = { vertexSharderBlob->GetBufferPointer(),
-	vertexSharderBlob->GetBufferSize() };
-	graphicsPipelineStateDesc.PS = { pixelSharderBlob->GetBufferPointer(),
-	pixelSharderBlob->GetBufferSize() };
+	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),
+	vertexShaderBlob->GetBufferSize() };
+	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),
+	pixelShaderBlob->GetBufferSize() };
 	graphicsPipelineStateDesc.BlendState = blendDesc;
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;
 	// 書き込むRTVの情報
@@ -573,6 +807,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// 頂点データの作成とビュー
 	//===============
 	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(Vector4) * 3);
+	
+	// WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
+	ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
+	// データを書き込む
+	Matrix4x4* wvpData = nullptr;
+	// 書き込むためのアドレスを取得
+	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
+	// 単位行列を書き込んでおく
+	*wvpData = MakeIdentity4x4();
 
 	// 頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
@@ -624,6 +867,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
+	// Transform, cameraTransform変数を作る
+	Transform transform{ {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f} };
+	Transform cameraTransform{ {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,-5.0f} };
+
 	//===============
 	// メインループ
 	//===============
@@ -637,6 +884,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 		else {
 			// ゲームの処理
+			//===============
+			// 三角形の回転
+			transform.rotate.y += 0.03f;
+			
+			// カメラ処理
+			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
+			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+			Matrix4x4 worldViewProjectionMatrix = Multiply(Multiply(worldMatrix, viewMatrix), projectionMatrix);
+			*wvpData = worldViewProjectionMatrix;
 
 			//===============
 			// 画面に描けるようにする
@@ -676,6 +934,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			// マテリアルCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+			// wvp用のCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
 			// 描画!(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今度
 			commandList->DrawInstanced(3, 1, 0, 0);
@@ -753,8 +1013,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		errorBlob->Release();
 	}
 	rootSignature->Release();
-	pixelSharderBlob->Release();
-	vertexSharderBlob->Release();
+	pixelShaderBlob->Release();
+	vertexShaderBlob->Release();
 
 	materialResource->Release();
 
