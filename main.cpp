@@ -1220,15 +1220,32 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 	}
 
+	// 頂点インデックス
+	ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
+
+	D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
+	// リソースの先頭のアドレスから使う
+	indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
+	// 使用するリソースのサイズはインデックスから6つ分のサイズ
+	indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
+	// インデックスはuint32_tとする
+	indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
+
+	// インデックスリソースにデータを書き込む
+	uint32_t* indexDataSprite = nullptr;
+	indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSprite));
+	indexDataSprite[0] = 0; indexDataSprite[1] = 1; indexDataSprite[2] = 2;
+	indexDataSprite[3] = 1; indexDataSprite[4] = 3; indexDataSprite[5] = 2;
+
 	// Sprite用の頂点リソースを作る
-	ID3D12Resource* vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
+	ID3D12Resource* vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 4);
 
 	// 頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
 	// リソースの先頭のアドレスから使う
 	vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
 	// 使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 4;
 	// 1頂点あたりのサイズ
 	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
 
@@ -1236,14 +1253,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	VertexData* vertexDataSprite = nullptr;
 	// 書き込むためのアドレスを取得
 	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
-	// 1枚目の三角形
-	vertexDataSprite[0] = { .position{   0.0f, 360.0f, 0.0f, 1.0f }, .texcoord{ 0.0f,  1.0f }, .normal{0.0f, 0.0f,-1.0f} };
-	vertexDataSprite[1] = { .position{   0.0f,   0.0f, 0.0f, 1.0f }, .texcoord{ 0.0f,  0.0f }, .normal{0.0f, 0.0f,-1.0f} };
-	vertexDataSprite[2] = { .position{ 640.0f, 360.0f, 0.0f, 1.0f }, .texcoord{ 1.0f,  1.0f }, .normal{0.0f, 0.0f,-1.0f} };
-	// 2枚目の三角形
-	vertexDataSprite[3] = { .position{   0.0f,   0.0f, 0.0f, 1.0f }, .texcoord{ 0.0f,  0.0f }, .normal{0.0f, 0.0f,-1.0f} };
-	vertexDataSprite[4] = { .position{ 640.0f,   0.0f, 0.0f, 1.0f }, .texcoord{ 1.0f,  0.0f }, .normal{0.0f, 0.0f,-1.0f} };
-	vertexDataSprite[5] = { .position{ 640.0f, 360.0f, 0.0f, 1.0f }, .texcoord{ 1.0f,  1.0f }, .normal{0.0f, 0.0f,-1.0f} };
+	// 頂点データ
+	vertexDataSprite[0] = { {0.0f,   360.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {0,0,-1} };
+	vertexDataSprite[1] = { {0.0f,     0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0,0,-1} };
+	vertexDataSprite[2] = { {640.0f, 360.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {0,0,-1} };
+	vertexDataSprite[3] = { {640.0f,   0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0,0,-1} };
 
 	//===============
 	// マテリアル
@@ -1525,10 +1539,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			// Spriteの描画。変更が必要なものだけ変更する
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
+			commandList->IASetIndexBuffer(&indexBufferViewSprite);	// IBVを設定する
 			// TransformationMatrixCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 			// 描画!(DrawCall/ドローコール)
-			commandList->DrawInstanced(6, 1, 0, 0);
+			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 #ifdef USE_IMGUI
 			// 実際のcommandListのImGuiの描画コマンドを積む
