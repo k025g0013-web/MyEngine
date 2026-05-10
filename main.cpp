@@ -12,6 +12,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 #include <chrono>
 
 #pragma comment(lib, "d3d12.lib")
@@ -101,9 +102,21 @@ struct DirectionalLight {
 	float intensity;
 };
 
+struct MaterialData {
+	std::string textureFilePath;
+};
+
+struct ModelData {
+	std::vector<VertexData> vertices;
+	MaterialData material;
+};
+
 #pragma endregion
 
 #pragma region 関数
+
+#pragma region MT3Math
+
 // 長さ
 float Length(const Vector3& v) {
 	return sqrtf(powf(v.x, 2) + powf(v.y, 2) + powf(v.z, 2));
@@ -337,6 +350,8 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 	return result;
 };
 
+#pragma endregion
+
 //	CrashHandleの登録
 static LONG WINAPI ExportDump(EXCEPTION_POINTERS* exception) {
 	// 時刻を取得して、時刻を名前に入れたファイルを作成。Dumpsディレクトリ以下に出力
@@ -379,6 +394,55 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
 	// 標準のメッセージ処理を行う
 	return DefWindowProc(hwnd, msg, wparam, lparam);
+}
+
+// ウィンドウ生成
+HWND CreateGameWindow(LPCWSTR title, int width, int height) {
+	// ウィンドウクラスを定義する
+	WNDCLASS wc{};
+	wc.lpfnWndProc = WindowProc;					// ウィンドウプロシ―ジャ
+	wc.lpszClassName = L"CG2WindowClass";			// ウィンドウクラス名
+	wc.hInstance = GetModuleHandle(nullptr);		// インスタントハンドル
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);	// カーソル
+
+	// ウィンドウクラスを登録する
+	RegisterClass(&wc);
+
+	// ウィンドウサイズを表す構造体にクライアント領域を入れる。
+	RECT wrc = { 0, 0, width, height };
+
+	// クライアント領域を基に実際のサイズにwrcを変更してもらう
+	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
+
+	// ウィンドウの生成
+	HWND hwnd = CreateWindow(
+		wc.lpszClassName,		// 利用するクラス名
+		title,					// タイトルバーの文字
+		WS_OVERLAPPEDWINDOW,	// よく見るウィンドウスタイル
+		CW_USEDEFAULT,			// 表示X座標(Windowsに任せる)
+		CW_USEDEFAULT,			// 表示Y座標(WindowsOSに任せる)
+		wrc.right - wrc.left,	// ウィンドウX幅
+		wrc.bottom - wrc.top,	// ウィンドウY幅
+		nullptr,				// 親ウィンドウハンドル
+		nullptr,				// メニューハンドル
+		wc.hInstance,			// インスタントハンドル
+		nullptr					// オプション
+	);
+
+#ifdef _DEBUG
+	ID3D12Debug1* debugController = nullptr;
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+		// デバッグレイヤーを有効化する
+		debugController->EnableDebugLayer();
+		// さらにGPU側でもチェックを行うようにする
+		debugController->SetEnableGPUBasedValidation(TRUE);
+	}
+#endif
+
+	// ウィンドウを表示する
+	ShowWindow(hwnd, SW_SHOW);
+
+	return hwnd;
 }
 
 //===============
@@ -694,10 +758,122 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descrip
 	return handleGPU;
 }
 
+MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& fileName) {
+	// 中で必要となる変数の宣言
+	MaterialData materialData;	// 構築するMaterialData
+	std::string line;	// ファイルから読んだ1行を格納するもの
+
+	// ファイルを開く
+	std::ifstream file(directoryPath + "/" + fileName);
+	assert(file.is_open());	// とりあえず開けなかったら止める
+
+	// 実際にファイルを読み、MaterialDataを構築していく
+	while (std::getline(file, line)) {
+		std::string identifier;
+		std::istringstream s(line);
+		s >> identifier;
+
+		// identifierに応じた処理
+		if (identifier == "map_Kd") {
+			std::string textureFileName;
+			s >> textureFileName;
+
+			// 連結してファイルパスにする
+			materialData.textureFilePath = directoryPath + "/" + textureFileName;
+		}
+	}
+
+	// materialDataを返す
+	return materialData;
+}
+
+ModelData LoadObjFile(const std::string& directoryPath, const std::string& fileName) {
+	// 中で必要となる変数の宣言
+	ModelData modelData;	// 構築するModelData
+	std::vector<Vector4> positions;	// 位置
+	std::vector<Vector3> normals;	// 法線
+	std::vector<Vector2> texcoords;	// テクスチャ座標
+	std::string line;	// ファイルから読んだ1行を格納するもの
+
+	// ファイルを開く
+	std::ifstream file(directoryPath + "/" + fileName);
+	assert(file.is_open());	// とりあえず開けなかったら止める
+
+	// 実際にファイルを読み、ModelDataを構築していく
+	while (std::getline(file, line)) {
+		std::string identifier;
+		std::istringstream s(line);
+		s >> identifier;	// 先頭の識別子を読む
+
+		// identifierに応じた処理
+		if (identifier == "v") {		// 位置 
+			Vector4 position;
+			s >> position.x >> position.y >> position.z;
+			position.x *= -1.0f;
+			position.w = 1.0f;
+			positions.push_back(position);
+
+		} else if (identifier == "vt"){	// テクスチャ座標
+			Vector2 texcoord;
+			s >> texcoord.x >> texcoord.y;
+			texcoord.y = 1.0f - texcoord.y;
+			texcoords.push_back(texcoord);
+		
+		} else if (identifier == "vn"){	// 法線
+			Vector3 normal;
+			s >> normal.x >> normal.y >> normal.z;
+			normal.x *= -1.0f;
+			normals.push_back(normal);
+
+		} else if (identifier == "f") {	// 面
+			VertexData triangle[3];
+			// 面は三角形限定。その他は未対応
+			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
+				std::string vertexDefinition;
+				s >> vertexDefinition;
+				// 頂点の要素へのIndexは「位置/UV/法線」で格納されているので、分解してIndexを取得する
+				std::istringstream v(vertexDefinition);
+				uint32_t elementIndices[3];
+				for (int32_t element = 0; element < 3; ++element) {
+					std::string index;
+					std::getline(v, index, '/');	// 区切りでインデックスを読んでいく
+					elementIndices[element] = std::stoi(index);
+				}
+				// 要素へのIndexから、実際の要素の値を取得して、頂点を構築する
+				Vector4 position = positions[elementIndices[0] - 1];
+				Vector2 texcoord = texcoords[elementIndices[1] - 1];
+				Vector3 normal = normals[elementIndices[2] - 1];
+				VertexData vertex = { position, texcoord, normal };
+				modelData.vertices.push_back(vertex);
+				triangle[faceVertex] = { position, texcoord, normal };
+			}
+			// 頂点を逆順で登録することで周り順を逆にする
+			modelData.vertices.push_back(triangle[2]);
+			modelData.vertices.push_back(triangle[1]);
+			modelData.vertices.push_back(triangle[0]);
+
+		} else if (identifier == "mtllib") {	// Material読み込み
+			// materialTemplateLibraryファイルの名前を取得する
+			std::string  materialFileName;
+			s >> materialFileName;
+
+			// 基本的にobjファイルと同一階層にmtlは存在させるのでディレクトリ名とファイル名を探す
+			modelData.material = LoadMaterialTemplateFile(directoryPath, materialFileName);
+		}
+	}
+
+	// modelDataを返す
+	return modelData;
+}
+
 #pragma endregion
 
 // 分割数
 const uint32_t kSubdivision = 16;
+
+// クライアント領域のサイズ
+const int32_t kClientWidth = 1280;
+const int32_t kClientHeight = 720;
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -727,59 +903,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	std::string logFilePath = std::string("logs/") + dateString + ".log";			// 時刻を使ってファイル名を決定
 	std::ofstream logStream(logFilePath);											// ファイルを作って書き込み準備
 
-	//===============
 	// ウィンドウ生成
 	//===============
-#pragma region ウィンドウ生成
-	// ウィンドウクラスを定義する
-	WNDCLASS wc{};
-	wc.lpfnWndProc = WindowProc;					// ウィンドウプロシ―ジャ
-	wc.lpszClassName = L"CG2WindowClass";			// ウィンドウクラス名
-	wc.hInstance = GetModuleHandle(nullptr);		// インスタントハンドル
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);	// カーソル
-
-	// ウィンドウクラスを登録する
-	RegisterClass(&wc);
-
-	// クライアント領域のサイズ
-	const int32_t kClientWidth = 1280;
-	const int32_t kClientHeight = 720;
-
-	// ウィンドウサイズを表す構造体にクライアント領域を入れる。
-	RECT wrc = { 0, 0, kClientWidth, kClientHeight };
-
-	// クライアント領域を基に実際のサイズにwrcを変更してもらう
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
-
-	// ウィンドウの生成
-	HWND hwnd = CreateWindow(
-		wc.lpszClassName,		// 利用するクラス名
-		L"CG2",					// タイトルバーの文字
-		WS_OVERLAPPEDWINDOW,	// よく見るウィンドウスタイル
-		CW_USEDEFAULT,			// 表示X座標(Windowsに任せる)
-		CW_USEDEFAULT,			// 表示Y座標(WindowsOSに任せる)
-		wrc.right - wrc.left,	// ウィンドウX幅
-		wrc.bottom - wrc.top,	// ウィンドウY幅
-		nullptr,				// 親ウィンドウハンドル
-		nullptr,				// メニューハンドル
-		wc.hInstance,			// インスタントハンドル
-		nullptr					// オプション
-	);
-
-#ifdef _DEBUG
-	ID3D12Debug1* debugController = nullptr;
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
-		// デバッグレイヤーを有効化する
-		debugController->EnableDebugLayer();
-		// さらにGPU側でもチェックを行うようにする
-		debugController->SetEnableGPUBasedValidation(TRUE);
-	}
-#endif
-
-	// ウィンドウを表示する
-	ShowWindow(hwnd, SW_SHOW);
-
-#pragma endregion
+	HWND hwnd = CreateGameWindow(L"CG2", kClientWidth, kClientHeight);
 
 	//===============
 	// DirectXの初期化
@@ -1142,18 +1268,26 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//===============
 	// 頂点データの作成とビュー
 	//===============
+	// モデル読み込み
+	ModelData modelData = LoadObjFile("resources", "axis.obj");
+	// 頂点リソースを作る
+	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
+	
+	// 頂点バッファビューを作成する
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();	// リソースの先頭のアドレスから使う
+	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());	// 使用するリソースのサイズは頂点6つ分のサイズ
+	vertexBufferView.StrideInBytes = sizeof(VertexData);	// 1頂点あたりのサイズ
+
+	// 頂点リソースにデータを書き込む
+	VertexData* vertexData = nullptr;
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));	// 書き込むためのアドレスを取得
+	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());	// 頂点データをリリースにコピー
+
+	/*
 	const uint32_t indexCount = kSubdivision * kSubdivision * 6;
 
 	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * indexCount);
-
-	// WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-	ID3D12Resource* transformationMatrixResource = CreateBufferResource(device, sizeof(TransformationMatrix));
-	// データを書き込む
-	TransformationMatrix* transformationMatrixData = nullptr;
-	// 書き込むためのアドレスを取得
-	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
-	// 単位行列を書き込んでおく
-	transformationMatrixData->WVP = MakeIdentity4x4();
 
 	// 頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
@@ -1231,6 +1365,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			}
 		}
 	}
+	*/
+
+	// WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
+	ID3D12Resource* transformationMatrixResource = CreateBufferResource(device, sizeof(TransformationMatrix));
+	// データを書き込む
+	TransformationMatrix* transformationMatrixData = nullptr;
+	// 書き込むためのアドレスを取得
+	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
+	// 単位行列を書き込んでおく
+	transformationMatrixData->WVP = MakeIdentity4x4();
 
 	// 頂点インデックス
 	ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
@@ -1370,7 +1514,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	ID3D12Resource* intermediateResource = UploadTextureData(textureResource, mipImages, device, commandList);
 
 	// 2枚目のTextureを読んで転送する
-	DirectX::ScratchImage mipImages2 = LoadTexture("resources/monsterBall.png");
+	DirectX::ScratchImage mipImages2 = LoadTexture(modelData.material.textureFilePath);
 	const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
 	ID3D12Resource* textureResource2 = CreateTextureResource(device, metadata2);
 	ID3D12Resource* intermediateResource2 = UploadTextureData(textureResource2, mipImages2, device, commandList);
@@ -1418,7 +1562,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// ゲームループ内変数の初期化
 	//===============
 	Transform transform{ {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f} };
-	Transform cameraTransform{ {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,-10.0f} };
+	Transform cameraTransform{ {1.0f,1.0f,1.0f}, {0.3f,0.0f,0.0f}, {0.0f,4.0f,-10.0f} };
 	Transform transformSprite{ {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f},  {0.0f,0.0f,0.0f} };
 
 	bool useMonsterBall = true;
@@ -1437,9 +1581,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		else {
 			// ゲームの処理
 			//===============
-			// 三角形の回転
-			transform.rotate.y += 0.01f;
-
 			// カメラ処理
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
@@ -1469,11 +1610,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			ImGui::Begin("setting");
 
+			// モデル
+			ImGui::SliderAngle("SphereRotateX", &transform.rotate.x);
+			ImGui::SliderAngle("SphereRotateY", &transform.rotate.y);
+			ImGui::SliderAngle("SphereRotateZ", &transform.rotate.z);
+
 			// カメラ
 			ImGui::DragFloat3("CameraTranslate", &cameraTransform.translate.x, 0.1f);
-			ImGui::SliderFloat("CameraRotateX", &cameraTransform.rotate.x, -100.0f, 100.0f, "%.0f deg");
-			ImGui::SliderFloat("CameraRotateY", &cameraTransform.rotate.y, -100.0f, 100.0f, "%.0f deg");
-			ImGui::SliderFloat("CameraRotateZ", &cameraTransform.rotate.z, -100.0f, 100.0f, "%.0f deg");
+			ImGui::SliderAngle("CameraRotateX", &cameraTransform.rotate.x);
+			ImGui::SliderAngle("CameraRotateY", &cameraTransform.rotate.y);
+			ImGui::SliderAngle("CameraRotateZ", &cameraTransform.rotate.z);
 
 			// 球
 			ImGui::ColorEdit4("color", &materialData->color.x);
@@ -1545,7 +1691,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			commandList->SetGraphicsRootSignature(rootSignature);
 			commandList->SetPipelineState(graphicsPipelineState);
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-			commandList->IASetIndexBuffer(&indexBufferView);
+			// commandList->IASetIndexBuffer(&indexBufferView);
 			// 形状を設定。PSOに設定している者とはまた別。同じものを設定すると考えておけば良い。
 			commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -1561,7 +1707,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			commandList->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
 
 			// 描画!(DrawCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今度
-			commandList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
+			// commandList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
+			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
 			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
 
@@ -1574,7 +1721,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// TransformationMatrixCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 			// 描画!(DrawCall/ドローコール)
-			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			// commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 #ifdef USE_IMGUI
 			// 実際のcommandListのImGuiの描画コマンドを積む
@@ -1639,9 +1786,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	device->Release();
 	useAdapter->Release();
 	dxgiFactory->Release();
+	
+	/*
 #ifdef _DEBUG
 	debugController->Release();
 #endif
+	*/
+	
 	CloseWindow(hwnd);
 
 	// リソースリークチェック
