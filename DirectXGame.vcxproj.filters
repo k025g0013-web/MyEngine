@@ -16,6 +16,36 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{74ffc2b9-539a-444a-b3c1-08d874188f12}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Core">
+      <UniqueIdentifier>{097e3540-8f22-4143-a9eb-cd572bb4dcf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Core">
+      <UniqueIdentifier>{0515e9c3-8994-4079-9b7c-c742faf60ca5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Graphics">
+      <UniqueIdentifier>{b54a4937-1736-4b7d-8ce1-d8c949f08052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Graphics">
+      <UniqueIdentifier>{63ba5001-517c-481c-86fc-85fc645b1aea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Graphics\DirectX">
+      <UniqueIdentifier>{d79197f6-ab67-4189-b9ee-03bfe72ca882}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Graphics\DirectX">
+      <UniqueIdentifier>{15f33364-add9-4a3f-8a7d-1ac4c40f44f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Graphics\Pipeline">
+      <UniqueIdentifier>{966ad10c-4a28-4398-a713-bd8044ba0e56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Graphics\Pipeline">
+      <UniqueIdentifier>{1b1bdb56-b2c3-455f-ab0c-787111324332}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Graphics\Resource">
+      <UniqueIdentifier>{0ce80164-4bc0-48ad-941e-0a063ba79d4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Graphics\Resource">
+      <UniqueIdentifier>{d270300b-cf03-4cbf-b3f6-eda41abd69e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -41,6 +71,63 @@
     </ClCompile>
     <ClCompile Include="externals\imgui\imgui_tables.cpp">
       <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="WinApp.cpp">
+      <Filter>ソース ファイル\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>ソース ファイル\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="ConvertString.cpp">
+      <Filter>ソース ファイル\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="CrashHandler.cpp">
+      <Filter>ソース ファイル\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXDevice.cpp">
+      <Filter>ソース ファイル\Graphics\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandContext.cpp">
+      <Filter>ソース ファイル\Graphics\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="SwapChain.cpp">
+      <Filter>ソース ファイル\Graphics\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorHeap.cpp">
+      <Filter>ソース ファイル\Graphics\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Fence.cpp">
+      <Filter>ソース ファイル\Graphics\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTargetViews.cpp">
+      <Filter>ソース ファイル\Graphics\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXCommon.cpp">
+      <Filter>ソース ファイル\Graphics\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="CompileShader.cpp">
+      <Filter>ソース ファイル\Graphics\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="RootSignature.cpp">
+      <Filter>ソース ファイル\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="InputLayout.cpp">
+      <Filter>ソース ファイル\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="BlendState.cpp">
+      <Filter>ソース ファイル\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterizerState.cpp">
+      <Filter>ソース ファイル\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>ソース ファイル\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsPipeline.cpp">
+      <Filter>ソース ファイル\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthStencilState.cpp">
+      <Filter>ソース ファイル\Graphics\Pipeline</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -78,6 +165,63 @@
     </ClInclude>
     <ClInclude Include="externals\imgui\imgui_internal.h">
       <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="WinApp.h">
+      <Filter>ヘッダー ファイル\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>ヘッダー ファイル\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ConvertString.h">
+      <Filter>ヘッダー ファイル\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="CrashHandler.h">
+      <Filter>ヘッダー ファイル\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXDevice.h">
+      <Filter>ヘッダー ファイル\Graphics\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandContext.h">
+      <Filter>ヘッダー ファイル\Graphics\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="SwapChain.h">
+      <Filter>ヘッダー ファイル\Graphics\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorHeap.h">
+      <Filter>ヘッダー ファイル\Graphics\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Fence.h">
+      <Filter>ヘッダー ファイル\Graphics\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTargetViews.h">
+      <Filter>ヘッダー ファイル\Graphics\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXCommon.h">
+      <Filter>ヘッダー ファイル\Graphics\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="CompileShader.h">
+      <Filter>ヘッダー ファイル\Graphics\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="RootSignature.h">
+      <Filter>ヘッダー ファイル\Graphics\Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="InputLayout.h">
+      <Filter>ヘッダー ファイル\Graphics\Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="BlendState.h">
+      <Filter>ヘッダー ファイル\Graphics\Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>ヘッダー ファイル\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterizerState.h">
+      <Filter>ヘッダー ファイル\Graphics\Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsPipeline.h">
+      <Filter>ヘッダー ファイル\Graphics\Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthStencilState.h">
+      <Filter>ヘッダー ファイル\Graphics\Pipeline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
