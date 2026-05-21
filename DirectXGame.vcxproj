@@ -102,8 +102,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="BlendState.cpp" />
     <ClCompile Include="CommandContext.cpp" />
-    <ClCompile Include="CrashHandler.cpp" />
+    <ClCompile Include="CompileShader.cpp" />
+    <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="ConvertString.cpp" />
+    <ClCompile Include="CrashHandler.cpp" />
+    <ClCompile Include="DepthStencil.cpp" />
     <ClCompile Include="DepthStencilState.cpp" />
     <ClCompile Include="DescriptorHeap.cpp" />
     <ClCompile Include="DirectXCommon.cpp" />
@@ -131,15 +134,19 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClCompile>
     <ClCompile Include="Fence.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
+    <ClCompile Include="ImGuiManager.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="RasterizerState.cpp" />
     <ClCompile Include="RenderTargetViews.cpp" />
-    <ClCompile Include="CompileShader.cpp" />
     <ClCompile Include="RootSignature.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SwapChain.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -161,9 +168,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlendState.h" />
+    <ClInclude Include="ColorUtility.h" />
     <ClInclude Include="CommandContext.h" />
-    <ClInclude Include="CrashHandler.h" />
+    <ClInclude Include="CompileShader.h" />
+    <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConvertString.h" />
+    <ClInclude Include="CrashHandler.h" />
+    <ClInclude Include="DepthStencil.h" />
     <ClInclude Include="DepthStencilState.h" />
     <ClInclude Include="DescriptorHeap.h" />
     <ClInclude Include="DirectXCommon.h" />
@@ -178,14 +189,25 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="Fence.h" />
     <ClInclude Include="GraphicsPipeline.h" />
+    <ClInclude Include="ImGuiManager.h" />
+    <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="InputLayout.h" />
     <ClInclude Include="Logger.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="MathFunctions.h" />
+    <ClInclude Include="Matrix3x3.h" />
+    <ClInclude Include="Matrix4x4.h" />
     <ClInclude Include="RasterizerState.h" />
     <ClInclude Include="RenderTargetViews.h" />
-    <ClInclude Include="CompileShader.h" />
+    <ClInclude Include="ResourceUtils.h" />
     <ClInclude Include="RootSignature.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SwapChain.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="Vector2.h" />
+    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="Vector4.h" />
+    <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="WinApp.h" />
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,6 @@
 #pragma comment(lib, "Dbghelp.lib")
 #include <strsafe.h>
 
-
 void CrashHandler::Initialize() {
 	// 誰も捕捉しなかった場合に(UnHandle)、補足する関数を登録
 	SetUnhandledExceptionFilter(CrashHandler::ExportDump);
