@@ -7,6 +7,7 @@
 #include "RenderTargetViews.h"  // rtv
 #include "Fence.h"              // Fence
 #include "CompileShader.h"      // CompileShader
+#include "DepthStencil.h"  // DepthStencilState
 
 class WinApp;
 class Logger;
@@ -20,7 +21,7 @@ public:
     void BeginFrame();
     void EndFrame();
 
-public:
+    // getter
     ID3D12Device* GetDevice() const {return directXDevice_.GetDevice();}
 
     ID3D12GraphicsCommandList* GetCommandList() const {return commandContext_.GetCommandList();}
@@ -37,6 +38,8 @@ public:
     
     CompileShader* GetCompileShader() {return &compileShader_;}
 
+    DepthStencil *GetDepthStencil() { return &depthStencil_; }
+
 private:
     DirectXDevice directXDevice_;
     
@@ -49,7 +52,12 @@ private:
 
     RenderTargetViews renderTargetViews_;
 
+    DepthStencil depthStencil_;
+
     Fence fence_;
 
     CompileShader compileShader_;
+
+    D3D12_VIEWPORT viewport_{};
+    D3D12_RECT scissorRect_{};
 };

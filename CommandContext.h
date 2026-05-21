@@ -11,6 +11,7 @@ class CommandContext {
 public:
     void Initialize(DirectXDevice* device);
 
+    // Command
     void Close();   // コマンドリストの内容を確定させる
     void Execute(); // GPUにコマンドリストの実行を行わせる
     void Reset();   // コマンドリストリセット
