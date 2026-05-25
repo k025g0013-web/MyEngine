@@ -4,131 +4,117 @@
 
 #include <DirectXTex/d3dx12.h>
 
+#include "DescriptorHeap.h"
+
 #include "ConvertString.h"
 #include "ResourceUtils.h"
 
 void Texture::Initialize(
-	ID3D12Device *device, ID3D12GraphicsCommandList *commandList, ID3D12DescriptorHeap *srvHeap,
-	uint32_t descriptorSize, uint32_t descriptorIndex, const std::string &filePath
+	ID3D12Device *device, ID3D12GraphicsCommandList *commandList,
+	DescriptorHeap *srvHeap, uint32_t descriptorIndex, const std::string &filePath
 ) {
 	filePath_ = filePath;
 
 	// Texture読み込み
-	mipImages_ = LoadTexture(filePath_);	
-	metadata_ = mipImages_.GetMetadata();
+	LoadTexture();
 
 	// Resource生成
-	textureResource_ = CreateTextureResource(device, metadata_);	
-	
+	CreateTextureResource(device);
+
 	// Upload
-	intermediateResource_ = UploadTextureData(textureResource_.Get(), mipImages_, device, commandList);	
+	UploadTextureData(device, commandList);
 
 	// SRVの作成
-	CreateSRV(device, srvHeap, descriptorSize, descriptorIndex);
+	CreateSRV(device, srvHeap, descriptorIndex);
 }
 
 // Texture読み込み
-DirectX::ScratchImage Texture::LoadTexture(const std::string &filePath) {
+void Texture::LoadTexture() {
+	// テクスチャファイルを呼んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
-
-	std::wstring filePathW = ConvertString(filePath);
-
-	// 画像のロード
-	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+	std::wstring filePathW = ConvertString(filePath_);
+	HRESULT hr = DirectX::LoadFromWICFile(	// 画像のロード
+		filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	assert(SUCCEEDED(hr));
 
 	// ミップマップ生成
-	DirectX::ScratchImage mipImages{};
 	hr = DirectX::GenerateMipMaps(
-		image.GetImages(), image.GetImageCount(), image.GetMetadata(),
-		DirectX::TEX_FILTER_SRGB, 0, mipImages
+		image.GetImages(), image.GetImageCount(), image.GetMetadata(), 
+		DirectX::TEX_FILTER_SRGB, 0, mipImages_
 	);
 	assert(SUCCEEDED(hr));
+	(void)hr;
 
-	return mipImages;
+	// ミニマップ付きのデータを入力する
+	metadata_ = mipImages_.GetMetadata();
 }
 
 // TextureResource作成
-Microsoft::WRL::ComPtr<ID3D12Resource> Texture::CreateTextureResource(
-	ID3D12Device *device, const DirectX::TexMetadata &metadata
-) {
-	// テクスチャの仕様をGPU用に構築
+void Texture::CreateTextureResource(ID3D12Device *device) {
+	// metadataを基にResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
-	resourceDesc.Width = UINT(metadata.width);
-	resourceDesc.Height = UINT(metadata.height);
-	resourceDesc.MipLevels = UINT16(metadata.mipLevels);
-	resourceDesc.DepthOrArraySize = UINT16(metadata.arraySize);
-	resourceDesc.Format = metadata.format;
-	resourceDesc.SampleDesc.Count = 1;
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);
+	resourceDesc.Width = UINT(metadata_.width);		// Textureの幅
+	resourceDesc.Height = UINT(metadata_.height);	// Textureの高さ
+	resourceDesc.MipLevels = UINT16(metadata_.mipLevels);			// mipmapの数
+	resourceDesc.DepthOrArraySize = UINT16(metadata_.arraySize);	// 奥行き or 配列Textureの配列数
+	resourceDesc.Format = metadata_.format;	// TextureのFormat
+	resourceDesc.SampleDesc.Count = 1;		// サンプリングカウント。1固定。
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata_.dimension);	// Textureの次元数。普段使っているのは2次元
 
-	// VRAM上に確保
+	// 利用するHeapの設定。VRAM上に作成する
 	D3D12_HEAP_PROPERTIES heapProperties{};
 	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-
-	// コピー先として初期状態をCOPY_DESTにする
+	// Resourceを生成する
 	HRESULT hr = device->CreateCommittedResource(
-		&heapProperties,
-		D3D12_HEAP_FLAG_NONE,
-		&resourceDesc,
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		nullptr,
-		IID_PPV_ARGS(&resource)
+		&heapProperties, // Heapの設定
+		D3D12_HEAP_FLAG_NONE, // Heapの特殊な設定。特になし。
+		&resourceDesc, // Resourceの設定
+		D3D12_RESOURCE_STATE_COPY_DEST, // データ転送される設定
+		nullptr, // Clear最適値。使わないのでnullptr
+		IID_PPV_ARGS(&textureResource_) // 作成するResourceポインタへのポインタ
 	);
-	assert(SUCCEEDED(hr));
+	(void)hr;
 
-	return resource;
+	assert(SUCCEEDED(hr));
 }
 
-// CPU→GPUテクスチャ転送
-Microsoft::WRL::ComPtr<ID3D12Resource> Texture::UploadTextureData(
-	ID3D12Resource *texture, const DirectX::ScratchImage &mipImages,
+// UploadTextureDataを書き換える
+void Texture::UploadTextureData(
 	ID3D12Device *device, ID3D12GraphicsCommandList *commandList
 ) {
 	// 各ミップレベルの転送情報を構築
-	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
+	std::vector<D3D12_SUBRESOURCE_DATA> subresources;			// IntermediateResource(中間リソース)
 	DirectX::PrepareUpload(
-		device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources
-	);
-
-	// Upload Heapサイズ算出
-	uint64_t intermediateSize = GetRequiredIntermediateSize(
-		texture, 0, UINT(subresources.size()));
-
-	// 中間バッファ（Upload用リソース）
-	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource =
+		device, mipImages_.GetImages(), mipImages_.GetImageCount(), mipImages_.GetMetadata(), subresources);
+	uint64_t intermediateSize = GetRequiredIntermediateSize(	// Upload Heapサイズ算出
+		textureResource_.Get(), 0, UINT(subresources.size()));
+	intermediateResource_ =										// 中間バッファ（Upload用リソース）
 		CreateBufferResource(device, intermediateSize);
 
-	// コマンドリストにコピー命令を積む
+	// データ転送をコマンドに積む
 	UpdateSubresources(
-		commandList, texture, intermediateResource.Get(),
+		commandList, textureResource_.Get(), intermediateResource_.Get(),
 		0, 0, UINT(subresources.size()), subresources.data()
 	);
 
-	// コピー完了後の状態へ遷移（COPY_DEST → SHADER_READ）
+	// Textureへの転送後は利用できるよう、D3D12_RESOURCE_STATE_COPY_DESTからD3D12_RESOURCE_STATE_GENERIC_READへResourceStateを変更する
 	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barrier.Transition.pResource = texture;
+	barrier.Transition.pResource = textureResource_.Get();
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-
 	commandList->ResourceBarrier(1, &barrier);
-
-	return intermediateResource;
 }
 
+// SRV生成
 void Texture::CreateSRV(
-	ID3D12Device *device, ID3D12DescriptorHeap *srvHeap, uint32_t descriptorSize, uint32_t descriptorIndex
+	ID3D12Device *device, DescriptorHeap *srvHeap, uint32_t descriptorIndex
 ) {
 	// CPU/GPU両方のハンドル計算
-	cpuHandle_ = srvHeap->GetCPUDescriptorHandleForHeapStart();
-	cpuHandle_.ptr += descriptorSize * descriptorIndex;
-
-	gpuHandle_ = srvHeap->GetGPUDescriptorHandleForHeapStart();
-	gpuHandle_.ptr += descriptorSize * descriptorIndex;
+	cpuHandle_ = srvHeap->GetCPUDescriptorHandle(descriptorIndex);
+	gpuHandle_ = srvHeap->GetGPUDescriptorHandle(descriptorIndex);
 
 	// SRV設定（シェーダ用ビュー定義）
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};

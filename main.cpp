@@ -11,6 +11,8 @@
 
 #include "DirectXCommon.h"		// DirectX初期化
 
+#include "ViewportState.h"
+
 // Pipeline
 #include "GraphicsPipeline.h"   // GraphicsPipeline
 #include "RootSignature.h"      // RootSignature
@@ -102,151 +104,6 @@ struct ModelData {
 #pragma endregion
 
 #pragma region 関数
-
-// Textureデータを読む
-DirectX::ScratchImage LoadTexture(const std::string &filePath) {
-	// テクスチャファイルを呼んでプログラムで扱えるようにする
-	DirectX::ScratchImage image{};
-	std::wstring filePathW = ConvertString(filePath);
-	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
-	assert(SUCCEEDED(hr));
-
-	// ミニマップの作製
-	DirectX::ScratchImage mipImages{};
-	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
-	assert(SUCCEEDED(hr));
-
-	// ミニマップ付きのデータを返す
-	return mipImages;
-}
-
-// DirectX12のTextureResourceを作る
-ID3D12Resource *CreateTextureResource(ID3D12Device *device, const DirectX::TexMetadata &metadata) {
-	// metadataを基にResourceの設定
-	D3D12_RESOURCE_DESC resourceDesc{};
-	resourceDesc.Width = UINT(metadata.width);		// Textureの幅
-	resourceDesc.Height = UINT(metadata.height);	// Textureの高さ
-	resourceDesc.MipLevels = UINT16(metadata.mipLevels);		// mipmapの数
-	resourceDesc.DepthOrArraySize = UINT16(metadata.arraySize); // 奥行き or 配列Textureの配列数
-	resourceDesc.Format = metadata.format;	// TextureのFormat
-	resourceDesc.SampleDesc.Count = 1;		// サンプリングカウント。1固定。
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension); // Textureの次元数。普段使っているのは2次元
-
-	// 利用するHeapの設定。VRAM上に作成する
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-
-	// Resourceを生成する
-	ID3D12Resource *resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(
-		&heapProperties, // Heapの設定
-		D3D12_HEAP_FLAG_NONE, // Heapの特殊な設定。特になし。
-		&resourceDesc, // Resourceの設定
-		D3D12_RESOURCE_STATE_COPY_DEST, // データ転送される設定
-		nullptr, // Clear最適値。使わないのでnullptr
-		IID_PPV_ARGS(&resource)); // 作成するResourceポインタへのポインタ
-	assert(SUCCEEDED(hr));
-	(void)hr;
-
-	return resource;
-}
-
-ID3D12Resource *CreateDepthStencilTextureResource(ID3D12Device *device, int32_t width, int32_t height) {
-	// 生成するResourceの設定
-	D3D12_RESOURCE_DESC resourceDesc{};
-	resourceDesc.Width = width;		// Textureの幅
-	resourceDesc.Height = height;	// Textureの高さ
-	resourceDesc.MipLevels = 1;		// mipmapの数
-	resourceDesc.DepthOrArraySize = 1; // 奥行き or 配列Textureの配列数
-	resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;	// TextureのFormat
-	resourceDesc.SampleDesc.Count = 1;		// サンプリングカウント。1固定。
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D; // 2次元
-	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL; // DepthStencilとして使う通知
-
-	// 利用するHeapの設定
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;	// VRAM上に作る
-
-	// 深度値のクリア設定
-	D3D12_CLEAR_VALUE depthClearValue{};
-	depthClearValue.DepthStencil.Depth = 1.0f;	// 1.0f(最大値)でクリア
-	depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;	// フォーマット。Resourceと合わせる
-
-	// Resourceの生成
-	ID3D12Resource *resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(
-		&heapProperties, // Heapの設定
-		D3D12_HEAP_FLAG_NONE, // Heapの特殊な設定。特になし。
-		&resourceDesc, // Resourceの設定
-		D3D12_RESOURCE_STATE_DEPTH_WRITE, // データ転送される設定
-		&depthClearValue, // Clear最適値
-		IID_PPV_ARGS(&resource)); // 作成するResourceポインタへのポインタ
-	assert(SUCCEEDED(hr));
-	(void)hr;
-
-	return resource;
-}
-
-// TextureResourceにデータを転送する
-void UploadTextureData(ID3D12Resource *texture, const DirectX::ScratchImage &mipImages) {
-	// Meta情報を取得
-	const DirectX::TexMetadata &metadata = mipImages.GetMetadata();
-	// 全MipMapについて
-	for (size_t mipLevel = 0; mipLevel < metadata.mipLevels; ++mipLevel) {
-		// MipMapLevelを指定して各Imageを取得
-		const DirectX::Image *img = mipImages.GetImage(mipLevel, 0, 0);
-		// Textureに転送
-		HRESULT hr = texture->WriteToSubresource(
-			UINT(mipLevel),
-			nullptr,
-			img->pixels,
-			UINT(img->rowPitch),
-			UINT(img->slicePitch)
-		);
-		assert(SUCCEEDED(hr));
-		(void)hr;
-	}
-}
-
-// UploadTextureDataを書き換える
-[[nodiscard]]	// 属性
-ID3D12Resource *UploadTextureData(
-	ID3D12Resource *texture, const DirectX::ScratchImage &mipImages,
-	ID3D12Device *device, ID3D12GraphicsCommandList *commandList
-) {
-	// IntermediateResource(中間リソース)
-	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-	DirectX::PrepareUpload(device, mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
-	uint64_t intermediateSize = GetRequiredIntermediateSize(texture, 0, UINT(subresources.size()));
-	ID3D12Resource *intermediateResource = CreateBufferResource(device, intermediateSize);
-
-	// データ転送をコマンドに積む
-	UpdateSubresources(commandList, texture, intermediateResource, 0, 0, UINT(subresources.size()), subresources.data());
-
-	// Textureへの転送後は利用できるよう、D3D12_RESOURCE_STATE_COPY_DESTからD3D12_RESOURCE_STATE_GENERIC_READへResourceStateを変更する
-	D3D12_RESOURCE_BARRIER barrier{};
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = texture;
-	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-	commandList->ResourceBarrier(1, &barrier);
-
-	return intermediateResource;
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap *descriptorHeap, uint32_t descriptorSize, uint32_t index) {
-	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	handleCPU.ptr += (descriptorSize * index);
-	return handleCPU;
-}
-
-D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap *descriptorHeap, uint32_t descriptorSize, uint32_t index) {
-	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	handleGPU.ptr += (descriptorSize * index);
-	return handleGPU;
-}
 
 MaterialSource LoadMaterialTemplateFile(const std::string &directoryPath, const std::string &fileName) {
 	// 中で必要となる変数の宣言
@@ -445,7 +302,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #pragma endregion
 
 	// モデル用の頂点データ
-#pragma region スプライト用の頂点データ
+#pragma region モデル用の頂点データ
 
 	// モデル読み込み
 	ModelData modelData = LoadObjFile("resources", "axis.obj");
@@ -465,8 +322,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	transformationMatrixBuffer.Initialize(device, sizeof(TransformationMatrix));
 
 	// データを書き込む
-	TransformationMatrix *transformationMatrixData =
-		static_cast<TransformationMatrix *>(transformationMatrixBuffer.Map());
+	TransformationMatrix *transformationMatrixData = static_cast<TransformationMatrix *>(transformationMatrixBuffer.Map());
 
 	// 単位行列を書き込んでおく
 	transformationMatrixData->WVP = MakeIdentity4x4();
@@ -545,37 +401,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
 	directionalLightData->intensity = { 1.0f };
 
-	//===============
-	// ViewportとScissor
-	//===============
-	// ビューポート
-	D3D12_VIEWPORT viewport{};
-	// クライアント領域のサイズと一緒にして画面全体に表示
-	viewport.Width = kClientWidth;
-	viewport.Height = kClientHeight;
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-
-	// シザー矩形
-	D3D12_RECT scissorRect{};
-	// 基本的にビューポートと同じ矩形が構成されるようにする
-	scissorRect.left = 0;
-	scissorRect.right = kClientWidth;
-	scissorRect.top = 0;
-	scissorRect.bottom = kClientHeight;
-
 	// Textureを組み込む
 	//===============
-	uint32_t descriptorSizeSRV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
 	// Textureを読んで転送する
 	Texture uvTexture;
-	uvTexture.Initialize(device, commandList, directXCommon.GetSRVHeap()->GetDescriptorHeap(), descriptorSizeSRV, 1, "resources/uvChecker.png");
+	uvTexture.Initialize(device, commandList, directXCommon.GetSRVHeap(), 1, "resources/uvChecker.png");
 
 	Texture modelTexture;
-	modelTexture.Initialize(device, commandList, directXCommon.GetSRVHeap()->GetDescriptorHeap(), descriptorSizeSRV, 2, modelData.material.textureFilePath);
+	modelTexture.Initialize(device, commandList, directXCommon.GetSRVHeap(), 2, modelData.material.textureFilePath);
 
 	// ImGuiの初期化
 	//===============
@@ -675,7 +508,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		ImGuiManager::GetInstance()->EndFrame();
 #endif
 
-
 		//===============
 		// 画面に描けるようにする
 		//===============
@@ -716,7 +548,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		// TransformationMatrixCBufferの場所を設定
 		commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite.GetGPUVirtualAddress());
 		// 描画!(DrawCall/ドローコール)
-		// commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+		commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 #ifdef USE_IMGUI
 		ImGuiManager::GetInstance()->Draw(commandList);

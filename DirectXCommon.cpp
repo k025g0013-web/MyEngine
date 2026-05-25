@@ -1,5 +1,7 @@
 #include "DirectXCommon.h"
 
+#include "ViewportState.h"
+
 void DirectXCommon::Initialize(
     WinApp* winApp, Logger* logger, uint32_t width, uint32_t height
 ) {
@@ -30,19 +32,11 @@ void DirectXCommon::Initialize(
     // CompileShader
     compileShader_.Initialize(logger);
 
-    // Viewport
-    viewport_.Width = static_cast<float>(width);
-    viewport_.Height = static_cast<float>(height);
-    viewport_.TopLeftX = 0.0f;
-    viewport_.TopLeftY = 0.0f;
-    viewport_.MinDepth = 0.0f;
-    viewport_.MaxDepth = 1.0f;
-
-    // ScissorRect
-    scissorRect_.left = 0;
-    scissorRect_.right = LONG(width);
-    scissorRect_.top = 0;
-    scissorRect_.bottom = LONG(height);
+    // Viewport/ScissorRect
+    viewportState_.Initialize(
+        static_cast<float>(width),
+        static_cast<float>(height)
+    );
 }
 
 void DirectXCommon::BeginFrame() {
@@ -76,8 +70,8 @@ void DirectXCommon::BeginFrame() {
     ID3D12DescriptorHeap *descriptorHeaps[] = { srvDescriptorHeap_.GetDescriptorHeap() };
     commandContext_.GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
 
-    commandContext_.GetCommandList()->RSSetViewports(1, &viewport_);		// Viewportを設定
-    commandContext_.GetCommandList()->RSSetScissorRects(1, &scissorRect_);  // Scissorを設定
+    // Viewport/Scissorを設定
+    viewportState_.SetCommand(commandContext_.GetCommandList());
 }
 
 void DirectXCommon::EndFrame() {
