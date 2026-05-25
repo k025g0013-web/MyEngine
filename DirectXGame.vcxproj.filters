@@ -22,20 +22,11 @@
     <Filter Include="ソース ファイル\Engine\Graphics">
       <UniqueIdentifier>{b54a4937-1736-4b7d-8ce1-d8c949f08052}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\Graphics\DirectX">
-      <UniqueIdentifier>{d79197f6-ab67-4189-b9ee-03bfe72ca882}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Graphics\Pipeline">
-      <UniqueIdentifier>{966ad10c-4a28-4398-a713-bd8044ba0e56}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\Engine\Graphics\Resource">
       <UniqueIdentifier>{0ce80164-4bc0-48ad-941e-0a063ba79d4c}</UniqueIdentifier>
     </Filter>
     <Filter Include="ソース ファイル\Engine\Graphics\Resource\Buffer">
       <UniqueIdentifier>{a2105a9a-34aa-4126-b9e0-63b92660b045}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Engine\Graphics\ImGui">
-      <UniqueIdentifier>{f7fd1006-c4da-47cc-b6ef-87c13d5ecc1a}</UniqueIdentifier>
     </Filter>
     <Filter Include="ソース ファイル\Engine\Core">
       <UniqueIdentifier>{097e3540-8f22-4143-a9eb-cd572bb4dcf1}</UniqueIdentifier>
@@ -49,9 +40,6 @@
     <Filter Include="ヘッダー ファイル\Engine\Graphics">
       <UniqueIdentifier>{63ba5001-517c-481c-86fc-85fc645b1aea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Graphics\DirectX">
-      <UniqueIdentifier>{15f33364-add9-4a3f-8a7d-1ac4c40f44f8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ヘッダー ファイル\Engine\Graphics\Pipeline">
       <UniqueIdentifier>{1b1bdb56-b2c3-455f-ab0c-787111324332}</UniqueIdentifier>
     </Filter>
@@ -60,9 +48,6 @@
     </Filter>
     <Filter Include="ヘッダー ファイル\Engine\Graphics\Resource\Buffer">
       <UniqueIdentifier>{8364b318-a514-4b3e-8a76-fa7fb85b0d29}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Engine\Graphics\ImGui">
-      <UniqueIdentifier>{37c6ef26-0d00-4cb9-a66a-e7213f9fbedd}</UniqueIdentifier>
     </Filter>
     <Filter Include="ヘッダー ファイル\Engine\Core">
       <UniqueIdentifier>{0515e9c3-8994-4079-9b7c-c742faf60ca5}</UniqueIdentifier>
@@ -73,8 +58,44 @@
     <Filter Include="ヘッダー ファイル\Engine\Graphics\RenderCore">
       <UniqueIdentifier>{e3553ea6-c30d-4ab4-a6c0-da100f4bf223}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Engine\Graphics\Asset">
+      <UniqueIdentifier>{cdbfc970-50a0-4209-ae47-f9d5ee34ae70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Graphics\Core">
+      <UniqueIdentifier>{86fba6c8-9e42-449f-b84f-77fda72a86f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Graphics\Frame">
+      <UniqueIdentifier>{db222939-63e4-4daf-9917-02cfb7455b22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Graphics\Pipeline">
+      <UniqueIdentifier>{038b2de2-6024-48b3-9f56-92acd344eb65}</UniqueIdentifier>
+    </Filter>
     <Filter Include="ソース ファイル\Engine\Graphics\RenderCore">
-      <UniqueIdentifier>{8b05799f-5825-49ef-ac43-ec6b45da2279}</UniqueIdentifier>
+      <UniqueIdentifier>{03acc38f-8af8-4dbd-83fc-35d1cadcca43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Graphics\Renderer">
+      <UniqueIdentifier>{1e4573b5-28b2-4049-91b5-4aaa934dca55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Graphics\ImGui">
+      <UniqueIdentifier>{f7fd1006-c4da-47cc-b6ef-87c13d5ecc1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Graphics\Core">
+      <UniqueIdentifier>{15f33364-add9-4a3f-8a7d-1ac4c40f44f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Graphics\ImGui">
+      <UniqueIdentifier>{37c6ef26-0d00-4cb9-a66a-e7213f9fbedd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Graphics\Frame">
+      <UniqueIdentifier>{c50530ea-0b04-4143-988a-c939c9d4feae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Graphics\Asset">
+      <UniqueIdentifier>{0b4855d0-8c04-48f7-80e6-135514ddaa1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Graphics\Renderer">
+      <UniqueIdentifier>{e3bef938-9598-4743-a37b-17755c588c66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Graphics\RenderCore\Mesh">
+      <UniqueIdentifier>{3d3212c5-6d43-48f7-b9c3-654baa2349cd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -102,50 +123,8 @@
     <ClCompile Include="externals\imgui\imgui_tables.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="RootSignature.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="InputLayout.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="BlendState.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="RasterizerState.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsPipeline.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="DepthStencilState.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="VertexBuffer.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Resource\Buffer</Filter>
-    </ClCompile>
-    <ClCompile Include="IndexBuffer.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Resource\Buffer</Filter>
-    </ClCompile>
-    <ClCompile Include="ConstantBuffer.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Resource\Buffer</Filter>
-    </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Resource</Filter>
-    </ClCompile>
     <ClCompile Include="ImGuiManager.cpp">
       <Filter>ソース ファイル\Engine\Graphics\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="CommandContext.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="CompileShader.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\DirectX</Filter>
     </ClCompile>
     <ClCompile Include="ConvertString.cpp">
       <Filter>ソース ファイル\Engine\Core</Filter>
@@ -159,26 +138,71 @@
     <ClCompile Include="WinApp.cpp">
       <Filter>ソース ファイル\Engine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="DepthStencil.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="DescriptorHeap.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXCommon.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\DirectX</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXDevice.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\DirectX</Filter>
+      <Filter>ソース ファイル\Engine\Graphics\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandContext.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Core</Filter>
     </ClCompile>
     <ClCompile Include="Fence.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\DirectX</Filter>
+      <Filter>ソース ファイル\Engine\Graphics\Core</Filter>
     </ClCompile>
-    <ClCompile Include="RenderTargetViews.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\DirectX</Filter>
+    <ClCompile Include="DescriptorHeap.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Core</Filter>
     </ClCompile>
     <ClCompile Include="SwapChain.cpp">
-      <Filter>ソース ファイル\Engine\Graphics\DirectX</Filter>
+      <Filter>ソース ファイル\Engine\Graphics\Frame</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsPipeline.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="RootSignature.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="BlendState.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterizerState.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthStencilState.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="InputLayout.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthStencil.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Frame</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstantBuffer.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Resource\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexBuffer.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Resource\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBuffer.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Resource\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTargetViews.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Frame</Filter>
+    </ClCompile>
+    <ClCompile Include="CompileShader.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\RenderCore</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXCommon.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewportState.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\Frame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -253,9 +277,6 @@
     <ClInclude Include="ColorUtility.h">
       <Filter>ヘッダー ファイル\Engine\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="ImGuiManager.h">
       <Filter>ヘッダー ファイル\Engine\Graphics\ImGui</Filter>
     </ClInclude>
@@ -281,10 +302,7 @@
       <Filter>ヘッダー ファイル\Engine\Math</Filter>
     </ClInclude>
     <ClInclude Include="CommandContext.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="CompileShader.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics\DirectX</Filter>
+      <Filter>ヘッダー ファイル\Engine\Graphics\Core</Filter>
     </ClInclude>
     <ClInclude Include="WinApp.h">
       <Filter>ヘッダー ファイル\Engine\Core</Filter>
@@ -298,26 +316,38 @@
     <ClInclude Include="ConvertString.h">
       <Filter>ヘッダー ファイル\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="DepthStencil.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics\DirectX</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXDevice.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics\DirectX</Filter>
+      <Filter>ヘッダー ファイル\Engine\Graphics\Core</Filter>
     </ClInclude>
     <ClInclude Include="DirectXCommon.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics\DirectX</Filter>
+      <Filter>ヘッダー ファイル\Engine\Graphics\Core</Filter>
     </ClInclude>
     <ClInclude Include="DescriptorHeap.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="SwapChain.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTargetViews.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics\DirectX</Filter>
+      <Filter>ヘッダー ファイル\Engine\Graphics\Core</Filter>
     </ClInclude>
     <ClInclude Include="Fence.h">
-      <Filter>ヘッダー ファイル\Engine\Graphics\DirectX</Filter>
+      <Filter>ヘッダー ファイル\Engine\Graphics\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="SwapChain.h">
+      <Filter>ヘッダー ファイル\Engine\Graphics\Frame</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTargetViews.h">
+      <Filter>ヘッダー ファイル\Engine\Graphics\Frame</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthStencil.h">
+      <Filter>ヘッダー ファイル\Engine\Graphics\Frame</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>ヘッダー ファイル\Engine\Graphics\RenderCore</Filter>
+    </ClInclude>
+    <ClInclude Include="CompileShader.h">
+      <Filter>ヘッダー ファイル\Engine\Graphics\Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewportState.h">
+      <Filter>ヘッダー ファイル\Engine\Graphics\Frame</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexData.h">
+      <Filter>ヘッダー ファイル\Engine\Graphics\RenderCore\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -8,6 +8,7 @@
 #include "Fence.h"              // Fence
 #include "CompileShader.h"      // CompileShader
 #include "DepthStencil.h"  // DepthStencilState
+#include "ViewportState.h" // Viewport/Scissor
 
 class WinApp;
 class Logger;
@@ -58,6 +59,5 @@ private:
 
     CompileShader compileShader_;
 
-    D3D12_VIEWPORT viewport_{};
-    D3D12_RECT scissorRect_{};
+    ViewportState viewportState_;
 };

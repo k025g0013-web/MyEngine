@@ -12,7 +12,7 @@ public:
     void Initialize(ID3D12Device *device, uint32_t width, uint32_t height);
 
     // getter
-    ID3D12Resource *GetResource() const {return depthStencilResource_.Get();}
+    ID3D12Resource *GetResource() const {return resource_.Get();}
     D3D12_CPU_DESCRIPTOR_HANDLE GetDSVHandle() const {return dsvHeap_.GetCPUDescriptorHandle(0);}
 
 private:
@@ -21,7 +21,7 @@ private:
     void CreateDepthStencilView(ID3D12Device *device);
 
 private:
-    Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource_;
+    Microsoft::WRL::ComPtr<ID3D12Resource> resource_;
 
     DescriptorHeap dsvHeap_;
 
