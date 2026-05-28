@@ -97,6 +97,9 @@
     <Filter Include="ヘッダー ファイル\Engine\Graphics\RenderCore\Mesh">
       <UniqueIdentifier>{3d3212c5-6d43-48f7-b9c3-654baa2349cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\Engine\Graphics\Resource\Object3D">
+      <UniqueIdentifier>{2cf2ee95-b71e-448d-990f-7bbef99b557c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -203,6 +206,27 @@
     </ClCompile>
     <ClCompile Include="ViewportState.cpp">
       <Filter>ソース ファイル\Engine\Graphics\Frame</Filter>
+    </ClCompile>
+    <ClCompile Include="Render.cpp">
+      <Filter>ソース ファイル\Engine\Graphics\RenderCore</Filter>
+    </ClCompile>
+    <ClCompile Include="Lighting.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Triangle.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -348,6 +372,33 @@
     </ClInclude>
     <ClInclude Include="VertexData.h">
       <Filter>ヘッダー ファイル\Engine\Graphics\RenderCore\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Render.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformationMatrix.h">
+      <Filter>ヘッダー ファイル\Engine\Graphics\Resource\Object3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Lighting.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Triangle.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

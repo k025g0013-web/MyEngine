@@ -12,7 +12,7 @@ class Texture {
 public:
 	void Initialize(
 		ID3D12Device *device, ID3D12GraphicsCommandList *commandList, 
-		DescriptorHeap *srvHeap, uint32_t descriptorIndex, const std::string &filePath
+		DescriptorHeap *srvHeap, const std::string &filePath
 	);
 
 	// getter
@@ -41,6 +41,8 @@ private:
 
 	DirectX::ScratchImage mipImages_;
 	DirectX::TexMetadata metadata_{};
+
+	static uint32_t nextDescriptorIndex_;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource_;
