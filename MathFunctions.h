@@ -6,6 +6,7 @@
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Matrix4x4.h"
+#include "Transform.h"
 
 // 単位行列の作成
 inline Matrix4x4 MakeIdentity4x4() {
@@ -237,4 +238,12 @@ inline Vector3 Normalize(const Vector3 &v) {
     };
 
     return result;
+}
+
+inline Matrix4x4 MakeWorldMatrix(const Transform &transform) {
+    return MakeAffineMatrix(
+        transform.scale,
+        transform.rotate,
+        transform.translate
+    );
 }

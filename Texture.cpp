@@ -9,11 +9,16 @@
 #include "ConvertString.h"
 #include "ResourceUtils.h"
 
+uint32_t Texture::nextDescriptorIndex_ = 1;
+
 void Texture::Initialize(
 	ID3D12Device *device, ID3D12GraphicsCommandList *commandList,
-	DescriptorHeap *srvHeap, uint32_t descriptorIndex, const std::string &filePath
+	DescriptorHeap *srvHeap, const std::string &filePath
 ) {
 	filePath_ = filePath;
+
+	uint32_t descriptorIndex = nextDescriptorIndex_;
+	nextDescriptorIndex_++;
 
 	// Texture読み込み
 	LoadTexture();
