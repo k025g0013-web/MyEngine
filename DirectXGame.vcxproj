@@ -55,7 +55,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals;$(ProjectDir)Engine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -84,7 +84,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals;$(ProjectDir)Engine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -100,18 +100,42 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BlendState.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="CommandContext.cpp" />
-    <ClCompile Include="CompileShader.cpp" />
-    <ClCompile Include="ConstantBuffer.cpp" />
-    <ClCompile Include="ConvertString.cpp" />
-    <ClCompile Include="CrashHandler.cpp" />
-    <ClCompile Include="DepthStencil.cpp" />
-    <ClCompile Include="DepthStencilState.cpp" />
-    <ClCompile Include="DescriptorHeap.cpp" />
-    <ClCompile Include="DirectXCommon.cpp" />
-    <ClCompile Include="DirectXDevice.cpp" />
+    <ClCompile Include="Engine\BlendState.cpp" />
+    <ClCompile Include="Engine\Camera.cpp" />
+    <ClCompile Include="Engine\ColorUtility.cpp" />
+    <ClCompile Include="Engine\CommandContext.cpp" />
+    <ClCompile Include="Engine\CompileShader.cpp" />
+    <ClCompile Include="Engine\ConstantBuffer.cpp" />
+    <ClCompile Include="Engine\ConvertString.cpp" />
+    <ClCompile Include="Engine\CrashHandler.cpp" />
+    <ClCompile Include="Engine\DepthStencil.cpp" />
+    <ClCompile Include="Engine\DepthStencilState.cpp" />
+    <ClCompile Include="Engine\DescriptorHeap.cpp" />
+    <ClCompile Include="Engine\DirectXCommon.cpp" />
+    <ClCompile Include="Engine\DirectXDevice.cpp" />
+    <ClCompile Include="Engine\Fence.cpp" />
+    <ClCompile Include="Engine\GraphicsPipeline.cpp" />
+    <ClCompile Include="Engine\ImGuiManager.cpp" />
+    <ClCompile Include="Engine\IndexBuffer.cpp" />
+    <ClCompile Include="Engine\InputLayout.cpp" />
+    <ClCompile Include="Engine\Lighting.cpp" />
+    <ClCompile Include="Engine\Logger.cpp" />
+    <ClCompile Include="Engine\Material.cpp" />
+    <ClCompile Include="Engine\Mesh.cpp" />
+    <ClCompile Include="Engine\ModelLoader.cpp" />
+    <ClCompile Include="Engine\Object3D.cpp" />
+    <ClCompile Include="Engine\RasterizerState.cpp" />
+    <ClCompile Include="Engine\Render.cpp" />
+    <ClCompile Include="Engine\RenderTargetViews.cpp" />
+    <ClCompile Include="Engine\RootSignature.cpp" />
+    <ClCompile Include="Engine\Shader.cpp" />
+    <ClCompile Include="Engine\Sound.cpp" />
+    <ClCompile Include="Engine\Sprite.cpp" />
+    <ClCompile Include="Engine\SwapChain.cpp" />
+    <ClCompile Include="Engine\Texture.cpp" />
+    <ClCompile Include="Engine\VertexBuffer.cpp" />
+    <ClCompile Include="Engine\ViewportState.cpp" />
+    <ClCompile Include="Engine\WinApp.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -133,29 +157,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_widgets.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Fence.cpp" />
-    <ClCompile Include="GraphicsPipeline.cpp" />
-    <ClCompile Include="ImGuiManager.cpp" />
-    <ClCompile Include="IndexBuffer.cpp" />
-    <ClCompile Include="InputLayout.cpp" />
-    <ClCompile Include="Lighting.cpp" />
-    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Material.cpp" />
-    <ClCompile Include="Model.cpp" />
-    <ClCompile Include="ModelLoader.cpp" />
-    <ClCompile Include="RasterizerState.cpp" />
-    <ClCompile Include="Render.cpp" />
-    <ClCompile Include="RenderTargetViews.cpp" />
-    <ClCompile Include="RootSignature.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Sprite.cpp" />
-    <ClCompile Include="SwapChain.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="Triangle.cpp" />
-    <ClCompile Include="VertexBuffer.cpp" />
-    <ClCompile Include="ViewportState.cpp" />
-    <ClCompile Include="WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -175,19 +177,52 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BlendState.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="ColorUtility.h" />
-    <ClInclude Include="CommandContext.h" />
-    <ClInclude Include="CompileShader.h" />
-    <ClInclude Include="ConstantBuffer.h" />
-    <ClInclude Include="ConvertString.h" />
-    <ClInclude Include="CrashHandler.h" />
-    <ClInclude Include="DepthStencil.h" />
-    <ClInclude Include="DepthStencilState.h" />
-    <ClInclude Include="DescriptorHeap.h" />
-    <ClInclude Include="DirectXCommon.h" />
-    <ClInclude Include="DirectXDevice.h" />
+    <ClInclude Include="Engine\BlendState.h" />
+    <ClInclude Include="Engine\Camera.h" />
+    <ClInclude Include="Engine\ColorUtility.h" />
+    <ClInclude Include="Engine\CommandContext.h" />
+    <ClInclude Include="Engine\CompileShader.h" />
+    <ClInclude Include="Engine\ConstantBuffer.h" />
+    <ClInclude Include="Engine\ConvertString.h" />
+    <ClInclude Include="Engine\CrashHandler.h" />
+    <ClInclude Include="Engine\DepthStencil.h" />
+    <ClInclude Include="Engine\DepthStencilState.h" />
+    <ClInclude Include="Engine\DescriptorHeap.h" />
+    <ClInclude Include="Engine\DirectXCommon.h" />
+    <ClInclude Include="Engine\DirectXDevice.h" />
+    <ClInclude Include="Engine\Fence.h" />
+    <ClInclude Include="Engine\GraphicsPipeline.h" />
+    <ClInclude Include="Engine\ImGuiManager.h" />
+    <ClInclude Include="Engine\IndexBuffer.h" />
+    <ClInclude Include="Engine\InputLayout.h" />
+    <ClInclude Include="Engine\Lighting.h" />
+    <ClInclude Include="Engine\Logger.h" />
+    <ClInclude Include="Engine\Material.h" />
+    <ClInclude Include="Engine\MathFunctions.h" />
+    <ClInclude Include="Engine\Matrix3x3.h" />
+    <ClInclude Include="Engine\Matrix4x4.h" />
+    <ClInclude Include="Engine\Mesh.h" />
+    <ClInclude Include="Engine\ModelLoader.h" />
+    <ClInclude Include="Engine\Object3D.h" />
+    <ClInclude Include="Engine\RasterizerState.h" />
+    <ClInclude Include="Engine\Render.h" />
+    <ClInclude Include="Engine\RenderTargetViews.h" />
+    <ClInclude Include="Engine\ResourceUtils.h" />
+    <ClInclude Include="Engine\RootSignature.h" />
+    <ClInclude Include="Engine\Shader.h" />
+    <ClInclude Include="Engine\Sound.h" />
+    <ClInclude Include="Engine\Sprite.h" />
+    <ClInclude Include="Engine\SwapChain.h" />
+    <ClInclude Include="Engine\Texture.h" />
+    <ClInclude Include="Engine\Transform.h" />
+    <ClInclude Include="Engine\TransformationMatrix.h" />
+    <ClInclude Include="Engine\Vector2.h" />
+    <ClInclude Include="Engine\Vector3.h" />
+    <ClInclude Include="Engine\Vector4.h" />
+    <ClInclude Include="Engine\VertexBuffer.h" />
+    <ClInclude Include="Engine\VertexData.h" />
+    <ClInclude Include="Engine\ViewportState.h" />
+    <ClInclude Include="Engine\WinApp.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -196,38 +231,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_rectpack.h" />
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
-    <ClInclude Include="Fence.h" />
-    <ClInclude Include="GraphicsPipeline.h" />
-    <ClInclude Include="ImGuiManager.h" />
-    <ClInclude Include="IndexBuffer.h" />
-    <ClInclude Include="InputLayout.h" />
-    <ClInclude Include="Lighting.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="Material.h" />
-    <ClInclude Include="MathFunctions.h" />
-    <ClInclude Include="Matrix3x3.h" />
-    <ClInclude Include="Matrix4x4.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="ModelLoader.h" />
-    <ClInclude Include="RasterizerState.h" />
-    <ClInclude Include="Render.h" />
-    <ClInclude Include="RenderTargetViews.h" />
-    <ClInclude Include="ResourceUtils.h" />
-    <ClInclude Include="RootSignature.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="Sprite.h" />
-    <ClInclude Include="SwapChain.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="Transform.h" />
-    <ClInclude Include="TransformationMatrix.h" />
-    <ClInclude Include="Triangle.h" />
-    <ClInclude Include="Vector2.h" />
-    <ClInclude Include="Vector3.h" />
-    <ClInclude Include="Vector4.h" />
-    <ClInclude Include="VertexBuffer.h" />
-    <ClInclude Include="VertexData.h" />
-    <ClInclude Include="ViewportState.h" />
-    <ClInclude Include="WinApp.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

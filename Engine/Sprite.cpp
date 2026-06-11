@@ -8,8 +8,7 @@ void Sprite::Initialize(
 	uint32_t color
 ) {
 	// 頂点生成
-	render_.CreateSpriteVertices(vertices_, left, top, right, bottom);	
-	render_.CreateSpriteIndices(indices_);
+	render_.CreateSprite(vertices_, indices_, left, top, right, bottom);
 
 	// 頂点データ
 	render_.CreateVertexBuffer(device, vertexBuffer_, vertices_);

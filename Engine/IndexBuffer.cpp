@@ -10,7 +10,7 @@ void IndexBuffer::Initialize(
     // リソースの先頭のアドレスから使う
     indexBufferView_.BufferLocation = resource_->GetGPUVirtualAddress();
     // 使用するリソースのサイズはインデックスから6つ分のサイズ
-    indexBufferView_.SizeInBytes = sizeof(uint32_t) * 6;
+    indexBufferView_.SizeInBytes = static_cast<UINT>(sizeInBytes);
     // インデックスはuint32_tとする
     indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
 }

@@ -3,17 +3,12 @@
 #include "MathFunctions.h"
 
 void Camera::Initialize(float width, float height) {
-
     width_ = width;
     height_ = height;
-
-    transform_.scale = { 1.0f,1.0f,1.0f };
-    transform_.rotate = { 0.3f,0.0f,0.0f };
-    transform_.translate = { 0.0f,4.0f,-10.0f };
 }
 
-void Camera::Update() {
-    Matrix4x4 cameraMatrix = MakeWorldMatrix(transform_);
+void Camera::Update(Transform &transform) {
+    Matrix4x4 cameraMatrix = MakeWorldMatrix(transform);
 
     viewMatrix_ = Inverse(cameraMatrix);
 

@@ -8,6 +8,22 @@
 #include "Matrix4x4.h"
 #include "Transform.h"
 
+#include <random>
+inline float RandomFloat(float min, float max) {
+    static std::mt19937 engine{ std::random_device{}() };
+    std::uniform_real_distribution<float> dist(min, max);
+    return dist(engine);
+}
+
+// クロス積
+inline Vector3 Cross(const Vector3 &v1, const Vector3 &v2) {
+    return {
+        v1.y * v2.z - v1.z * v2.y,
+        v1.z * v2.x - v1.x * v2.z,
+        v1.x * v2.y - v1.y * v2.x
+    };
+}
+
 // 単位行列の作成
 inline Matrix4x4 MakeIdentity4x4() {
     Matrix4x4 result = {};

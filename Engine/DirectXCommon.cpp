@@ -39,6 +39,9 @@ void DirectXCommon::Initialize(
     );
 }
 
+void DirectXCommon::Finalize() {
+}
+
 void DirectXCommon::BeginFrame() {
     // これから書き込むバックバッファのインデックスを取得
     UINT backBufferIndex = swapChain_.GetCurrentBackBufferIndex();
