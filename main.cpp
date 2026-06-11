@@ -47,6 +47,9 @@
 // Math
 #include "MathFunctions.h"
 
+// Input
+#include "InputKey.h"
+
 #pragma endregion
 
 struct D3DResourceLeakChecker {
@@ -112,6 +115,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// サウンドマネージャ初期化
 	Sound sound;
 	sound.Initialize();
+
+	// キー入力マネージャ初期化
+	InputKey inputKey;
+	inputKey.Initialize(&winApp);
 
 	// PSO
 #pragma region PSO
@@ -261,6 +268,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//===============
 	// ウィンドウの×ボタンが押されるまでループ
 	while (winApp.ProcessMessage()) {
+		inputKey.Update();
 
 		//===============
 		// 更新処理
@@ -630,6 +638,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #endif
 
 		directXCommon.EndFrame();
+
+		if (inputKey.PushKey(DIK_ESCAPE)) {
+			return 0;
+		}
 	}
 
 	// COMの終了

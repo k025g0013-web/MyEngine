@@ -117,6 +117,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\GraphicsPipeline.cpp" />
     <ClCompile Include="Engine\ImGuiManager.cpp" />
     <ClCompile Include="Engine\IndexBuffer.cpp" />
+    <ClCompile Include="Engine\InputKey.cpp" />
     <ClCompile Include="Engine\InputLayout.cpp" />
     <ClCompile Include="Engine\Lighting.cpp" />
     <ClCompile Include="Engine\Logger.cpp" />
@@ -194,6 +195,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\GraphicsPipeline.h" />
     <ClInclude Include="Engine\ImGuiManager.h" />
     <ClInclude Include="Engine\IndexBuffer.h" />
+    <ClInclude Include="Engine\InputKey.h" />
     <ClInclude Include="Engine\InputLayout.h" />
     <ClInclude Include="Engine\Lighting.h" />
     <ClInclude Include="Engine\Logger.h" />

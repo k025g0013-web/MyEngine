@@ -153,6 +153,9 @@
     <ClCompile Include="Engine\Sound.cpp">
       <Filter>ソース ファイル\KizunaEngine</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\InputKey.cpp">
+      <Filter>ソース ファイル\KizunaEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore">
@@ -326,6 +329,9 @@
       <Filter>ソース ファイル\KizunaEngine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Sound.h">
+      <Filter>ソース ファイル\KizunaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\InputKey.h">
       <Filter>ソース ファイル\KizunaEngine</Filter>
     </ClInclude>
   </ItemGroup>

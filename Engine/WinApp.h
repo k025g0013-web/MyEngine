@@ -11,6 +11,7 @@ public:
 
     // getter
     HWND GetHWND() const { return hwnd_; }
+    WNDCLASS GetWC() const { return wc_; }
 
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
