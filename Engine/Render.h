@@ -31,21 +31,25 @@ public:
     );
 
     // Sprite
-    void CreateSpriteVertices(
+    void CreateSprite(
         std::vector<VertexData> &vertices,
+        std::vector<uint32_t> &indices,
         float left,
         float top,
         float right,
         float bottom
     );
 
-    void CreateSpriteIndices(
-        std::vector<uint32_t> &indices
-    );
-
     // Triangle
-    void CreateTriangleVertices(
+    void CreateTriangle(
         std::vector<VertexData> &vertices,
         Vector3 left, Vector3 top, Vector3 right
+    );
+
+    // Sphere
+    void CreateSphere(
+        std::vector<VertexData> &vertices,
+        std::vector<uint32_t> &indices,
+        uint32_t subdivision
     );
 };

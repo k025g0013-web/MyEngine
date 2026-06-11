@@ -18,6 +18,7 @@ public:
     void Initialize(
         WinApp* winApp, Logger* logger, uint32_t width, uint32_t height
     );
+    void Finalize();
 
     void BeginFrame();
     void EndFrame();
@@ -59,5 +60,5 @@ private:
 
     CompileShader compileShader_;
 
-    ViewportState viewportState_;
+    ViewportState viewportState_{};
 };

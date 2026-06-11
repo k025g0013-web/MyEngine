@@ -5,6 +5,8 @@
 
 #include <cassert>
 
+#include <algorithm>
+
 #include <dbghelp.h>
 #pragma comment(lib, "Dbghelp.lib")
 
@@ -32,15 +34,18 @@
 #include "Shader.h"
 #include "Lighting.h"
 #include "Texture.h"
+#include "Sound.h"
 
 // ImGui
 #include "ImGuiManager.h"
 
 // Object
-#include "Model.h"
-#include "Triangle.h"
+#include "Object3D.h"
 #include "Sprite.h"
 #include "Camera.h"
+
+// Math
+#include "MathFunctions.h"
 
 #pragma endregion
 
@@ -56,6 +61,8 @@ struct D3DResourceLeakChecker {
 	}
 #endif
 };
+
+const int32_t kSubdivision = 16;
 
 // クライアント領域のサイズ
 const int32_t kClientWidth = 1280;
@@ -102,6 +109,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	ID3D12Device *device = directXCommon.GetDevice();
 	ID3D12GraphicsCommandList *commandList = directXCommon.GetCommandList();
 
+	// サウンドマネージャ初期化
+	Sound sound;
+	sound.Initialize();
+
 	// PSO
 #pragma region PSO
 
@@ -142,28 +153,58 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 #pragma endregion
 
+	/*
 	// モデル
-	Model axis;
-	axis.Initialize(
-		device, "resources", "axis.obj", 0xFFFFFFFF, true
-	);
+	Object3D model;
+	model.CreateModel(device, "resourcrs", "axis.obj", 0xFFFFFFFF, true);
+	Transform modelTransform{
+		.scale{1.0f, 1.0f, 1.0f}, .rotate{}, .translate{}
+	};
+
+	// 平面三角形
+	Object3D triangle;
+	triangle.CreatePlaneTriangle(device,
+		{-0.5f, -0.5f}, {0.0f, 0.5f}, {0.5f, -0.5f}, 0xFFFFFFFF, true);
+	Transform triangleTransform{
+		.scale{1.0f, 1.0f, 1.0f}, .rotate{}, .translate{}
+	};
+
+	// 球
+	Object3D sphere;
+	sphere.CreateSphere(device, kSubdivision, 0xFFFFFFFF, true);
+	Transform sphereTransform{
+		.scale{1.0f, 1.0f, 1.0f}, .rotate{}, .translate{}
+	};
+	*/
+
+	std::vector<Object3D> models;
+	std::vector<Transform> transforms;
+	std::vector<int> textureIndices;
 
 	// モデル用テクスチャ
-	Texture axisTexture[4];
-	axisTexture[0].Initialize(device, commandList, directXCommon.GetSRVHeap(), axis.GetModelData().material.textureFilePath);
-	axisTexture[1].Initialize(device, commandList, directXCommon.GetSRVHeap(), "resources/monsterBall.png");
-	axisTexture[2].Initialize(device, commandList, directXCommon.GetSRVHeap(), "resources/test0.png");
-	axisTexture[3].Initialize(device, commandList, directXCommon.GetSRVHeap(), "resources/test1.png");
+	Texture texture[4];
+	texture[0].Initialize(device, commandList, directXCommon.GetSRVHeap(), "resources/uvChecker.png");
+	texture[1].Initialize(device, commandList, directXCommon.GetSRVHeap(), "resources/monsterBall.png");
+	texture[2].Initialize(device, commandList, directXCommon.GetSRVHeap(), "resources/sample.png");
+	texture[3].Initialize(device, commandList, directXCommon.GetSRVHeap(), "resources/axis.jpg");
 
-	Model plane;
-	plane.Initialize(device,
-		"resources", "plane.obj", 0xFFFFFFFF, true
+	Object3D object3D;
+	object3D.CreatePlaneTriangle(
+		device,
+		{ -0.5f,-0.5f },
+		{ 0.0f, 0.5f },
+		{ 0.5f,-0.5f },
+		0xFFFFFFFF,
+		true
 	);
+	models.push_back(std::move(object3D));
+	transforms.push_back({
+		{1.0f,1.0f,1.0f},
+		{0.0f,0.0f,0.0f},
+		{0.0f,0.0f,0.0f}
+		});
 
-	// 三角形
-	Triangle triangle[2];
-	triangle[0].Initialize(device, { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.5f, 0.0f }, { 0.5f, -0.5f,  0.0f }, 0xFFFFFFFF);
-	triangle[1].Initialize(device, { -0.5f, -0.5f, 0.5f }, { 0.0f, 0.0f, 0.0f }, { 0.5f, -0.5f, -0.5f }, 0xFFFFFFFF);
+	textureIndices.push_back(0);
 
 	// スプライト
 	Sprite sprite;
@@ -201,14 +242,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//===============
 	Camera camera;
 	camera.Initialize(float(kClientWidth), float(kClientHeight));
+	Transform cameraTransform{ {1.0f,1.0f,1.0f}, {0.3f,0.0f,0.0f}, {0.0f,2.0f,-5.0f} };
 
-	int currentTextureIndex = 0;
+	// int currentTextureIndex = 0;
 	const char *textureItems[] = {
 		"resources/uvChecker.png",
 		"resources/monsterBall.png",
-		"resources/Test0.png",
-		"resources/Test1.png"
+		"resources/sample.png",
+		"resources/axis.jpg",
 	};
+
+	SoundData audioHandle = sound.SoundLoadWave("resources/fanfare.wav");
+	sound.SoundPlayWave(audioHandle);
+	
 
 	//===============
 	// メインループ
@@ -216,50 +262,322 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// ウィンドウの×ボタンが押されるまでループ
 	while (winApp.ProcessMessage()) {
 
-		// ゲームの処理
 		//===============
-		// カメラ処理
-		camera.Update();
+		// 更新処理
+		//===============
+		// カメラ
+		camera.Update(cameraTransform);
 
 		// モデル更新
-		axis.Update(&camera);
-		plane.Update(&camera);
+		for (size_t i = 0; i < models.size(); i++) {
+			models[i].Update(&camera, transforms[i]);
+		}
 
-		triangle[0].Update(&camera);
-		triangle[1].Update(&camera);
-
+		/*
 		// スプライト更新
 		sprite.Update(kClientWidth, kClientHeight);
+		*/
 
+#ifdef USE_IMGUI
+
+		ImGuiManager::GetInstance()->BeginFrame();
+
+		ImGui::DockSpaceOverViewport(
+			ImGui::GetMainViewport()->ID,
+			nullptr,
+			ImGuiDockNodeFlags_PassthruCentralNode
+		);
+
+		ImGui::Begin("Settings");
+
+		static int currentObjectIndex = 0;
+		static int createType = 0;
+
+		const char *createItems[] = {
+			"PlaneTriangle",
+			"Sphere",
+			"Model"
+		};
+
+		//
+		// 作成するモデル種類
+		//
+		ImGui::Combo(
+			"Model",
+			&createType,
+			createItems,
+			IM_ARRAYSIZE(createItems)
+		);
+
+		//
+		// Create
+		//
+		if (ImGui::Button("Create")) {
+
+			Object3D object;
+
+			switch (createType) {
+
+			case 0:
+				object.CreatePlaneTriangle(
+					device,
+					{ -0.5f,-0.5f },
+					{ 0.0f, 0.5f },
+					{ 0.5f,-0.5f },
+					0xFFFFFFFF,
+					true
+				);
+				break;
+
+			case 1:
+				object.CreateSphere(
+					device,
+					kSubdivision,
+					0xFFFFFFFF,
+					true
+				);
+				break;
+
+			case 2:
+				object.CreateModel(
+					device,
+					"resources",
+					"axis.obj",
+					0xFFFFFFFF,
+					true
+				);
+				break;
+			}
+
+			models.push_back(std::move(object));
+
+			transforms.push_back({
+				{1.0f,1.0f,1.0f},
+				{0.0f,0.0f,0.0f},
+				{0.0f,0.0f,0.0f}
+				});
+
+			textureIndices.push_back(0);
+
+			currentObjectIndex =
+				static_cast<int>(models.size()) - 1;
+		}
+
+		//
+		// Object一覧
+		//
+		if (ImGui::BeginListBox("Objects")) {
+			for (int i = 0; i < static_cast<int>(models.size()); i++) {
+
+				char label[32];
+				sprintf_s(label, "Object %d", i);
+
+				bool selected =
+					(currentObjectIndex == i);
+
+				if (ImGui::Selectable(label, selected)) {
+					currentObjectIndex = i;
+				}
+			}
+
+			ImGui::EndListBox();
+		}
+
+		//
+		// 選択中オブジェクト
+		//
+		if (!models.empty()) {
+
+			currentObjectIndex = std::clamp(
+				currentObjectIndex,
+				0,
+				static_cast<int>(models.size()) - 1
+			);
+
+			//
+			// Object
+			//
+			if (ImGui::CollapsingHeader(
+				"Object",
+				ImGuiTreeNodeFlags_DefaultOpen
+			)) {
+
+				Transform &transform =
+					transforms[currentObjectIndex];
+
+				ImGui::DragFloat3(
+					"Translate",
+					&transform.translate.x,
+					0.1f
+				);
+
+				ImGui::DragFloat3(
+					"Rotate",
+					&transform.rotate.x,
+					0.01f
+				);
+
+				ImGui::DragFloat3(
+					"Scale",
+					&transform.scale.x,
+					0.01f
+				);
+			}
+
+			//
+			// Delete
+			//
+			if (models.size() > 1) {
+				if (ImGui::Button("Delete")) {
+
+					models.erase(
+						models.begin() + currentObjectIndex
+					);
+
+					transforms.erase(
+						transforms.begin() + currentObjectIndex
+					);
+
+					textureIndices.erase(
+						textureIndices.begin() + currentObjectIndex
+					);
+
+					if (!models.empty()) {
+
+						currentObjectIndex =
+							(std::min)(
+								currentObjectIndex,
+								static_cast<int>(models.size()) - 1
+								);
+					} else {
+
+						currentObjectIndex = 0;
+					}
+				}
+			} else {
+				ImGui::BeginDisabled();
+				ImGui::Button("Delete");
+				ImGui::EndDisabled();
+			}
+
+			//
+			// Material
+			//
+			if (ImGui::CollapsingHeader(
+				"Material",
+				ImGuiTreeNodeFlags_DefaultOpen
+			)) {
+
+				ImGui::ColorEdit4(
+					"Color",
+					&models[currentObjectIndex]
+					.GetMaterial()
+					.GetMaterialData()
+					->color.x
+				);
+
+				bool enableLighting =
+					models[currentObjectIndex]
+					.GetMaterial()
+					.GetMaterialData()
+					->enableLighting != 0;
+
+				if (ImGui::Checkbox(
+					"Lighting",
+					&enableLighting
+				)) {
+
+					models[currentObjectIndex]
+						.GetMaterial()
+						.GetMaterialData()
+						->enableLighting =
+						enableLighting ? 1 : 0;
+				}
+
+				if (!models.empty())
+				{
+					ImGui::Combo(
+						"Texture",
+						&textureIndices[currentObjectIndex],
+						textureItems,
+						IM_ARRAYSIZE(textureItems)
+					);
+				}
+			}
+		}
+
+		//
+		// Light
+		//
+		if (ImGui::CollapsingHeader(
+			"Light",
+			ImGuiTreeNodeFlags_DefaultOpen
+		)) {
+
+			ImGui::ColorEdit4(
+				"LightColor",
+				&lighting.GetLightingData()->color.x
+			);
+
+			ImGui::SliderFloat3(
+				"Direction",
+				&lighting.GetLightingData()->direction.x,
+				-1.0f,
+				1.0f
+			);
+
+			ImGui::DragFloat(
+				"Intensity",
+				&lighting.GetLightingData()->intensity,
+				0.05f,
+				0.0f,
+				10.0f
+			);
+		}
+
+		lighting.Update();
+
+		ImGui::End();
+
+		ImGuiManager::GetInstance()->EndFrame();
+
+#endif
+
+		/*
 #ifdef USE_IMGUI
 		ImGuiManager::GetInstance()->BeginFrame();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 
 		ImGui::Begin("Setting");
 		// モデル
-		ImGui::SliderAngle("SphereRotateX", &axis.GetTransform().rotate.x);
-		ImGui::SliderAngle("SphereRotateY", &axis.GetTransform().rotate.y);
-		ImGui::SliderAngle("SphereRotateZ", &axis.GetTransform().rotate.z);
+		ImGui::SliderAngle("SphereRotateX", &modelTransform.rotate.x);
+		ImGui::SliderAngle("SphereRotateY", &modelTransform.rotate.y);
+		ImGui::SliderAngle("SphereRotateZ", &modelTransform.rotate.z);
 
 		// カメラ
-		ImGui::DragFloat3("CameraTranslate", &camera.GetTransform().translate.x, 0.1f);
-		ImGui::SliderAngle("CameraRotateX", &camera.GetTransform().rotate.x);
-		ImGui::SliderAngle("CameraRotateY", &camera.GetTransform().rotate.y);
-		ImGui::SliderAngle("CameraRotateZ", &camera.GetTransform().rotate.z);
+		ImGui::DragFloat3("CameraTranslate", &cameraTransform.translate.x, 0.1f);
+		ImGui::SliderAngle("CameraRotateX", &cameraTransform.rotate.x);
+		ImGui::SliderAngle("CameraRotateY", &cameraTransform.rotate.y);
+		ImGui::SliderAngle("CameraRotateZ", &cameraTransform.rotate.z);
+
 
 		// マテリアル
-		ImGui::ColorEdit4("color", &axis.GetMaterial().GetMaterialData()->color.x);
+		ImGui::ColorEdit4("color", &model[currentModelIndex].GetMaterial().GetMaterialData()->color.x);
 		ImGui::Combo(
 			"Texture", &currentTextureIndex, textureItems, IM_ARRAYSIZE(textureItems));
+
+		ImGui::Combo(
+			"Model", &currentModelIndex, modelItems, IM_ARRAYSIZE(modelItems));
+
 
 		// Sprite
 		ImGui::ColorEdit4("colorSprite", &sprite.GetMaterial().GetMaterialData()->color.x);
 		ImGui::SliderFloat3("translateSprite", &sprite.GetTransform().translate.x, 0.0f, 500.0f);
 
 		// Lighting
-		bool enableLighting = axis.GetMaterial().GetMaterialData()->enableLighting != 0;
+		bool enableLighting = model[currentModelIndex].GetMaterial().GetMaterialData()->enableLighting != 0;
 		ImGui::Checkbox("enableLighting", &enableLighting);
-		axis.GetMaterial().GetMaterialData()->enableLighting = enableLighting ? 1 : 0;
+		model[currentModelIndex].GetMaterial().GetMaterialData()->enableLighting = enableLighting ? 1 : 0;
 
 		ImGui::ColorEdit4("LightColor", &lighting.GetLightingData()->color.x);
 		ImGui::SliderFloat3("LightDirection", &lighting.GetLightingData()->direction.x, -1.0f, 1.0f);
@@ -276,11 +594,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		// ImGuiの内部コマンドを生成する
 		ImGuiManager::GetInstance()->EndFrame();
 #endif
+		*/
 
 		//===============
-		// 画面に描けるようにする
+		// 描画処理
 		//===============
-		// DirectX毎フレーム処理
 		directXCommon.BeginFrame();
 
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
@@ -294,25 +612,26 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		lighting.Bind(3, commandList);
 
 		// モデル描画
-		axis.Draw(commandList, axisTexture[currentTextureIndex]);
-		plane.Draw(commandList, axisTexture[currentTextureIndex]);
+		// model.Draw(commandList, texture[currentTextureIndex]);
+		for (size_t i = 0; i < models.size(); i++) {
+			if (i < textureIndices.size()) {
+				models[i].Draw(
+					commandList,
+					texture[textureIndices[i]]
+				);
+			}
+		}
 
 		// スプライト描画
-		sprite.Draw(commandList, spriteTexture);
-
-		triangle[0].Draw(commandList, axisTexture[currentTextureIndex]);
-		triangle[1].Draw(commandList, axisTexture[currentTextureIndex]);
+		// sprite.Draw(commandList, spriteTexture);
 
 #ifdef USE_IMGUI
 		ImGuiManager::GetInstance()->Draw(commandList);
 #endif
 
-		// 画面入れ替え
-		//=================
 		directXCommon.EndFrame();
 	}
 
-	//===============
 	// COMの終了
 	//===============
 	// WindowsAPI後始末
@@ -321,6 +640,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #ifdef USE_IMGUI
 	ImGuiManager::GetInstance()->Finalize();
 #endif
+
+	sound.SoundUnload(&audioHandle);
+
+	sound.Finalize();
 
 	CoUninitialize();
 

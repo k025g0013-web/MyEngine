@@ -3,6 +3,8 @@
 
 class ViewportState {
 public:
+    ViewportState() = default;
+
     void Initialize(float width, float height);
 
     void SetCommand(
@@ -10,6 +12,6 @@ public:
     );
 
 private:
-    D3D12_VIEWPORT viewport_;
-    D3D12_RECT scissorRect_;
+    D3D12_VIEWPORT viewport_{};
+    D3D12_RECT scissorRect_{};
 };

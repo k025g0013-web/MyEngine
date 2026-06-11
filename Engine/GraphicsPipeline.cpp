@@ -2,7 +2,7 @@
 
 #include "RootSignature.h"      // RootSignature
 #include "InputLayout.h"		// InputLayout
-#include "BlendState.h"			// BlendState
+#include "BlendState.h"	// BlendState
 #include "RasterizerState.h"	// RasterizerState
 #include "Shader.h"	            // Shader
 #include "DepthStencilState.h"  // DepthStencilState
