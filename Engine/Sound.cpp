@@ -56,7 +56,7 @@ SoundData Sound::SoundLoadWave(const char *filename) {
 	file.read((char *)&format.fmt, format.chunk.size);
 
 	// Dataチャンクの読み込み
-	ChunkHeader data;
+	ChunkHeader data{};
 	file.read((char *)&data, sizeof(data));
 	// JUNKチャンクを検出した場合
 	if (strncmp(data.id, "JUNK", 4) == 0) {

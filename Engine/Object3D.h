@@ -10,6 +10,7 @@
 #include "Render.h"
 
 #include "Camera.h"
+#include "DebugCamera.h"
 
 class Object3D {
 public:
@@ -32,7 +33,7 @@ public:
         uint32_t color, bool enableLighting
     );
 
-    void Update(Camera *camera, Transform transform);
+    void Update(DebugCamera *camera, Transform transform);
 
     void Draw(ID3D12GraphicsCommandList *commandList, Texture &texture);
 

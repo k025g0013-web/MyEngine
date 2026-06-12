@@ -108,6 +108,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\ConstantBuffer.cpp" />
     <ClCompile Include="Engine\ConvertString.cpp" />
     <ClCompile Include="Engine\CrashHandler.cpp" />
+    <ClCompile Include="Engine\DebugCamera.cpp" />
     <ClCompile Include="Engine\DepthStencil.cpp" />
     <ClCompile Include="Engine\DepthStencilState.cpp" />
     <ClCompile Include="Engine\DescriptorHeap.cpp" />
@@ -119,6 +120,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\IndexBuffer.cpp" />
     <ClCompile Include="Engine\InputKey.cpp" />
     <ClCompile Include="Engine\InputLayout.cpp" />
+    <ClCompile Include="Engine\InputMouse.cpp" />
     <ClCompile Include="Engine\Lighting.cpp" />
     <ClCompile Include="Engine\Logger.cpp" />
     <ClCompile Include="Engine\Material.cpp" />
@@ -186,6 +188,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\ConstantBuffer.h" />
     <ClInclude Include="Engine\ConvertString.h" />
     <ClInclude Include="Engine\CrashHandler.h" />
+    <ClInclude Include="Engine\DebugCamera.h" />
     <ClInclude Include="Engine\DepthStencil.h" />
     <ClInclude Include="Engine\DepthStencilState.h" />
     <ClInclude Include="Engine\DescriptorHeap.h" />
@@ -197,6 +200,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\IndexBuffer.h" />
     <ClInclude Include="Engine\InputKey.h" />
     <ClInclude Include="Engine\InputLayout.h" />
+    <ClInclude Include="Engine\InputMouse.h" />
     <ClInclude Include="Engine\Lighting.h" />
     <ClInclude Include="Engine\Logger.h" />
     <ClInclude Include="Engine\Material.h" />
