@@ -43,12 +43,14 @@
 #include "Object3D.h"
 #include "Sprite.h"
 #include "Camera.h"
+#include "DebugCamera.h"
 
 // Math
 #include "MathFunctions.h"
 
 // Input
 #include "InputKey.h"
+#include "InputMouse.h"
 
 #pragma endregion
 
@@ -116,9 +118,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Sound sound;
 	sound.Initialize();
 
-	// キー入力マネージャ初期化
-	InputKey inputKey;
-	inputKey.Initialize(&winApp);
+	// 入力マネージャ初期化
+	InputKey keyboard;
+	keyboard.Initialize(&winApp);
+	InputMouse mouse;
+	mouse.Initialize(hwnd);
+	winApp.SetInputMouse(&mouse);
 
 	// PSO
 #pragma region PSO
@@ -196,11 +201,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	texture[3].Initialize(device, commandList, directXCommon.GetSRVHeap(), "resources/axis.jpg");
 
 	Object3D object3D;
-	object3D.CreatePlaneTriangle(
+	object3D.CreateSphere(
 		device,
-		{ -0.5f,-0.5f },
-		{ 0.0f, 0.5f },
-		{ 0.5f,-0.5f },
+		kSubdivision,
 		0xFFFFFFFF,
 		true
 	);
@@ -220,6 +223,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// スプライト用テクスチャ
 	Texture spriteTexture;
 	spriteTexture.Initialize(device, commandList, directXCommon.GetSRVHeap(), "resources/uvChecker.png");
+
+	// 天球
+	Texture skydomeTexture;
+	skydomeTexture.Initialize(device, commandList, directXCommon.GetSRVHeap(), "resources/uvChecker.png");
+	Object3D skydomeModel;
+	skydomeModel.CreateModel(device, "resources", "skydome.obj", 0xFFFFFFFF, false);
+	Transform skydomeTransform{};
 
 	// Lighting
 	//===============
@@ -249,7 +259,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//===============
 	Camera camera;
 	camera.Initialize(float(kClientWidth), float(kClientHeight));
-	Transform cameraTransform{ {1.0f,1.0f,1.0f}, {0.3f,0.0f,0.0f}, {0.0f,2.0f,-5.0f} };
+	Transform cameraTransform{ .scale{1.0f,1.0f,1.0f}, .rotate{0.3f,0.0f,0.0f}, .translate{0.0f,2.0f,-5.0f} };
+
+	DebugCamera debugCamera;
+	debugCamera.Initialize(&keyboard, &mouse);
 
 	// int currentTextureIndex = 0;
 	const char *textureItems[] = {
@@ -268,18 +281,22 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//===============
 	// ウィンドウの×ボタンが押されるまでループ
 	while (winApp.ProcessMessage()) {
-		inputKey.Update();
+		keyboard.Update();
+		mouse.Update();
 
 		//===============
 		// 更新処理
 		//===============
 		// カメラ
 		camera.Update(cameraTransform);
+		debugCamera.Update();
 
 		// モデル更新
 		for (size_t i = 0; i < models.size(); i++) {
-			models[i].Update(&camera, transforms[i]);
+			models[i].Update(&debugCamera, transforms[i]);
 		}
+
+		skydomeModel.Update(&debugCamera, skydomeTransform);
 
 		/*
 		// スプライト更新
@@ -297,7 +314,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		);
 
 		ImGui::Begin("Settings");
-
+		
 		static int currentObjectIndex = 0;
 		static int createType = 0;
 
@@ -630,6 +647,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			}
 		}
 
+		skydomeModel.Draw(commandList, skydomeTexture);
+
 		// スプライト描画
 		// sprite.Draw(commandList, spriteTexture);
 
@@ -639,7 +658,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		directXCommon.EndFrame();
 
-		if (inputKey.PushKey(DIK_ESCAPE)) {
+		mouse.EndFrame();
+
+		// ESCキーで強制終了
+		if (keyboard.PushKey(DIK_ESCAPE)) {
 			return 0;
 		}
 	}

@@ -60,7 +60,7 @@ void Object3D::CreateModel(				// モデル
 	material_.Initialize(device, color, enableLighting);
 }
 
-void Object3D::Update(Camera *camera, Transform transform) {
+void Object3D::Update(DebugCamera *camera, Transform transform) {
 	Matrix4x4 worldMatrix = MakeWorldMatrix(transform);
 
 	Matrix4x4 worldViewProjectionMatrix =

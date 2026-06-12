@@ -156,6 +156,12 @@
     <ClCompile Include="Engine\InputKey.cpp">
       <Filter>ソース ファイル\KizunaEngine</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\DebugCamera.cpp">
+      <Filter>ソース ファイル\KizunaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\InputMouse.cpp">
+      <Filter>ソース ファイル\KizunaEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore">
@@ -332,6 +338,12 @@
       <Filter>ソース ファイル\KizunaEngine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\InputKey.h">
+      <Filter>ソース ファイル\KizunaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DebugCamera.h">
+      <Filter>ソース ファイル\KizunaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\InputMouse.h">
       <Filter>ソース ファイル\KizunaEngine</Filter>
     </ClInclude>
   </ItemGroup>

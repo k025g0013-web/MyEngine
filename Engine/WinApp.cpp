@@ -1,4 +1,5 @@
 #include "WinApp.h"
+#include "InputMouse.h"
 
 #ifdef USE_IMGUI
 #include <imgui/imgui.h>
@@ -16,8 +17,24 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
     }
 #endif
 
+    // ウィンドウ作成時に、WinAppのインスタンス（this）をウィンドウのデータ領域に保存する
+    if (msg == WM_NCCREATE) {
+        LPCREATESTRUCT createStruct = reinterpret_cast<LPCREATESTRUCT>(lparam);
+        SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(createStruct->lpCreateParams));
+    }
+
+    // 保存しておいた WinApp のインスタンスを取得
+    WinApp *winApp = reinterpret_cast<WinApp *>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+
     // メッセージに応じてゲーム固有の処理を行う
     switch (msg) {
+    case WM_MOUSEWHEEL:
+        if (winApp && winApp->inputMouse_) {
+            int delta = GET_WHEEL_DELTA_WPARAM(wparam);
+            winApp->inputMouse_->SetWheelDelta(delta);
+        }
+        return 0;
+
         // ウィンドウが破壊された
     case WM_DESTROY:
         // OSに対して、アプリの終了を伝える
@@ -62,7 +79,7 @@ void WinApp::Initialize(LPCWSTR title, uint32_t width, uint32_t height) {
         nullptr,				// 親ウィンドウハンドル
         nullptr,				// メニューハンドル
         wc_.hInstance,			// インスタントハンドル
-        nullptr					// オプション
+        this					// オプション
     );
 
     ShowWindow(hwnd_, SW_SHOW);

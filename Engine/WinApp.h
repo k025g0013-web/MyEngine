@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+class InputMouse;
+
 class WinApp {
 public:
     void Initialize(LPCWSTR title, uint32_t width, uint32_t height);
@@ -13,10 +15,13 @@ public:
     HWND GetHWND() const { return hwnd_; }
     WNDCLASS GetWC() const { return wc_; }
 
+    void SetInputMouse(InputMouse *inputMouse) { inputMouse_ = inputMouse; }
+
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
-private:
     HWND hwnd_ = nullptr;
     WNDCLASS wc_{};
+
+    InputMouse *inputMouse_ = nullptr;
 };
