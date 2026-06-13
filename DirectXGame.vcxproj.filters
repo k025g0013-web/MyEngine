@@ -16,8 +16,23 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{74ffc2b9-539a-444a-b3c1-08d874188f12}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\KizunaEngine">
-      <UniqueIdentifier>{ebce1fb3-1188-446f-80b0-36b61235d9b4}</UniqueIdentifier>
+    <Filter Include="ソース ファイル\Shader">
+      <UniqueIdentifier>{d403edce-8925-4a94-8c16-1c2c232d2c2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Source">
+      <UniqueIdentifier>{8863cc97-d991-4010-aa1b-4681c024f1fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Source\Input">
+      <UniqueIdentifier>{848116ab-6da0-4c2f-96a6-6cb5ec96df9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Source\Pipeline">
+      <UniqueIdentifier>{c1882e2d-6b2a-424a-82d0-a5a830bfe333}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Source\Utils">
+      <UniqueIdentifier>{d1e5dac0-b9d0-4e61-af22-224db6df7b6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Source\Math">
+      <UniqueIdentifier>{17a09e71-d949-4149-b67a-afa01f55ba9a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -42,125 +57,92 @@
     <ClCompile Include="externals\imgui\imgui_tables.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\BlendState.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Camera.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\ColorUtility.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\CommandContext.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\CompileShader.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\ConstantBuffer.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\ConvertString.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\CrashHandler.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\DepthStencil.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\DepthStencilState.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Fence.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\DirectXCommon.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\DescriptorHeap.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\DirectXDevice.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\ImGuiManager.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\GraphicsPipeline.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\IndexBuffer.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\InputLayout.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Lighting.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Logger.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Material.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Mesh.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\Sprite.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\ModelLoader.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\Texture.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Object3D.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\ViewportState.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\RasterizerState.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\WinApp.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Render.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\Camera.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\RenderTargetViews.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\CommandContext.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\RootSignature.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\DescriptorHeap.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Shader.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\DirectXCommon.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Sprite.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\DirectXDevice.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\SwapChain.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\Fence.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Texture.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\ImGuiManager.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\VertexBuffer.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\Lighting.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\ViewportState.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\Logger.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\WinApp.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\Material.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Sound.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\Mesh.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\InputKey.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\ModelLoader.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\DebugCamera.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\Object3D.cpp">
+      <Filter>ソース ファイル\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\InputMouse.cpp">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClCompile Include="Source\Renderer.cpp">
+      <Filter>ソース ファイル\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderOutput.cpp">
+      <Filter>ソース ファイル\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Shader.cpp">
+      <Filter>ソース ファイル\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Sound.cpp">
+      <Filter>ソース ファイル\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Input\Keyboard.cpp">
+      <Filter>ソース ファイル\Source\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Input\Mouse.cpp">
+      <Filter>ソース ファイル\Source\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Pipeline\GraphicsPipeline.cpp">
+      <Filter>ソース ファイル\Source\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Pipeline\PipelineManager.cpp">
+      <Filter>ソース ファイル\Source\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Pipeline\RootSignature.cpp">
+      <Filter>ソース ファイル\Source\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MeshBuffer.cpp">
+      <Filter>ソース ファイル\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugManager.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -168,11 +150,12 @@
       <Filter>ソース ファイル</Filter>
     </None>
     <None Include="exclusion.dic" />
-    <None Include="Object3d.hlsli" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Object3d.PS.hlsl" />
-    <FxCompile Include="Object3d.VS.hlsl" />
+    <None Include="Resources\Shader\Object3d.hlsli">
+      <Filter>ソース ファイル\Shader</Filter>
+    </None>
+    <None Include="Resources\Shader\Object2d.hlsli">
+      <Filter>ソース ファイル\Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imstb_rectpack.h">
@@ -199,157 +182,135 @@
     <ClInclude Include="externals\imgui\imgui_internal.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\BlendState.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Sprite.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Camera.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Texture.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\ColorUtility.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\TransformationMatrix.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\CommandContext.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\ViewportState.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\CompileShader.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\WinApp.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\ConstantBuffer.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Camera.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\ConvertString.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\CommandContext.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\CrashHandler.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\DescriptorHeap.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DepthStencil.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\DirectXCommon.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DepthStencilState.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\DirectXDevice.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DirectXDevice.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Fence.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DescriptorHeap.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\ImGuiManager.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Fence.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Lighting.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DirectXCommon.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Logger.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\GraphicsPipeline.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Material.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\ImGuiManager.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Mesh.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\InputLayout.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\ModelLoader.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\IndexBuffer.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Object3D.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Lighting.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Renderer.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Logger.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\RenderOutput.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Material.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Shader.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\MathFunctions.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Sound.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Matrix3x3.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Input\Keyboard.h">
+      <Filter>ソース ファイル\Source\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Matrix4x4.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Input\Mouse.h">
+      <Filter>ソース ファイル\Source\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Mesh.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Math\Functions.h">
+      <Filter>ソース ファイル\Source\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\ModelLoader.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Math\Matrix.h">
+      <Filter>ソース ファイル\Source\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Object3D.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Math\Transform.h">
+      <Filter>ソース ファイル\Source\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\RasterizerState.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Math\Vector.h">
+      <Filter>ソース ファイル\Source\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Render.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Pipeline\GraphicsPipeline.h">
+      <Filter>ソース ファイル\Source\Pipeline</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\RenderTargetViews.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Pipeline\PipelineElements.h">
+      <Filter>ソース ファイル\Source\Pipeline</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\ResourceUtils.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Pipeline\PipelineManager.h">
+      <Filter>ソース ファイル\Source\Pipeline</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\RootSignature.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Pipeline\RootSignature.h">
+      <Filter>ソース ファイル\Source\Pipeline</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Shader.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Utils\ColorHelper.h">
+      <Filter>ソース ファイル\Source\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Sprite.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Utils\ConvertString.h">
+      <Filter>ソース ファイル\Source\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\SwapChain.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\Utils\ResourceHelper.h">
+      <Filter>ソース ファイル\Source\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Texture.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="Source\MeshBuffer.h">
+      <Filter>ソース ファイル\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Transform.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\TransformationMatrix.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Vector2.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Vector3.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Vector4.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\VertexBuffer.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\VertexData.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\ViewportState.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\WinApp.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Sound.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\InputKey.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\DebugCamera.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\InputMouse.h">
-      <Filter>ソース ファイル\KizunaEngine</Filter>
+    <ClInclude Include="DebugManager.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
       <Filter>imgui</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resources\Shader\Object3d.VS.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Object3d.PS.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Object2d.VS.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Object2d.PS.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

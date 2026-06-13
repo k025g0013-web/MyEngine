@@ -55,7 +55,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals;$(ProjectDir)Engine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals;$(ProjectDir)Source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -84,7 +84,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals;$(ProjectDir)Engine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals;$(ProjectDir)Source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -100,45 +100,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Engine\BlendState.cpp" />
-    <ClCompile Include="Engine\Camera.cpp" />
-    <ClCompile Include="Engine\ColorUtility.cpp" />
-    <ClCompile Include="Engine\CommandContext.cpp" />
-    <ClCompile Include="Engine\CompileShader.cpp" />
-    <ClCompile Include="Engine\ConstantBuffer.cpp" />
-    <ClCompile Include="Engine\ConvertString.cpp" />
-    <ClCompile Include="Engine\CrashHandler.cpp" />
-    <ClCompile Include="Engine\DebugCamera.cpp" />
-    <ClCompile Include="Engine\DepthStencil.cpp" />
-    <ClCompile Include="Engine\DepthStencilState.cpp" />
-    <ClCompile Include="Engine\DescriptorHeap.cpp" />
-    <ClCompile Include="Engine\DirectXCommon.cpp" />
-    <ClCompile Include="Engine\DirectXDevice.cpp" />
-    <ClCompile Include="Engine\Fence.cpp" />
-    <ClCompile Include="Engine\GraphicsPipeline.cpp" />
-    <ClCompile Include="Engine\ImGuiManager.cpp" />
-    <ClCompile Include="Engine\IndexBuffer.cpp" />
-    <ClCompile Include="Engine\InputKey.cpp" />
-    <ClCompile Include="Engine\InputLayout.cpp" />
-    <ClCompile Include="Engine\InputMouse.cpp" />
-    <ClCompile Include="Engine\Lighting.cpp" />
-    <ClCompile Include="Engine\Logger.cpp" />
-    <ClCompile Include="Engine\Material.cpp" />
-    <ClCompile Include="Engine\Mesh.cpp" />
-    <ClCompile Include="Engine\ModelLoader.cpp" />
-    <ClCompile Include="Engine\Object3D.cpp" />
-    <ClCompile Include="Engine\RasterizerState.cpp" />
-    <ClCompile Include="Engine\Render.cpp" />
-    <ClCompile Include="Engine\RenderTargetViews.cpp" />
-    <ClCompile Include="Engine\RootSignature.cpp" />
-    <ClCompile Include="Engine\Shader.cpp" />
-    <ClCompile Include="Engine\Sound.cpp" />
-    <ClCompile Include="Engine\Sprite.cpp" />
-    <ClCompile Include="Engine\SwapChain.cpp" />
-    <ClCompile Include="Engine\Texture.cpp" />
-    <ClCompile Include="Engine\VertexBuffer.cpp" />
-    <ClCompile Include="Engine\ViewportState.cpp" />
-    <ClCompile Include="Engine\WinApp.cpp" />
+    <ClCompile Include="DebugManager.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -161,74 +123,48 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Source\Camera.cpp" />
+    <ClCompile Include="Source\CommandContext.cpp" />
+    <ClCompile Include="Source\DescriptorHeap.cpp" />
+    <ClCompile Include="Source\DirectXCommon.cpp" />
+    <ClCompile Include="Source\DirectXDevice.cpp" />
+    <ClCompile Include="Source\Fence.cpp" />
+    <ClCompile Include="Source\ImGuiManager.cpp" />
+    <ClCompile Include="Source\Input\Keyboard.cpp" />
+    <ClCompile Include="Source\Input\Mouse.cpp" />
+    <ClCompile Include="Source\Lighting.cpp" />
+    <ClCompile Include="Source\Logger.cpp" />
+    <ClCompile Include="Source\Material.cpp" />
+    <ClCompile Include="Source\Mesh.cpp" />
+    <ClCompile Include="Source\MeshBuffer.cpp" />
+    <ClCompile Include="Source\ModelLoader.cpp" />
+    <ClCompile Include="Source\Object3D.cpp" />
+    <ClCompile Include="Source\Pipeline\GraphicsPipeline.cpp" />
+    <ClCompile Include="Source\Pipeline\PipelineManager.cpp" />
+    <ClCompile Include="Source\Pipeline\RootSignature.cpp" />
+    <ClCompile Include="Source\Renderer.cpp" />
+    <ClCompile Include="Source\RenderOutput.cpp" />
+    <ClCompile Include="Source\Shader.cpp" />
+    <ClCompile Include="Source\Sound.cpp" />
+    <ClCompile Include="Source\Sprite.cpp" />
+    <ClCompile Include="Source\Texture.cpp" />
+    <ClCompile Include="Source\ViewportState.cpp" />
+    <ClCompile Include="Source\WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="exclusion.dic" />
-    <None Include="Object3d.hlsli">
+    <None Include="Resources\Shader\Object2d.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Resources\Shader\Object3d.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Object3d.PS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Object3d.VS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Engine\BlendState.h" />
-    <ClInclude Include="Engine\Camera.h" />
-    <ClInclude Include="Engine\ColorUtility.h" />
-    <ClInclude Include="Engine\CommandContext.h" />
-    <ClInclude Include="Engine\CompileShader.h" />
-    <ClInclude Include="Engine\ConstantBuffer.h" />
-    <ClInclude Include="Engine\ConvertString.h" />
-    <ClInclude Include="Engine\CrashHandler.h" />
-    <ClInclude Include="Engine\DebugCamera.h" />
-    <ClInclude Include="Engine\DepthStencil.h" />
-    <ClInclude Include="Engine\DepthStencilState.h" />
-    <ClInclude Include="Engine\DescriptorHeap.h" />
-    <ClInclude Include="Engine\DirectXCommon.h" />
-    <ClInclude Include="Engine\DirectXDevice.h" />
-    <ClInclude Include="Engine\Fence.h" />
-    <ClInclude Include="Engine\GraphicsPipeline.h" />
-    <ClInclude Include="Engine\ImGuiManager.h" />
-    <ClInclude Include="Engine\IndexBuffer.h" />
-    <ClInclude Include="Engine\InputKey.h" />
-    <ClInclude Include="Engine\InputLayout.h" />
-    <ClInclude Include="Engine\InputMouse.h" />
-    <ClInclude Include="Engine\Lighting.h" />
-    <ClInclude Include="Engine\Logger.h" />
-    <ClInclude Include="Engine\Material.h" />
-    <ClInclude Include="Engine\MathFunctions.h" />
-    <ClInclude Include="Engine\Matrix3x3.h" />
-    <ClInclude Include="Engine\Matrix4x4.h" />
-    <ClInclude Include="Engine\Mesh.h" />
-    <ClInclude Include="Engine\ModelLoader.h" />
-    <ClInclude Include="Engine\Object3D.h" />
-    <ClInclude Include="Engine\RasterizerState.h" />
-    <ClInclude Include="Engine\Render.h" />
-    <ClInclude Include="Engine\RenderTargetViews.h" />
-    <ClInclude Include="Engine\ResourceUtils.h" />
-    <ClInclude Include="Engine\RootSignature.h" />
-    <ClInclude Include="Engine\Shader.h" />
-    <ClInclude Include="Engine\Sound.h" />
-    <ClInclude Include="Engine\Sprite.h" />
-    <ClInclude Include="Engine\SwapChain.h" />
-    <ClInclude Include="Engine\Texture.h" />
-    <ClInclude Include="Engine\Transform.h" />
-    <ClInclude Include="Engine\TransformationMatrix.h" />
-    <ClInclude Include="Engine\Vector2.h" />
-    <ClInclude Include="Engine\Vector3.h" />
-    <ClInclude Include="Engine\Vector4.h" />
-    <ClInclude Include="Engine\VertexBuffer.h" />
-    <ClInclude Include="Engine\VertexData.h" />
-    <ClInclude Include="Engine\ViewportState.h" />
-    <ClInclude Include="Engine\WinApp.h" />
+    <ClInclude Include="DebugManager.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -237,6 +173,42 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_rectpack.h" />
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
+    <ClInclude Include="Source\Camera.h" />
+    <ClInclude Include="Source\CommandContext.h" />
+    <ClInclude Include="Source\DescriptorHeap.h" />
+    <ClInclude Include="Source\DirectXCommon.h" />
+    <ClInclude Include="Source\DirectXDevice.h" />
+    <ClInclude Include="Source\Fence.h" />
+    <ClInclude Include="Source\ImGuiManager.h" />
+    <ClInclude Include="Source\Input\Keyboard.h" />
+    <ClInclude Include="Source\Input\Mouse.h" />
+    <ClInclude Include="Source\Lighting.h" />
+    <ClInclude Include="Source\Logger.h" />
+    <ClInclude Include="Source\Material.h" />
+    <ClInclude Include="Source\Math\Functions.h" />
+    <ClInclude Include="Source\Math\Matrix.h" />
+    <ClInclude Include="Source\Math\Transform.h" />
+    <ClInclude Include="Source\Math\Vector.h" />
+    <ClInclude Include="Source\Mesh.h" />
+    <ClInclude Include="Source\MeshBuffer.h" />
+    <ClInclude Include="Source\ModelLoader.h" />
+    <ClInclude Include="Source\Object3D.h" />
+    <ClInclude Include="Source\Pipeline\GraphicsPipeline.h" />
+    <ClInclude Include="Source\Pipeline\PipelineElements.h" />
+    <ClInclude Include="Source\Pipeline\PipelineManager.h" />
+    <ClInclude Include="Source\Pipeline\RootSignature.h" />
+    <ClInclude Include="Source\Renderer.h" />
+    <ClInclude Include="Source\RenderOutput.h" />
+    <ClInclude Include="Source\Shader.h" />
+    <ClInclude Include="Source\Sound.h" />
+    <ClInclude Include="Source\Sprite.h" />
+    <ClInclude Include="Source\Texture.h" />
+    <ClInclude Include="Source\TransformationMatrix.h" />
+    <ClInclude Include="Source\Utils\ColorHelper.h" />
+    <ClInclude Include="Source\Utils\ConvertString.h" />
+    <ClInclude Include="Source\Utils\ResourceHelper.h" />
+    <ClInclude Include="Source\ViewportState.h" />
+    <ClInclude Include="Source\WinApp.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
@@ -245,6 +217,24 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
       <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resources\Shader\Object2d.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Object2d.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Object3d.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Object3d.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
