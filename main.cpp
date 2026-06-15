@@ -1,55 +1,45 @@
-#pragma region include
+#include "KizunaEngine.h"
 
-#include <windows.h>
-#include <wrl.h>
+// === Core ===
+#include "Core/WinApp.h"
+#include "Core/Logger.h"
+#include "Core/DebugManager.h"
 
-#include <cassert>
-
-#include <algorithm>
-
-#include <dbghelp.h>
-#pragma comment(lib, "Dbghelp.lib")
-
-#include <dxgidebug.h>
-#pragma comment(lib, "dxguid.lib")
-
-#include <dxcapi.h>
-#pragma comment(lib, "dxcompiler.lib")
-
-// Core
-#include "WinApp.h"
-#include "Logger.h"
-#include "DirectXCommon.h"
-#include "DebugManager.h"
+// === Graphics ===
+#include "Graphics/DirectXCommon.h"
 
 // Pipeline
-#include "Pipeline/PipelineManager.h"
-#include "Pipeline/RootSignature.h"
-#include "Pipeline/PipelineElements.h"
-#include "Pipeline/GraphicsPipeline.h"
+#include "Graphics/Pipeline/PipelineManager.h"
+#include "Graphics/Pipeline/RootSignature.h"
+#include "Graphics/Pipeline/PipelineElements.h"
+#include "Graphics/Pipeline/GraphicsPipeline.h"
 
 // Resource
-#include "Shader.h"
-#include "Lighting.h"
-#include "Texture.h"
-#include "Sound.h"
+#include "Graphics/Resource/Shader.h"
+#include "Graphics/Resource/Texture.h"
 
-// ImGui
-#include "ImGuiManager.h"
+// === RenderCore ===
+#include "RenderCore/Camera.h"
+#include "RenderCore/Lighting.h"
 
-// Object
-#include "Object3D.h"
-#include "Sprite.h"
-#include "Camera.h"
+// === Renderer ===
+#include "Renderer/Sprite.h"
 
-// Math
+// === Audio ===
+#include "Audio/Audio.h"
+
+// === External ===
+#include "External/ImGuiManager.h"
+
+// === Object ===
+#include "Object/Object3D.h"
+
+// === Math ===
 #include "Math/Functions.h"
 
-// Input
+// === Input ===
 #include "Input/Keyboard.h"
 #include "Input/Mouse.h"
-
-#pragma endregion
 
 const int32_t kSubdivision = 16;
 
@@ -59,10 +49,23 @@ const int32_t kClientHeight = 720;
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
+	/*
+	KizunaEngine* engine = KizunaEngine::GetInstance();
+	engine->Initialize(L"CG2", kClientWidth, kClientHeight);
+
+	WinApp *winApp = engine->GetWinApp();
+	DirectXCommon *directXCommon = engine->GetDirectXCommon();
+	PipelineManager *pipelineManager = engine->GetPipelineManager();
+	Keyboard *keyboard = engine->GetKeyboard();
+	Mouse *mouse = engine->GetMouse();
+
+	HWND hwnd = winApp->GetHWND();
+	ID3D12Device *device = directXCommon->GetDevice();
+	ID3D12GraphicsCommandList *commandList = directXCommon->GetCommandList();
+	*/
+
 	DebugManager debugManager;
 
-	// WindowAPI初期化
-#pragma region WindowAPI初期化
 	// ログ
 	Logger logger;
 	logger.Initialize();
@@ -75,17 +78,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// デバッグレイヤーを有効化する
 	debugManager.EnableDebugLayer();
 
-#pragma endregion
-
 	// DirectX初期化
 	DirectXCommon directXCommon;
 	directXCommon.Initialize(&winApp, &logger, kClientWidth, kClientHeight);
 	ID3D12Device *device = directXCommon.GetDevice();
 	ID3D12GraphicsCommandList *commandList = directXCommon.GetCommandList();
 
-	// サウンドマネージャ初期化
-	Sound sound;
-	sound.Initialize();
 
 	// 入力マネージャ初期化
 	Keyboard keyboard;
@@ -97,6 +95,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// PSO
 	PipelineManager pipelineManager;
 	pipelineManager.Initialize(device, &logger);
+
+	// サウンドマネージャ初期化
+	Audio sound;
+	sound.Initialize();
 
 	// 球
 	Object3D model;
@@ -146,9 +148,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	camera.Initialize(float(kClientWidth), float(kClientHeight), &keyboard, &mouse);
 	Transform cameraTransform{ .scale{1.0f,1.0f,1.0f}, .rotate{0.3f,0.0f,0.0f}, .translate{0.0f,1.5f,-5.0f} };
 
-	// 音声読み込み/再生/解放
-	SoundData audioHandle = sound.SoundLoadWave("Resources/fanfare.wav");
-	sound.SoundPlayWave(audioHandle);
+	// 音声読み込み/再生
+	SoundData audioHandle = sound.LoadAudio("Resources/fanfare.wav");
+	sound.PlayAudio(audioHandle, 0, 1.0f);
 
 	//===============
 	// メインループ
@@ -218,7 +220,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		// ImGuiの内部コマンドを生成する
 		ImGuiManager::GetInstance()->EndFrame();
 #endif
-
+		
 		//===============
 		// 描画処理
 		//===============
@@ -250,7 +252,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #ifdef USE_IMGUI
 		ImGuiManager::GetInstance()->Draw(commandList);
 #endif
-
 		directXCommon.EndFrame();
 
 		mouse.EndFrame();
@@ -270,7 +271,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	ImGuiManager::GetInstance()->Finalize();
 #endif
 
-	sound.SoundUnload(&audioHandle);
 	sound.Finalize();
 
 	return 0;

@@ -6,7 +6,7 @@
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 
-#include "WinApp.h"
+#include "Core/WinApp.h"
 
 class Keyboard {
 public:
