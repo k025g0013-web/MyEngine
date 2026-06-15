@@ -12,7 +12,6 @@
 
 #include "Math/Transform.h"
 
-
 class Sprite {
 public:
 	void Initialize(
@@ -23,7 +22,7 @@ public:
 
 	void Update(uint32_t windowWidth, uint32_t windowHeight);
 
-	void Draw(ID3D12GraphicsCommandList *commandList, Texture &texture);
+	void Draw(ID3D12GraphicsCommandList *commandList, TextureData &texture);
 
 	// getter
 	Transform &GetTransform() { return transform_; }

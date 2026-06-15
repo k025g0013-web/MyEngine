@@ -99,7 +99,7 @@ void Audio::UnloadAudio(SoundData *soundData) {
 
 // 音データ再生 (多重再生対応)
 void Audio::PlayAudio(const SoundData &soundData, int loopFlag, float volume) {
-	// ⭕ ループ再生かつ、すでに再生中の場合は、二重に再生されないように処理を抜ける
+	// ループ再生かつ、すでに再生中の場合は、二重に再生されないように処理を抜ける
 	if (loopFlag && IsPlayingAudio(soundData)) {
 		return;
 	}

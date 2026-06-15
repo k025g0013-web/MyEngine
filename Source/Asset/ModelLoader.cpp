@@ -4,13 +4,13 @@
 #include <sstream>
 #include <cassert>
 
-MaterialSource ModelLoader::LoadMaterialTemplateFile(const std::string &directoryPath, const std::string &fileName) {
+MaterialSource ModelLoader::LoadMaterialTemplateFile(const std::string &modelDirectory, const std::string &fileName) {
 	// 中で必要となる変数の宣言
 	MaterialSource materialData;	// 構築するMaterialData
 	std::string line;	// ファイルから読んだ1行を格納するもの
 
 	// ファイルを開く
-	std::ifstream file(directoryPath + "/" + fileName);
+	std::ifstream file(modelDirectory + "/" + fileName);
 	assert(file.is_open());	// とりあえず開けなかったら止める
 
 	// 実際にファイルを読み、MaterialDataを構築していく
@@ -25,7 +25,7 @@ MaterialSource ModelLoader::LoadMaterialTemplateFile(const std::string &director
 			s >> textureFileName;
 
 			// 連結してファイルパスにする
-			materialData.textureFilePath = directoryPath + "/" + textureFileName;
+			materialData.textureFilePath = modelDirectory + "/" + textureFileName;
 		}
 	}
 
@@ -33,16 +33,20 @@ MaterialSource ModelLoader::LoadMaterialTemplateFile(const std::string &director
 	return materialData;
 }
 
-ModelData ModelLoader::LoadObjFile(const std::string &directoryPath, const std::string &fileName) {
+ModelData ModelLoader::LoadObjFile(const std::string &modelName) {
+	std::string modelDirectory = "Resources/Models/" + modelName;
+	std::string objFilePath = modelDirectory + "/" + modelName + ".obj";
+
 	// 中で必要となる変数の宣言
+
 	ModelData modelData;	// 構築するModelData
 	std::vector<Vector4> positions;	// 位置
 	std::vector<Vector3> normals;	// 法線
 	std::vector<Vector2> texcoords;	// テクスチャ座標
 	std::string line;	// ファイルから読んだ1行を格納するもの
 
-	// ファイルを開く
-	std::ifstream file(directoryPath + "/" + fileName);
+	// 自動生成したパスでファイルを開く
+	std::ifstream file(objFilePath);
 	assert(file.is_open());	// とりあえず開けなかったら止める
 
 	// 実際にファイルを読み、ModelDataを構築していく
@@ -104,7 +108,7 @@ ModelData ModelLoader::LoadObjFile(const std::string &directoryPath, const std::
 			s >> materialFileName;
 
 			// 基本的にobjファイルと同一階層にmtlは存在させるのでディレクトリ名とファイル名を探す
-			modelData.material = LoadMaterialTemplateFile(directoryPath, materialFileName);
+			modelData.material = LoadMaterialTemplateFile(modelDirectory, materialFileName);
 		}
 	}
 

@@ -48,14 +48,14 @@ void Sprite::Update(uint32_t width, uint32_t height) {
 	material_.GetMaterialData()->uvTransform = uvTransformMatrix;
 }
 
-void Sprite::Draw(ID3D12GraphicsCommandList *commandList, Texture &texture) {
+void Sprite::Draw(ID3D12GraphicsCommandList *commandList, TextureData &texture) {
 	commandList->SetGraphicsRootConstantBufferView(0, material_.GetGPUVirtualAddress());
 
 	// TransformationMatrixCBufferの場所を設定
 	commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixBuffer_.GetGPUVirtualAddress());
 	
 	// テクスチャ決定
-	commandList->SetGraphicsRootDescriptorTable(2, texture.GetGPUHandle());
+	commandList->SetGraphicsRootDescriptorTable(2, texture.gpuHandle);
 
 	// Spriteの描画。変更が必要なものだけ変更する
 	commandList->IASetVertexBuffers(0, 1, vertexBuffer_.GetVertexBufferView());

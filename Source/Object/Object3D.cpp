@@ -42,11 +42,11 @@ void Object3D::CreateSphere(			// 球
 
 void Object3D::CreateModel(				// モデル
 	ID3D12Device *device,
-	const std::string &directoryPath, const std::string &fileName,
+	const std::string &fileName,
 	uint32_t color, bool enableLighting
 ) {
 	// モデル読み込み
-	modelData_ = ModelLoader::LoadObjFile(directoryPath, fileName);
+	modelData_ = ModelLoader::LoadObjFile(fileName);
 
 	// 頂点データ
 	mesh_.Create(device, modelData_.vertices);
@@ -70,7 +70,7 @@ void Object3D::Update(Camera *camera, Transform transform) {
 	transformationMatrixData_->World = worldMatrix;
 }
 
-void Object3D::Draw(ID3D12GraphicsCommandList *commandList, Texture &texture) {	
+void Object3D::Draw(ID3D12GraphicsCommandList *commandList, TextureData &texture) {
 	// マテリアルCBufferの場所を設定
     commandList->SetGraphicsRootConstantBufferView(0, material_.GetGPUVirtualAddress());
 
@@ -78,7 +78,7 @@ void Object3D::Draw(ID3D12GraphicsCommandList *commandList, Texture &texture) {
     commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixBuffer_.GetGPUVirtualAddress());
 
 	// SRVのDescriptorTableの先頭を設定
-    commandList->SetGraphicsRootDescriptorTable(2, texture.GetGPUHandle());
+    commandList->SetGraphicsRootDescriptorTable(2, texture.gpuHandle);
 
     mesh_.Bind(commandList);
 }
