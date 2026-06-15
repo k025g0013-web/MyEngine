@@ -3,13 +3,19 @@
 #include <memory>
 #include <string>
 
-// === 基盤システム ===
+// === Core ===
 #include "Core/WinApp.h"
 #include "Core/Logger.h"
 #include "Core/DebugManager.h"
-#include "Graphics/DirectXCommon.h"
 
-// === 追加でまとめるシステム ===
+// === Graphics ===
+#include "Graphics/DirectXCommon.h"
+#include "Graphics/Resource/Texture.h"
+
+// === Audio ===
+#include "Audio/Audio.h"
+
+// === Input ===
 #include "Input/Keyboard.h"
 #include "Input/Mouse.h"
 #include "Graphics/Pipeline/PipelineManager.h"
@@ -39,6 +45,9 @@ public:
 	ID3D12Device *GetDevice() const { return directXCommon_->GetDevice(); }
 	ID3D12GraphicsCommandList *GetCommandList() const { return directXCommon_->GetCommandList(); }
 
+	Texture *GetTextureManager() const { return textureManager_.get(); }
+	Audio *GetAudioManager() const { return audioManager_.get(); }
+
 	Keyboard *GetKeyboard() const { return keyboard_.get(); }
 	Mouse *GetMouse() const { return mouse_.get(); }
 	PipelineManager *GetPipelineManager() const { return pipelineManager_.get(); }
@@ -58,4 +67,7 @@ private:
 	std::unique_ptr<Keyboard> keyboard_;
 	std::unique_ptr<Mouse> mouse_;
 	std::unique_ptr<PipelineManager> pipelineManager_;
+
+	std::unique_ptr<Texture> textureManager_;
+	std::unique_ptr<Audio> audioManager_;
 };

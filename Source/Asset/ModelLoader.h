@@ -23,7 +23,6 @@ public:
 	);
 
 	static ModelData LoadObjFile(
-		const std::string &directoryPath,
-		const std::string &fileName
+		const std::string &modelName
 	);
 };

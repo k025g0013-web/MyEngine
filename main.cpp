@@ -49,21 +49,6 @@ const int32_t kClientHeight = 720;
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
-	/*
-	KizunaEngine* engine = KizunaEngine::GetInstance();
-	engine->Initialize(L"CG2", kClientWidth, kClientHeight);
-
-	WinApp *winApp = engine->GetWinApp();
-	DirectXCommon *directXCommon = engine->GetDirectXCommon();
-	PipelineManager *pipelineManager = engine->GetPipelineManager();
-	Keyboard *keyboard = engine->GetKeyboard();
-	Mouse *mouse = engine->GetMouse();
-
-	HWND hwnd = winApp->GetHWND();
-	ID3D12Device *device = directXCommon->GetDevice();
-	ID3D12GraphicsCommandList *commandList = directXCommon->GetCommandList();
-	*/
-
 	DebugManager debugManager;
 
 	// ログ
@@ -84,7 +69,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	ID3D12Device *device = directXCommon.GetDevice();
 	ID3D12GraphicsCommandList *commandList = directXCommon.GetCommandList();
 
-
 	// 入力マネージャ初期化
 	Keyboard keyboard;
 	keyboard.Initialize(&winApp);
@@ -96,9 +80,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	PipelineManager pipelineManager;
 	pipelineManager.Initialize(device, &logger);
 
-	// サウンドマネージャ初期化
-	Audio sound;
-	sound.Initialize();
+	// テクスチャマネージャ初期化
+	Texture textureManager;
+	textureManager.Initialize(device, directXCommon.GetSRVHeap());
+
+	// オーディオマネージャ初期化
+	Audio audioManager;
+	audioManager.Initialize();
 
 	// 球
 	Object3D model;
@@ -107,7 +95,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// 天球
 	Object3D skydomeModel;
-	skydomeModel.CreateModel(device, "Resources", "skydome.obj", 0xFFFFFFFF, false);
+	skydomeModel.CreateModel(device, "skydome", 0xFFFFFFFF, false);
 	Transform skydomeTransform{ {1.0f, 1.0f, 1.0f}, {}, {}, };
 
 	// スプライト
@@ -115,8 +103,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	sprite.Initialize(device, 0.0f, 0.0f, 640.0f, 360.0f, 0xFFFFFFFF);
 
 	// テクスチャ
-	Texture texture;
-	texture.Initialize(device, commandList, directXCommon.GetSRVHeap(), "Resources/uvChecker.png");
+	TextureData uvTexture = textureManager.LoadTexture(commandList, "Resources/uvChecker.png");
 
 	// Lighting
 	//===============
@@ -149,8 +136,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Transform cameraTransform{ .scale{1.0f,1.0f,1.0f}, .rotate{0.3f,0.0f,0.0f}, .translate{0.0f,1.5f,-5.0f} };
 
 	// 音声読み込み/再生
-	SoundData audioHandle = sound.LoadAudio("Resources/fanfare.wav");
-	sound.PlayAudio(audioHandle, 0, 1.0f);
+	SoundData audioHandle = audioManager.LoadAudio("Resources/fanfare.wav");
+	audioManager.PlayAudio(audioHandle, 0, 1.0f);
 
 	//===============
 	// メインループ
@@ -235,8 +222,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			lighting.Bind(3, commandList);		// Lighting
 
 			// モデル描画
-			model.Draw(commandList, texture);
-			skydomeModel.Draw(commandList, texture);
+			model.Draw(commandList, uvTexture);
+			skydomeModel.Draw(commandList, uvTexture);
 		}
 
 		{	// Object2d描画
@@ -246,7 +233,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// 形状を設定
 
 			// スプライト描画
-			sprite.Draw(commandList, texture);
+			sprite.Draw(commandList, uvTexture);
 		}
 
 #ifdef USE_IMGUI
@@ -264,14 +251,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// COMの終了
 	//===============
-	// WindowsAPI後始末
-	winApp.Finalize();
-
 #ifdef USE_IMGUI
 	ImGuiManager::GetInstance()->Finalize();
 #endif
 
-	sound.Finalize();
+	textureManager.Finalize();
+	audioManager.Finalize();
 
+	// WindowsAPI後始末
+	winApp.Finalize();
+	
 	return 0;
 }

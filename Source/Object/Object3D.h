@@ -11,7 +11,6 @@
 #include "RenderCore/Mesh.h"
 #include "Renderer/Renderer.h"
 
-
 class Object3D {
 public:
     // 形状生成(実質Initialize)
@@ -29,13 +28,13 @@ public:
 
     void CreateModel(           // モデル
         ID3D12Device *device,
-        const std::string &directoryPath, const std::string &fileName,
+        const std::string &fileName,
         uint32_t color, bool enableLighting
     );
 
     void Update(Camera *camera, Transform transform);
 
-    void Draw(ID3D12GraphicsCommandList *commandList, Texture &texture);
+    void Draw(ID3D12GraphicsCommandList *commandList, TextureData &texture);
 
     // getter
     ModelData &GetModelData() { return modelData_; }
