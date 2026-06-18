@@ -29,9 +29,9 @@ struct FormatChunk {
 
 // 音声データ
 struct SoundData {
-	WAVEFORMATEX wfex;			// 波形フォーマット
+	WAVEFORMATEXTENSIBLE wfex;	// 波形フォーマット
 	BYTE *pBuffer;				// バッファの先頭アドレス
-	unsigned int bufferSize;	// バッファのサイズ
+	UINT32 bufferSize;			// バッファのサイズ
 };
 
 class Audio {
@@ -40,7 +40,11 @@ public:
 	void Finalize();
 
 	// 音声データの読み込み
-	SoundData LoadAudio(const char *filename);
+	SoundData LoadAudio(const std::string &filename);
+
+	SoundData LoadWav(const char *filename);	// wavデータ
+	SoundData LoadMp3(const wchar_t *filename);	// mp3データ
+
 	// 音声データの解放
 	void UnloadAudio(SoundData *soundData);
 

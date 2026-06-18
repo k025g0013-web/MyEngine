@@ -91,7 +91,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// 球
 	Object3D model;
 	model.CreateSphere(device, kSubdivision, 0xFFFFFFFF, true);
-	Transform modelTransform{ {1.0f, 1.0f, 1.0f}, {}, {}, };
+	Transform modelTransform{ {0.5f, 0.5f, 0.5f}, {}, {}, };
 
 	// 天球
 	Object3D skydomeModel;
@@ -104,6 +104,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// テクスチャ
 	TextureData uvTexture = textureManager.LoadTexture(commandList, "Resources/uvChecker.png");
+	TextureData cubeTexture = textureManager.LoadTexture(commandList, "Resources/cube.jpg");
 
 	// Lighting
 	//===============
@@ -137,7 +138,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// 音声読み込み/再生
 	SoundData audioHandle = audioManager.LoadAudio("Resources/fanfare.wav");
-	audioManager.PlayAudio(audioHandle, 0, 1.0f);
+	SoundData audioHandleMusic = audioManager.LoadAudio("Resources/music.mp3");
+	// audioManager.PlayAudio(audioHandle, 0, 1.0f);
 
 	//===============
 	// メインループ
@@ -191,16 +193,26 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		ImGui::ColorEdit4("colorSprite", &sprite.GetMaterial().GetMaterialData()->color.x);
 		ImGui::SliderFloat3("translateSprite", &sprite.GetTransform().translate.x, 0.0f, 500.0f);
 
+		// uvTransform
+		ImGui::DragFloat2("UVTransform", &sprite.GetUVTransform().translate.x, 0.01f, -10.0f, 10.0f);
+		ImGui::DragFloat2("UVScale", &sprite.GetUVTransform().scale.x, 0.01f, -10.0f, 10.0f);
+		ImGui::SliderAngle("UVRotate", &sprite.GetUVTransform().rotate.z);
+		ImGui::Separator();
+
+		// Lighting
+		Lighting::LightingType currentType = lighting.GetLightType();
+		const char *lightTypeNames[] = { "None", "Lambert", "Half-Lambert" };
+		int currentItem = static_cast<int>(currentType);
+
+		if (ImGui::Combo("Light Type", &currentItem, lightTypeNames, IM_ARRAYSIZE(lightTypeNames))) {
+			lighting.SetLightType(static_cast<Lighting::LightingType>(currentItem));
+		}
+
 		ImGui::ColorEdit4("LightColor", &lighting.GetLightingData()->color.x);
 		ImGui::SliderFloat3("LightDirection", &lighting.GetLightingData()->direction.x, -1.0f, 1.0f);
 		lighting.Update();
 		ImGui::DragFloat("Intensity", &lighting.GetLightingData()->intensity, 0.05f, 0.0f, 10.0f);
 		ImGui::Separator();
-
-		// uvTransform
-		ImGui::DragFloat2("UVTransform", &sprite.GetUVTransform().translate.x, 0.01f, -10.0f, 10.0f);
-		ImGui::DragFloat2("UVScale", &sprite.GetUVTransform().scale.x, 0.01f, -10.0f, 10.0f);
-		ImGui::SliderAngle("UVRotate", &sprite.GetUVTransform().rotate.z);
 
 		ImGui::End();
 
@@ -214,7 +226,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		directXCommon.BeginFrame();
 
 		{	// Object3d描画
-			const PipelineSet *opaque3D = pipelineManager.GetPipeline("Object3dOpaque");
+			auto *opaque3D = pipelineManager.GetPipeline(PipelineType::Object3dOpaque);
 			commandList->SetGraphicsRootSignature(opaque3D->rootSignature->GetRootSignature());
 			commandList->SetPipelineState(opaque3D->pipeline->GetPipelineState());
 			commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// 形状を設定
@@ -227,13 +239,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 
 		{	// Object2d描画
-			const PipelineSet *opaque2D = pipelineManager.GetPipeline("Object2dOpaque");
+			auto *opaque2D = pipelineManager.GetPipeline(PipelineType::Object2dOpaque);
 			commandList->SetGraphicsRootSignature(opaque2D->rootSignature->GetRootSignature());
 			commandList->SetPipelineState(opaque2D->pipeline->GetPipelineState());
 			commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// 形状を設定
 
 			// スプライト描画
-			sprite.Draw(commandList, uvTexture);
+			// sprite.Draw(commandList, uvTexture);
 		}
 
 #ifdef USE_IMGUI

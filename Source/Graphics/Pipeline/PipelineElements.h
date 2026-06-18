@@ -128,4 +128,39 @@ public:
 
         return descs; // 配列の実体を安全に返す
     }
+
+
+    // 3Dモデル用の標準的なInputLayout
+    static std::vector<D3D12_INPUT_ELEMENT_DESC> CreateModel3dInputLayout() {
+        std::vector<D3D12_INPUT_ELEMENT_DESC> descs(3);
+
+        // position
+        descs[0].SemanticName = "POSITION";
+        descs[0].SemanticIndex = 0;
+        descs[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+        descs[0].InputSlot = 0;
+        descs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+        descs[0].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+        descs[0].InstanceDataStepRate = 0;
+
+        // texcoord
+        descs[1].SemanticName = "TEXCOORD";
+        descs[1].SemanticIndex = 0;
+        descs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+        descs[1].InputSlot = 0;
+        descs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+        descs[1].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+        descs[1].InstanceDataStepRate = 0;
+
+        // normal
+        descs[2].SemanticName = "NORMAL";
+        descs[2].SemanticIndex = 0;
+        descs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+        descs[2].InputSlot = 0;
+        descs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+        descs[2].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+        descs[2].InstanceDataStepRate = 0;
+
+        return descs; // 配列の実体を安全に返す
+    }
 };

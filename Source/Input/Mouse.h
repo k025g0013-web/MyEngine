@@ -29,7 +29,7 @@ public:
     // ホイール
     int GetWheelDelta() const { return wheelDelta_; }
     bool TriggerWheel() const { return wheelDelta_ != 0 && preWheelDelta_ == 0; }
-    void SetWheelDelta(int delta) { wheelDelta_ += delta; }
+    void SetWheelDelta(int delta) { wheelDelta_ = delta; }
 
 private:
     HWND hwnd_ = nullptr;

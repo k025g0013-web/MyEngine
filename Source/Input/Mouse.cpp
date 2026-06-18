@@ -44,5 +44,6 @@ void Mouse::Update() {
 }
 
 void Mouse::EndFrame() {
+    preWheelDelta_ = wheelDelta_;
     wheelDelta_ = 0;
 }

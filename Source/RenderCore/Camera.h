@@ -35,6 +35,8 @@ public:
     const Vector3 &GetDebugTarget() const { return debugTarget_; }
     const Vector3 &GetDebugRotation() const { return debugRotation_; }
 
+    const float &GetDebugDistance() const { return debugDistance_; }
+
 private:
     // 内部更新
     void UpdateCamera(const Transform &targetTransform);

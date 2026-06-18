@@ -11,6 +11,12 @@ void Lighting::Initialize(ID3D12Device *device) {
     lightingData_->color = { 1.0f,1.0f,1.0f,1.0f };
     lightingData_->direction = { 0.0f,-1.0f,0.0f };
     lightingData_->intensity = 1.0f;
+
+    SetLightType(LightingType::Half_Lambert);
+
+    lightingData_->padding[0] = 0.0f;
+    lightingData_->padding[1] = 0.0f;
+    lightingData_->padding[2] = 0.0f;
 }
 
 void Lighting::Update() {
@@ -22,4 +28,11 @@ void Lighting::Bind(
     ID3D12GraphicsCommandList *commandList
 ) {
     commandList->SetGraphicsRootConstantBufferView(rootParameterIndex, constantBuffer_.GetGPUVirtualAddress());
+}
+
+void Lighting::SetLightType(LightingType type) {
+    if (lightingData_) {
+        currentLightType_ = type;
+        lightingData_->lightType = static_cast<int>(type);
+    }
 }
