@@ -106,8 +106,8 @@ void Camera::DebugZoom() {
     if (wheel != 0) {
         debugDistance_ -= static_cast<float>(wheel) * 0.0005f;
 
-        const float minDistance = 1.0f;
-        const float maxDistance = 500.0f;
+        const float minDistance = -500.0f;
+        const float maxDistance = -1.0f;
         debugDistance_ = std::clamp(debugDistance_, minDistance, maxDistance);
     }
 }

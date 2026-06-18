@@ -2,10 +2,22 @@
 #include <cassert>
 #include <cstring>
 #include <algorithm>
+#include <vector>
+#include <filesystem>
+
+#include <mfapi.h>
+#include <mfidl.h>
+#include <mfreadwrite.h>
+
+#pragma comment(lib, "mfplat.lib")
+#pragma comment(lib, "mfreadwrite.lib")
+#pragma comment(lib, "mfuuid.lib")
 
 void Audio::Initialize() {
 	XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	xAudio2_->CreateMasteringVoice(&masterVoice_);
+
+	MFStartup(MF_VERSION);
 }
 
 void Audio::Finalize() {
@@ -25,9 +37,31 @@ void Audio::Finalize() {
 		masterVoice_ = nullptr;
 	}
 	xAudio2_.Reset();
+
+	MFShutdown();
 }
 
-SoundData Audio::LoadAudio(const char *filename) {
+SoundData Audio::LoadAudio(const std::string &filename) {
+	std::filesystem::path path(filename);
+
+	if (path.extension() == ".wav") {
+		return LoadWav(filename.c_str());
+	}
+
+	if (path.extension() == ".mp3") {
+		std::wstring wpath(
+			filename.begin(),
+			filename.end()
+		);
+		return LoadMp3(wpath.c_str());
+	}
+
+	assert(false && "対応していない音声形式");
+
+	return {};
+}
+
+SoundData Audio::LoadWav(const char *filename) {
 	// ファイルオープン
 	//====================
 	// ファイル入力ストリームのインスタンス
@@ -78,10 +112,84 @@ SoundData Audio::LoadAudio(const char *filename) {
 	// 読み込んだ音声データをreturn
 	//====================
 	SoundData soundData = {};
-	soundData.wfex = format.fmt;
+	std::memset(&soundData.wfex, 0, sizeof(soundData.wfex));
+	std::memcpy(&soundData.wfex, &format.fmt, sizeof(format.fmt));
 	soundData.pBuffer =
 		reinterpret_cast<BYTE *>(pBuffer);
 	soundData.bufferSize = data.size;
+
+	return soundData;
+}
+
+SoundData Audio::LoadMp3(const wchar_t *filename) {
+	Microsoft::WRL::ComPtr<IMFSourceReader> reader = nullptr;
+
+	HRESULT hr = MFCreateSourceReaderFromURL(
+		filename, nullptr, &reader);
+	assert(SUCCEEDED(hr));
+
+	// PCMへ変換
+	IMFMediaType *mediaType = nullptr;
+	MFCreateMediaType(&mediaType);
+	mediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
+	mediaType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
+
+	reader->SetCurrentMediaType(
+		static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), nullptr, mediaType);
+	mediaType->Release();
+
+	// 実際のフォーマット取得
+	IMFMediaType *currentType = nullptr;
+	reader->GetCurrentMediaType(
+		static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), &currentType);
+
+	WAVEFORMATEX *waveFormat = nullptr;
+	UINT32 waveFormatSize = 0;
+	MFCreateWaveFormatExFromMFMediaType(
+		currentType, &waveFormat, &waveFormatSize);
+	currentType->Release();
+
+	// 音声データの読み込み
+	std::vector<BYTE> audioData;
+	while (true) {
+		IMFSample *sample = nullptr;
+		DWORD flags = 0;
+
+		hr = reader->ReadSample(
+			static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
+			0, nullptr, &flags, nullptr, &sample);
+
+		if (flags & MF_SOURCE_READERF_ENDOFSTREAM) break;
+		if (!sample) continue;
+
+		IMFMediaBuffer *buffer = nullptr;
+		sample->ConvertToContiguousBuffer(&buffer);
+
+		BYTE *data = nullptr;
+		DWORD maxLength = 0;
+		DWORD currentLength = 0;
+
+		buffer->Lock(&data, &maxLength, &currentLength);
+
+		// データをバッファに追加
+		audioData.insert(audioData.end(), data, data + currentLength);
+
+		buffer->Unlock();
+		buffer->Release();
+		sample->Release();
+	}
+
+	// 読み込んだデータをヒープへコピー
+	BYTE *pcmBuffer = new BYTE[audioData.size()];
+	memcpy(pcmBuffer, audioData.data(), audioData.size());
+
+	SoundData soundData{};
+	std::memcpy(&soundData.wfex, waveFormat, waveFormatSize);
+
+	soundData.pBuffer = pcmBuffer;
+	soundData.bufferSize = static_cast<UINT32>(audioData.size());
+
+	CoTaskMemFree(waveFormat);
 
 	return soundData;
 }
@@ -109,7 +217,9 @@ void Audio::PlayAudio(const SoundData &soundData, int loopFlag, float volume) {
 
 	// 波形フォーマットを基にSourceVoiceの生成
 	IXAudio2SourceVoice *pSourceVoice = nullptr;
-	HRESULT result = xAudio2_->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
+	HRESULT result = xAudio2_->CreateSourceVoice(
+		&pSourceVoice, reinterpret_cast<const WAVEFORMATEX *>(&soundData.wfex)
+	);
 	assert(SUCCEEDED(result));
 
 	// 再生する波形データの設定

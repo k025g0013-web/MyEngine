@@ -195,6 +195,9 @@
     <None Include="Resources\Shader\Object2d.hlsli">
       <Filter>ソース ファイル\Engine\Shader</Filter>
     </None>
+    <None Include="Resources\Shader\Model3d.hlsli">
+      <Filter>ソース ファイル\Engine\Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imstb_rectpack.h">
@@ -352,6 +355,12 @@
       <Filter>ソース ファイル\Engine\Shader</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shader\Object2d.PS.hlsl">
+      <Filter>ソース ファイル\Engine\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Model3d.PS.hlsl">
+      <Filter>ソース ファイル\Engine\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Model3d.VS.hlsl">
       <Filter>ソース ファイル\Engine\Shader</Filter>
     </FxCompile>
   </ItemGroup>
