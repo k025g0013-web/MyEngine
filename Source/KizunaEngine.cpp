@@ -1,13 +1,8 @@
 #include "KizunaEngine.h"
 #include "External/ImGuiManager.h"
 
-KizunaEngine::KizunaEngine() = default;
-KizunaEngine::~KizunaEngine() = default;
-
-KizunaEngine *KizunaEngine::GetInstance() {
-    static KizunaEngine instance;
-    return &instance;
-}
+#include "Graphics/Pipeline/RootSignature.h"
+#include "Graphics/Pipeline/GraphicsPipeline.h"
 
 void KizunaEngine::Initialize(const std::wstring &title, int32_t width, int32_t height) {
     // デバッグレイヤーとログの初期化
@@ -32,9 +27,11 @@ void KizunaEngine::Initialize(const std::wstring &title, int32_t width, int32_t 
     HWND hwnd = winApp_->GetHWND();
 
     // テクスチャマネージャ初期化
+    textureManager_ = std::make_unique<Texture>();
     textureManager_->Initialize(device, directXCommon_->GetSRVHeap());
 
     // オーディオマネージャ初期化
+    audioManager_ = std::make_unique<Audio>();
     audioManager_->Initialize();
 
     // キーボード初期化
@@ -49,6 +46,10 @@ void KizunaEngine::Initialize(const std::wstring &title, int32_t width, int32_t 
     // PSO初期化
     pipelineManager_ = std::make_unique<PipelineManager>();
     pipelineManager_->Initialize(device, logger_.get());
+
+    // Lighting
+    lighting_ = std::make_unique<Lighting>();
+    lighting_->Initialize(device);
 
     // ImGui初期化
 #ifdef USE_IMGUI
@@ -101,4 +102,13 @@ void  KizunaEngine::EndFrame() {
 void KizunaEngine::UpdateInput() {
     if (keyboard_) keyboard_->Update();
     if (mouse_) mouse_->Update();
+}
+
+void KizunaEngine::SetPipeline(PipelineType type) {
+    auto *pipelineData = pipelineManager_->GetPipeline(type);
+    auto *commandList = directXCommon_->GetCommandList();
+
+    commandList->SetGraphicsRootSignature(pipelineData->rootSignature->GetRootSignature());
+    commandList->SetPipelineState(pipelineData->pipeline->GetPipelineState());
+    commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

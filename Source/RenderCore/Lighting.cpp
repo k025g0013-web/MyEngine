@@ -12,6 +12,7 @@ void Lighting::Initialize(ID3D12Device *device) {
     lightingData_->direction = { 0.0f,-1.0f,0.0f };
     lightingData_->intensity = 1.0f;
 
+    currentLightType_ = LightingType::None;
     SetLightType(LightingType::Half_Lambert);
 
     lightingData_->padding[0] = 0.0f;

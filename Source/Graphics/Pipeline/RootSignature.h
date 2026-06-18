@@ -16,7 +16,11 @@ public:
     };
 
 public:
-    void Initialize(ID3D12Device *device, Logger *logger, Type type);
+    // 標準的な3D描画用
+    void CreateSkinny3D(ID3D12Device *device, Logger *logger);
+
+    // Lighting無し2D用
+    void CreateSkinny2D(ID3D12Device *device, Logger *logger);
 
     // getter
     ID3D12RootSignature *GetRootSignature() const {return rootSignature_.Get();}

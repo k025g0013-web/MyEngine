@@ -10,7 +10,13 @@
 
 // === Graphics ===
 #include "Graphics/DirectXCommon.h"
+
+#include "Graphics/Pipeline/PipelineManager.h"
+
 #include "Graphics/Resource/Texture.h"
+
+// === RenderCore ===
+#include "RenderCore/Lighting.h"
 
 // === Audio ===
 #include "Audio/Audio.h"
@@ -18,14 +24,16 @@
 // === Input ===
 #include "Input/Keyboard.h"
 #include "Input/Mouse.h"
-#include "Graphics/Pipeline/PipelineManager.h"
 
 class KizunaEngine {
 public:
-	// シングルトンパターンによるアクセス
-	static KizunaEngine *GetInstance();
+	KizunaEngine() = default;
+	~KizunaEngine() = default;
 
-	// ライフサイクル関数
+	// コピー対策
+	KizunaEngine(const KizunaEngine &) = delete;
+	KizunaEngine &operator=(const KizunaEngine &) = delete;
+
 	void Initialize(const std::wstring &title, int32_t width, int32_t height);
 	void Finalize();
 
@@ -39,7 +47,10 @@ public:
 	// 入力デバイス更新
 	void UpdateInput();
 
-	// 外部から各システムを利用するためのゲッター群
+	// 指定したPipelineを用意
+	void SetPipeline(PipelineType type);
+
+	// getter
 	WinApp *GetWinApp() const { return winApp_.get(); }
 	DirectXCommon *GetDirectXCommon() const { return directXCommon_.get(); }
 	ID3D12Device *GetDevice() const { return directXCommon_->GetDevice(); }
@@ -52,11 +63,7 @@ public:
 	Mouse *GetMouse() const { return mouse_.get(); }
 	PipelineManager *GetPipelineManager() const { return pipelineManager_.get(); }
 
-private:
-	KizunaEngine();
-	~KizunaEngine();
-	KizunaEngine(const KizunaEngine &) = delete;
-	KizunaEngine &operator=(const KizunaEngine &) = delete;
+	Lighting *GetLight() const { return lighting_.get(); }
 
 private:
 	std::unique_ptr<DebugManager> debugManager_;
@@ -67,6 +74,7 @@ private:
 	std::unique_ptr<Keyboard> keyboard_;
 	std::unique_ptr<Mouse> mouse_;
 	std::unique_ptr<PipelineManager> pipelineManager_;
+	std::unique_ptr<Lighting> lighting_;
 
 	std::unique_ptr<Texture> textureManager_;
 	std::unique_ptr<Audio> audioManager_;
