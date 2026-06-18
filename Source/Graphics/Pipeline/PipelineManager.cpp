@@ -24,12 +24,10 @@ void PipelineManager::Initialize(ID3D12Device* device, Logger* logger) {
 
         // rootSignature生成
         auto rootSignature = std::make_unique<RootSignature>();
-        rootSignature->Initialize(device, logger, RootSignature::Type::Skinny3D);
+        rootSignature->CreateSkinny3D(device, logger);
 
         // Pipeline生成
         auto pipeline = std::make_unique<GraphicsPipeline>();
-        
-        // InputLayOutをローカル変数へ移行
         auto inputLayout = PipelineElements::CreateDefaultInputLayout(); 
 
         pipeline->Initialize(
@@ -51,12 +49,10 @@ void PipelineManager::Initialize(ID3D12Device* device, Logger* logger) {
 
         // rootSignature生成
         auto rootSignature = std::make_unique<RootSignature>();
-        rootSignature->Initialize(device, logger, RootSignature::Type::Skinny3D);
+        rootSignature->CreateSkinny3D(device, logger);
 
         // Pipeline生成
         auto pipeline = std::make_unique<GraphicsPipeline>();
-
-        // InputLayOutをローカル変数へ移行
         auto inputLayout = PipelineElements::CreateDefaultInputLayout();
 
         pipeline->Initialize(
@@ -78,17 +74,15 @@ void PipelineManager::Initialize(ID3D12Device* device, Logger* logger) {
 
         // rootSignature生成
         auto rootSignature = std::make_unique<RootSignature>();
-        rootSignature->Initialize(device, logger, RootSignature::Type::Skinny3D);
+        rootSignature->CreateSkinny3D(device, logger);
 
         // Pipeline生成
         auto pipeline = std::make_unique<GraphicsPipeline>();
-
-        // InputLayOutをローカル変数へ移行
         auto inputLayout = PipelineElements::CreateDefaultInputLayout();
 
         pipeline->Initialize(
             device, rootSignature->GetRootSignature(), vs, ps, inputLayout,
-            PipelineElements::CreateDefaultRasterizer(),
+            PipelineElements::CreateWireframeRasterizer(),
             PipelineElements::CreateDefaultDepthStencil(),
             PipelineElements::CreateDefaultBlendState()
         );
@@ -108,12 +102,10 @@ void PipelineManager::Initialize(ID3D12Device* device, Logger* logger) {
 
         // rootSignature生成
         auto rootSignature = std::make_unique<RootSignature>();
-        rootSignature->Initialize(device, logger, RootSignature::Type::Skinny2D);
+        rootSignature->CreateSkinny2D(device, logger);
 
         // Pipeline生成
         auto pipeline = std::make_unique<GraphicsPipeline>();
-
-        // InputLayOutをローカル変数へ移行
         auto inputLayout = PipelineElements::CreateDefaultInputLayout();
 
         pipeline->Initialize(
@@ -138,12 +130,10 @@ void PipelineManager::Initialize(ID3D12Device* device, Logger* logger) {
 
         // rootSignature生成
         auto rootSignature = std::make_unique<RootSignature>();
-        rootSignature->Initialize(device, logger, RootSignature::Type::Skinny3D);
+        rootSignature->CreateSkinny3D(device, logger);
 
         // Pipeline生成
         auto pipeline = std::make_unique<GraphicsPipeline>();
-
-        // InputLayOutをローカル変数へ移行
         auto inputLayout = PipelineElements::CreateModel3dInputLayout();
 
         pipeline->Initialize(
@@ -153,7 +143,7 @@ void PipelineManager::Initialize(ID3D12Device* device, Logger* logger) {
             PipelineElements::CreateDefaultBlendState()
         );
 
-        // 新しい識別子でマネージャーに登録！
+        // マネージャーに登録
         RegisterPipeline(PipelineType::Model3dOpaque, std::move(rootSignature), std::move(pipeline));
     }    
 }

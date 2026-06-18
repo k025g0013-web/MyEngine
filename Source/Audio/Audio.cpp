@@ -41,7 +41,7 @@ void Audio::Finalize() {
 	MFShutdown();
 }
 
-SoundData Audio::LoadAudio(const std::string &filename) {
+AudioData Audio::LoadAudio(const std::string &filename) {
 	std::filesystem::path path(filename);
 
 	if (path.extension() == ".wav") {
@@ -61,7 +61,7 @@ SoundData Audio::LoadAudio(const std::string &filename) {
 	return {};
 }
 
-SoundData Audio::LoadWav(const char *filename) {
+AudioData Audio::LoadWav(const char *filename) {
 	// ファイルオープン
 	//====================
 	// ファイル入力ストリームのインスタンス
@@ -111,7 +111,7 @@ SoundData Audio::LoadWav(const char *filename) {
 
 	// 読み込んだ音声データをreturn
 	//====================
-	SoundData soundData = {};
+	AudioData soundData = {};
 	std::memset(&soundData.wfex, 0, sizeof(soundData.wfex));
 	std::memcpy(&soundData.wfex, &format.fmt, sizeof(format.fmt));
 	soundData.pBuffer =
@@ -121,7 +121,7 @@ SoundData Audio::LoadWav(const char *filename) {
 	return soundData;
 }
 
-SoundData Audio::LoadMp3(const wchar_t *filename) {
+AudioData Audio::LoadMp3(const wchar_t *filename) {
 	Microsoft::WRL::ComPtr<IMFSourceReader> reader = nullptr;
 
 	HRESULT hr = MFCreateSourceReaderFromURL(
@@ -183,7 +183,7 @@ SoundData Audio::LoadMp3(const wchar_t *filename) {
 	BYTE *pcmBuffer = new BYTE[audioData.size()];
 	memcpy(pcmBuffer, audioData.data(), audioData.size());
 
-	SoundData soundData{};
+	AudioData soundData{};
 	std::memcpy(&soundData.wfex, waveFormat, waveFormatSize);
 
 	soundData.pBuffer = pcmBuffer;
@@ -194,7 +194,7 @@ SoundData Audio::LoadMp3(const wchar_t *filename) {
 	return soundData;
 }
 
-void Audio::UnloadAudio(SoundData *soundData) {
+void Audio::UnloadAudio(AudioData *soundData) {
 	StopAudio(*soundData);
 
 	// バッファのメモリを解放
@@ -206,7 +206,7 @@ void Audio::UnloadAudio(SoundData *soundData) {
 }
 
 // 音データ再生 (多重再生対応)
-void Audio::PlayAudio(const SoundData &soundData, int loopFlag, float volume) {
+void Audio::PlayAudio(const AudioData &soundData, int loopFlag, float volume) {
 	// ループ再生かつ、すでに再生中の場合は、二重に再生されないように処理を抜ける
 	if (loopFlag && IsPlayingAudio(soundData)) {
 		return;
@@ -246,7 +246,7 @@ void Audio::PlayAudio(const SoundData &soundData, int loopFlag, float volume) {
 }
 
 // 音データ一括停止
-void Audio::StopAudio(const SoundData &soundData) {
+void Audio::StopAudio(const AudioData &soundData) {
 	auto it = playVoices_.find(soundData.pBuffer);
 	if (it != playVoices_.end()) {
 		// 配列内のすべてのボイスをループで停止・破棄
@@ -264,7 +264,7 @@ void Audio::StopAudio(const SoundData &soundData) {
 }
 
 // 音データ一括一時停止
-void Audio::PauseAudio(const SoundData &soundData) {
+void Audio::PauseAudio(const AudioData &soundData) {
 	auto it = playVoices_.find(soundData.pBuffer);
 	if (it != playVoices_.end()) {
 		// 配列内のすべてのボイスを一時停止
@@ -275,7 +275,7 @@ void Audio::PauseAudio(const SoundData &soundData) {
 }
 
 // 音データ一括再開
-void Audio::ResumeAudio(const SoundData &soundData) {
+void Audio::ResumeAudio(const AudioData &soundData) {
 	auto it = playVoices_.find(soundData.pBuffer);
 	if (it != playVoices_.end()) {
 		// 配列内のすべてのボイスを再開
@@ -286,7 +286,7 @@ void Audio::ResumeAudio(const SoundData &soundData) {
 }
 
 // 音データ一括音量設定
-void Audio::SetAudioVolume(const SoundData &soundData, float volume) {
+void Audio::SetAudioVolume(const AudioData &soundData, float volume) {
 	auto it = playVoices_.find(soundData.pBuffer);
 	if (it != playVoices_.end()) {
 		// 配列内のすべてのボイスの音量を変更
@@ -297,7 +297,7 @@ void Audio::SetAudioVolume(const SoundData &soundData, float volume) {
 }
 
 // 再生中か取得 (1つでも鳴っていれば再生中と判定)
-bool Audio::IsPlayingAudio(const SoundData &soundData) const {
+bool Audio::IsPlayingAudio(const AudioData &soundData) const {
 	auto it = playVoices_.find(soundData.pBuffer);
 	if (it == playVoices_.end()) {
 		return false;

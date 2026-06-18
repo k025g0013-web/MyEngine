@@ -34,5 +34,5 @@ private:
     MeshBuffer constantBuffer_;
     DirectionalLight *lightingData_ = nullptr;
 
-    LightingType currentLightType_;
+    LightingType currentLightType_{};
 };
