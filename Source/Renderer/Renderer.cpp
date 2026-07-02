@@ -3,7 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include "Math/Functions.h"
+#include "Math/FunctionMatrix.h"
 
 void Renderer::CreateVertexBuffer(
     ID3D12Device *device,
@@ -47,8 +47,8 @@ void Renderer::CreateTransformationMatrixBuffer(
     data = static_cast<TransformationMatrix *>(constantBuffer.Map());
 
     // 単位行列を書き込んでおく
-    data->WVP = MakeIdentity4x4();
-    data->World = MakeIdentity4x4();
+    data->WVP = Math::MakeIdentity<Matrix4x4>();
+    data->World = Math::MakeIdentity<Matrix4x4>();
 }
 
 void Renderer::CreateSprite(std::vector<VertexData> &vertices, std::vector<uint32_t> &indices, float left, float top, float right, float bottom) {

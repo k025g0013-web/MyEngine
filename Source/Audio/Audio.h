@@ -11,27 +11,27 @@
 
 // チャンクヘッダ
 struct ChunkHeader {
-	char id[4];
-	int32_t size;
+	char id[4]{};
+	int32_t size = 0;
 };
 
 // RIFFヘッダチャンク
 struct RiffHeader {
-	ChunkHeader chunk;
-	char type[4];
+	ChunkHeader chunk{};
+	char type[4]{};
 };
 
 // FMT
 struct FormatChunk {
-	ChunkHeader chunk;
-	WAVEFORMATEX fmt;
+	ChunkHeader chunk{};
+	WAVEFORMATEX fmt{};
 };
 
 // 音声データ
 struct AudioData {
-	WAVEFORMATEXTENSIBLE wfex;	// 波形フォーマット
-	BYTE *pBuffer;				// バッファの先頭アドレス
-	UINT32 bufferSize;			// バッファのサイズ
+	WAVEFORMATEXTENSIBLE wfex{};	// 波形フォーマット
+	BYTE *pBuffer = nullptr;		// バッファの先頭アドレス
+	UINT32 bufferSize = 0;			// バッファのサイズ
 };
 
 class Audio {

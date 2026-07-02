@@ -1,6 +1,6 @@
 #include "Sprite.h"
 
-#include "Math/Functions.h"
+#include "Math/FunctionMatrix.h"
 
 void Sprite::Initialize(
 	ID3D12Device *device, 
@@ -25,25 +25,25 @@ void Sprite::Initialize(
 
 void Sprite::Update(uint32_t width, uint32_t height) {
 	// カメラ処理
-	Matrix4x4 worldMatrix = MakeWorldMatrix(transform_);
+	Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
 
-	Matrix4x4 viewMatrix = MakeIdentity4x4();
+	Matrix4x4 viewMatrix = Math::MakeIdentity<Matrix4x4>();
 	
-	Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(
+	Matrix4x4 projectionMatrixSprite = Math::MakeOrthographicMatrix(
 		0.0f, 0.0f, float(width), float(height), 0.0f, 100.0f);
 	
 	Matrix4x4 worldViewProjectionMatrix = 
-		Multiply(Multiply(worldMatrix, viewMatrix), projectionMatrixSprite);
+		Math::Multiply(Math::Multiply(worldMatrix, viewMatrix), projectionMatrixSprite);
 
 	transformationMatrixData_->WVP = worldViewProjectionMatrix;
 	transformationMatrixData_->World = worldMatrix;
 
 	// uvTransform
-	Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransform_.scale);
+	Matrix4x4 uvTransformMatrix = Math::MakeScaleMatrix(uvTransform_.scale);
 
-	uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform_.rotate.z));
+	uvTransformMatrix = Math::Multiply(uvTransformMatrix, Math::MakeRotateZMatrix(uvTransform_.rotate.z));
 
-	uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransform_.translate));
+	uvTransformMatrix = Math::Multiply(uvTransformMatrix, Math::MakeTranslateMatrix(uvTransform_.translate));
 	
 	material_.GetMaterialData()->uvTransform = uvTransformMatrix;
 }

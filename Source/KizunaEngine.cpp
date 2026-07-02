@@ -42,6 +42,10 @@ void KizunaEngine::Initialize(const std::wstring &title, int32_t width, int32_t 
     mouse_ = std::make_unique<Mouse>();
     mouse_->Initialize(hwnd);
     winApp_->SetInputMouse(mouse_.get());
+    
+    // GamePad初期化
+    gamePad_ = std::make_unique<GamePad>();
+    gamePad_->Initialize(winApp_.get());
 
     // PSO初期化
     pipelineManager_ = std::make_unique<PipelineManager>();
@@ -102,6 +106,7 @@ void  KizunaEngine::EndFrame() {
 void KizunaEngine::UpdateInput() {
     if (keyboard_) keyboard_->Update();
     if (mouse_) mouse_->Update();
+    if (gamePad_) gamePad_->Update();
 }
 
 void KizunaEngine::SetPipeline(PipelineType type) {
