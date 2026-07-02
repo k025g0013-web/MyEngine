@@ -1,17 +1,16 @@
 #include "Input/Keyboard.h"
 #include <cassert>
 
-void Keyboard::Initialize(WinApp* winApp) {
+void Keyboard::Initialize(WinApp *winApp) {
 	HRESULT result;
 	// DirectInputの初期化
-	IDirectInput8 *directInput = nullptr;
 	result = DirectInput8Create(
 		winApp->GetWC().hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
-		(void**)&directInput, nullptr
+		(void **)&directInput_, nullptr
 	);
-	
+
 	// キーボードデバイスの生成
-	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard_, NULL);
+	result = directInput_->CreateDevice(GUID_SysKeyboard, &keyboard_, NULL);
 	assert(SUCCEEDED(result));
 
 	// 入力データ形式のセット

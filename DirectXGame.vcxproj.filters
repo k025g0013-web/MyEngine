@@ -183,6 +183,12 @@
     <ClCompile Include="Source\KizunaEngine.cpp">
       <Filter>ソース ファイル\Engine\Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Math\Easing.cpp">
+      <Filter>ソース ファイル\Engine\Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Input\GamePad.cpp">
+      <Filter>ソース ファイル\Engine\Source\Input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore">
@@ -230,7 +236,7 @@
     <ClInclude Include="Source\Input\Mouse.h">
       <Filter>ソース ファイル\Engine\Source\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Math\Functions.h">
+    <ClInclude Include="Source\Math\FunctionVector.h">
       <Filter>ソース ファイル\Engine\Source\Math</Filter>
     </ClInclude>
     <ClInclude Include="Source\Math\Matrix.h">
@@ -337,6 +343,18 @@
     </ClInclude>
     <ClInclude Include="Source\KizunaEngine.h">
       <Filter>ソース ファイル\Engine\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Easing.h">
+      <Filter>ソース ファイル\Engine\Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Input\GamePad.h">
+      <Filter>ソース ファイル\Engine\Source\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\FunctionMatrix.h">
+      <Filter>ソース ファイル\Engine\Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utils\RandomHelper.h">
+      <Filter>ソース ファイル\Engine\Source\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

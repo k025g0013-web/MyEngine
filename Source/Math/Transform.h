@@ -1,6 +1,6 @@
 #pragma once
-#include "Math/Vector.h"
-#include "Math/Matrix.h"
+#include "Vector.h"
+#include "Matrix.h"
 
 struct Transform {
 	Vector3 scale{ 1.0f, 1.0f, 1.0f };

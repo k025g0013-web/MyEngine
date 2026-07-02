@@ -12,9 +12,9 @@ class DescriptorHeap;
 
 // テクスチャへの参照用ハンドル
 struct TextureData {
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
-	DirectX::TexMetadata metadata;
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle{};
+	DirectX::TexMetadata metadata{};
 	ID3D12Resource *resource = nullptr;
 };
 
@@ -47,20 +47,20 @@ public:
 
 private:
 	struct ResourceRecord {
-		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-		Microsoft::WRL::ComPtr<ID3D12Resource> intermediate;
-		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
-		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
-		DirectX::TexMetadata metadata;
+		Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+		Microsoft::WRL::ComPtr<ID3D12Resource> intermediate = nullptr;
+		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle{};
+		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle{};
+		DirectX::TexMetadata metadata{};
 	};
 
 	struct LoadContext {
-		DirectX::ScratchImage mipImages;
-		DirectX::TexMetadata metadata;
-		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-		Microsoft::WRL::ComPtr<ID3D12Resource> intermediate;
-		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
-		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
+		DirectX::ScratchImage mipImages{};
+		DirectX::TexMetadata metadata{};
+		Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+		Microsoft::WRL::ComPtr<ID3D12Resource> intermediate = nullptr;
+		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle{};
+		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle{};
 	};
 
 	bool LoadWICAndGenerateMips(const std::string &textureName, LoadContext &context);

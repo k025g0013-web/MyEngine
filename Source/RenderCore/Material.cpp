@@ -1,6 +1,6 @@
 #include "Material.h"
 
-#include "Math/Functions.h"
+#include "Math/FunctionMatrix.h"
 #include "Utils/ColorHelper.h"
 
 void Material::Initialize(
@@ -15,5 +15,5 @@ void Material::Initialize(
     materialData_->enableLighting = enableLighting ? 1 : 0; // lightingの有無
 
     // 単位行列を書き込んでおく
-    materialData_->uvTransform = MakeIdentity4x4();
+    materialData_->uvTransform = Math::MakeIdentity<Matrix4x4>();
 }

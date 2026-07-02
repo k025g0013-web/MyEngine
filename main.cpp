@@ -73,7 +73,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		//===============
 		// カメラ切り替え
 #ifdef _DEBUG
-		if (engine->GetKeyboard()->TriggerKey(DIK_Q)) {
+		if (engine->GetKeyboard()->TriggerKey(DIK_Q) ||
+			engine->GetGamePad()->TriggerButton(XINPUT_GAMEPAD_A)) {
 			camera.ToggleMode();
 		}
 #endif
@@ -130,7 +131,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		ImGuiManager::GetInstance()->EndFrame();
 #endif
-		
+
 		//===============
 		// 描画処理
 		//===============

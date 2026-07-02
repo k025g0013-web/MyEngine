@@ -1,6 +1,6 @@
 #include "Object3D.h"
 
-#include "Math/Functions.h"
+#include "Math/FunctionMatrix.h"
 
 void Object3D::CreatePlaneTriangle(		// 平面三角形
 	ID3D12Device *device,
@@ -61,10 +61,10 @@ void Object3D::CreateModel(				// モデル
 }
 
 void Object3D::Update(Camera *camera, Transform transform) {
-	Matrix4x4 worldMatrix = MakeWorldMatrix(transform);
+	Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 
 	Matrix4x4 worldViewProjectionMatrix =
-		Multiply(worldMatrix, camera->GetViewProjectionMatrix());
+		Math::Multiply(worldMatrix, camera->GetViewProjectionMatrix());
 
 	transformationMatrixData_->WVP = worldViewProjectionMatrix;
 	transformationMatrixData_->World = worldMatrix;

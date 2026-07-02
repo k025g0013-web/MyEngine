@@ -24,6 +24,7 @@
 // === Input ===
 #include "Input/Keyboard.h"
 #include "Input/Mouse.h"
+#include "Input/GamePad.h"
 
 class KizunaEngine {
 public:
@@ -61,6 +62,8 @@ public:
 
 	Keyboard *GetKeyboard() const { return keyboard_.get(); }
 	Mouse *GetMouse() const { return mouse_.get(); }
+	GamePad *GetGamePad() const { return gamePad_.get(); }
+
 	PipelineManager *GetPipelineManager() const { return pipelineManager_.get(); }
 
 	Lighting *GetLight() const { return lighting_.get(); }
@@ -73,6 +76,8 @@ private:
 
 	std::unique_ptr<Keyboard> keyboard_;
 	std::unique_ptr<Mouse> mouse_;
+	std::unique_ptr<GamePad> gamePad_;
+
 	std::unique_ptr<PipelineManager> pipelineManager_;
 	std::unique_ptr<Lighting> lighting_;
 

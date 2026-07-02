@@ -1,6 +1,7 @@
 #include "Camera.h"
 
-#include "Math/Functions.h"
+#include "Math/FunctionVector.h"
+#include "Math/FunctionMatrix.h"
 
 #include <cassert>
 #include <algorithm>
@@ -26,7 +27,7 @@ void Camera::Update(const Transform &transform) {
     }
 
     // どちらのモードであっても、最終的に共通のViewProjection行列を合成する
-    viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
+    viewProjectionMatrix_ = Math::Multiply(viewMatrix_, projectionMatrix_);
 }
 
 // モードを交互に切り替え
@@ -40,10 +41,10 @@ void Camera::ToggleMode() {
 
 // --- 通常カメラの更新 ---
 void Camera::UpdateCamera(const Transform &targetTransform) {
-    Matrix4x4 cameraMatrix = MakeWorldMatrix(targetTransform);
-    viewMatrix_ = Inverse(cameraMatrix);
+    Matrix4x4 cameraMatrix = Math::MakeAffineMatrix(targetTransform.scale, targetTransform.rotate, targetTransform.translate);
+    viewMatrix_ = Math::Inverse(cameraMatrix);
 
-    projectionMatrix_ = MakePerspectiveFovMatrix(
+    projectionMatrix_ = Math::MakePerspectiveFovMatrix(
         fovY_, width_ / height_, nearClip_, farClip_
     );
 }

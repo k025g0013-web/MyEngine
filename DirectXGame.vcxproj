@@ -141,9 +141,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\Graphics\Resource\MeshBuffer.cpp" />
     <ClCompile Include="Source\Graphics\Resource\Shader.cpp" />
     <ClCompile Include="Source\Graphics\Resource\Texture.cpp" />
+    <ClCompile Include="Source\Input\GamePad.cpp" />
     <ClCompile Include="Source\Input\Keyboard.cpp" />
     <ClCompile Include="Source\Input\Mouse.cpp" />
     <ClCompile Include="Source\KizunaEngine.cpp" />
+    <ClCompile Include="Source\Math\Easing.cpp" />
     <ClCompile Include="Source\Object\Object3D.cpp" />
     <ClCompile Include="Source\RenderCore\Camera.cpp" />
     <ClCompile Include="Source\RenderCore\Lighting.cpp" />
@@ -200,10 +202,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Graphics\Resource\MeshBuffer.h" />
     <ClInclude Include="Source\Graphics\Resource\Shader.h" />
     <ClInclude Include="Source\Graphics\Resource\Texture.h" />
+    <ClInclude Include="Source\Input\GamePad.h" />
     <ClInclude Include="Source\Input\Keyboard.h" />
     <ClInclude Include="Source\Input\Mouse.h" />
     <ClInclude Include="Source\KizunaEngine.h" />
-    <ClInclude Include="Source\Math\Functions.h" />
+    <ClInclude Include="Source\Math\Easing.h" />
+    <ClInclude Include="Source\Math\FunctionMatrix.h" />
+    <ClInclude Include="Source\Math\FunctionVector.h" />
     <ClInclude Include="Source\Math\Matrix.h" />
     <ClInclude Include="Source\Math\Transform.h" />
     <ClInclude Include="Source\Math\Vector.h" />
@@ -217,6 +222,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Renderer\Sprite.h" />
     <ClInclude Include="Source\Utils\ColorHelper.h" />
     <ClInclude Include="Source\Utils\ConvertString.h" />
+    <ClInclude Include="Source\Utils\RandomHelper.h" />
     <ClInclude Include="Source\Utils\ResourceHelper.h" />
   </ItemGroup>
   <ItemGroup>

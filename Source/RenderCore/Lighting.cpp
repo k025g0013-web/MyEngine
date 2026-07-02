@@ -1,6 +1,6 @@
 #include "Lighting.h"
 
-#include "Math/Functions.h"
+#include "Math/FunctionVector.h"
 
 void Lighting::Initialize(ID3D12Device *device) {
     // 並行光源用のResourceの作成
@@ -21,7 +21,7 @@ void Lighting::Initialize(ID3D12Device *device) {
 }
 
 void Lighting::Update() {
-    lightingData_->direction = Normalize(lightingData_->direction);
+    lightingData_->direction = Math::Normalize(lightingData_->direction);
 }
 
 void Lighting::Bind(
