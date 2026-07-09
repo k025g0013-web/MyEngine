@@ -189,6 +189,9 @@
     <ClCompile Include="Source\Input\GamePad.cpp">
       <Filter>ソース ファイル\Engine\Source\Input</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Renderer\ThroughWallRenderer.cpp">
+      <Filter>ソース ファイル\Engine\Source\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore">
@@ -356,6 +359,9 @@
     <ClInclude Include="Source\Utils\RandomHelper.h">
       <Filter>ソース ファイル\Engine\Source\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Renderer\ThroughWallRenderer.h">
+      <Filter>ソース ファイル\Engine\Source\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -379,6 +385,9 @@
       <Filter>ソース ファイル\Engine\Shader</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shader\Model3d.VS.hlsl">
+      <Filter>ソース ファイル\Engine\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\ThroughWall3d.PS.hlsl">
       <Filter>ソース ファイル\Engine\Shader</Filter>
     </FxCompile>
   </ItemGroup>

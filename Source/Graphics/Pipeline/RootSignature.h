@@ -22,6 +22,8 @@ public:
     // Lighting無し2D用
     void CreateSkinny2D(ID3D12Device *device, Logger *logger);
 
+    void CreateThroughWall3D(ID3D12Device *device, Logger *logger);
+
     // getter
     ID3D12RootSignature *GetRootSignature() const {return rootSignature_.Get();}
 

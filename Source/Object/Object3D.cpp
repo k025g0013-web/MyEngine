@@ -19,6 +19,7 @@ void Object3D::CreatePlaneTriangle(		// 平面三角形
 
 	// マテリアル
 	material_.Initialize(device, color, enableLighting);
+	throughWallMaterial_.Initialize(device, color, enableLighting);
 }
 
 void Object3D::CreateSphere(			// 球
@@ -38,6 +39,7 @@ void Object3D::CreateSphere(			// 球
 
 	// マテリアル
 	material_.Initialize(device, color, enableLighting);
+	throughWallMaterial_.Initialize(device, color, enableLighting);
 }
 
 void Object3D::CreateModel(				// モデル
@@ -58,6 +60,7 @@ void Object3D::CreateModel(				// モデル
 
 	// マテリアル
 	material_.Initialize(device, color, enableLighting);
+	throughWallMaterial_.Initialize(device, color, enableLighting);
 }
 
 void Object3D::Update(Camera *camera, Transform transform) {
@@ -81,4 +84,17 @@ void Object3D::Draw(ID3D12GraphicsCommandList *commandList, TextureData &texture
     commandList->SetGraphicsRootDescriptorTable(2, texture.gpuHandle);
 
     mesh_.Bind(commandList);
+}
+
+void Object3D::DrawThroughWall(ID3D12GraphicsCommandList *commandList, TextureData &texture) {
+	// マテリアルCBufferの場所を設定
+	commandList->SetGraphicsRootConstantBufferView(0, throughWallMaterial_.GetGPUVirtualAddress());
+
+	// wvp用のCBufferの場所を設定
+	commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixBuffer_.GetGPUVirtualAddress());
+
+	// SRVのDescriptorTableの先頭を設定
+	commandList->SetGraphicsRootDescriptorTable(2, texture.gpuHandle);
+
+	mesh_.Bind(commandList);
 }

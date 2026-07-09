@@ -17,6 +17,7 @@ enum class PipelineType {
     Object3dOpaque,
     Object3dAlpha,
     Object3dWireframe,
+    Object3dThroughWall,    // 壁越しにあるオブジェクト描画
 
     Object2dOpaque,
 
