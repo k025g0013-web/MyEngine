@@ -11,6 +11,11 @@
 #include "RenderCore/Mesh.h"
 #include "Renderer/Renderer.h"
 
+enum class RenderLayer {
+    kDefault,
+    kThroughWall
+};
+
 class Object3D {
 public:
     // 形状生成(実質Initialize)
@@ -35,16 +40,24 @@ public:
     void Update(Camera *camera, Transform transform);
 
     void Draw(ID3D12GraphicsCommandList *commandList, TextureData &texture);
+    void DrawThroughWall(ID3D12GraphicsCommandList *commandList, TextureData &texture);
 
+
+    // setter
+    void SetRenderLayer(RenderLayer layer) { renderLayer_ = layer; }
+    
     // getter
     ModelData &GetModelData() { return modelData_; }
     Material &GetMaterial() { return material_; }
+    Material &GetThroughWallMaterial() { return throughWallMaterial_; }
+    RenderLayer GetRenderLayer() const { return renderLayer_; }
 
 private:
     ModelData modelData_;
 
     Renderer render_;
     Material material_;
+    Material throughWallMaterial_;
 
     Mesh mesh_;
     std::vector<VertexData> vertices_;
@@ -52,4 +65,7 @@ private:
 
     MeshBuffer transformationMatrixBuffer_;
     TransformationMatrix *transformationMatrixData_ = nullptr;
+
+    // 壁越し描画を行う対象の選別
+    RenderLayer renderLayer_ = RenderLayer::kDefault;
 };

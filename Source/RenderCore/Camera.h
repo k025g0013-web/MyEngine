@@ -2,6 +2,7 @@
 
 #include "Input/Keyboard.h"
 #include "Input/Mouse.h"
+#include "Input/GamePad.h"
 
 #include "Math/Vector.h"
 #include "Math/Matrix.h"
@@ -16,7 +17,7 @@ public:
     };
 
 public:
-    void Initialize(float width, float height, Keyboard *keyboard, Mouse *mouse);
+    void Initialize(float width, float height, Keyboard *keyboard, Mouse *mouse, GamePad *gamePad);
     void Update(const Transform &normalTargetTransform);
 
     // モード切り替え
@@ -66,6 +67,7 @@ private:
     // 入力デバイス
     Keyboard *keyboard_ = nullptr;
     Mouse *mouse_ = nullptr;
+    GamePad *gamePad_ = nullptr;
 
     // カメラ中央軸
     Vector3 debugTarget_ = { 0.0f, 0.0f, 0.0f };

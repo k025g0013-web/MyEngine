@@ -91,6 +91,31 @@ void PipelineManager::Initialize(ID3D12Device* device, Logger* logger) {
         RegisterPipeline(PipelineType::Object3dWireframe, std::move(rootSignature), std::move(pipeline));
     }
 
+    {   // === 壁越し3Dオブジェクト用Pipeline ===
+       // HLSL読み込み
+        Shader vs, ps;
+        vs.Compile(L"Resources/Shader/Object3d.VS.hlsl", L"vs_6_0");
+        ps.Compile(L"Resources/Shader/ThroughWall3d.PS.hlsl", L"ps_6_0");
+
+        // rootSignature生成
+        auto rootSignature = std::make_unique<RootSignature>();
+        rootSignature->CreateSkinny3D(device, logger);
+
+        // Pipeline生成
+        auto pipeline = std::make_unique<GraphicsPipeline>();
+        auto inputLayout = PipelineElements::CreateDefaultInputLayout();
+
+        pipeline->Initialize(
+            device, rootSignature->GetRootSignature(), vs, ps, inputLayout,
+            PipelineElements::CreateDefaultRasterizer(),
+            PipelineElements::CreateThroughWallDepthStencil(),
+            PipelineElements::CreateAlphaBlendState()
+        );
+
+        // マネージャーに登録
+        RegisterPipeline(PipelineType::Object3dThroughWall, std::move(rootSignature), std::move(pipeline));
+    }
+
     //====================
     // 2Dオブジェクト用PSO
     //====================

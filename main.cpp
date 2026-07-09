@@ -6,6 +6,7 @@
 #include "Object/Object3D.h"
 
 #include "Renderer/Sprite.h"
+#include "Renderer/ThroughWallRenderer.h"
 
 #include "External/ImGuiManager.h"
 
@@ -29,15 +30,30 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// データ生成
 	//===============
-	// 球
-	Object3D model;
-	model.CreateSphere(device, kSubdivision, 0xFFFFFFFF, true);
+	// 球1
+	Object3D model1;
+	model1.CreateSphere(device, kSubdivision, 0xFFFFFFFF, true);
 	Transform modelTransform{ {0.5f, 0.5f, 0.5f}, {}, {} };
+
+	// 球2
+	Object3D model2;
+	model2.CreateSphere(device, kSubdivision, 0xFFFFFFFF, true);
+	Transform modelTransform2{ {0.5f, 0.5f, 0.5f}, {}, {0,0,1} };
 
 	// 天球
 	Object3D skydomeModel;
 	skydomeModel.CreateModel(device, "skydome", 0xFFFFFFFF, false);
 	Transform skydomeTransform{ {1.0f, 1.0f, 1.0f}, {}, {} };
+
+	// 箱
+	Object3D cubeModel;
+	cubeModel.CreateModel(device, "cube", 0xFFFFFFFF, false);
+	Transform cubeTransform{ {1.0f, 1.0f, 1.0f}, {}, {0,0,-2} };
+
+	// 壁越し描画対象の選別
+	ThroughWallRenderer throughWallRenderer;
+	throughWallRenderer.AddObject(&model1, 0xFFFF00FF);
+	throughWallRenderer.AddObject(&model2, 0x0000FFFF);
 
 	// スプライト
 	Sprite sprite;
@@ -51,7 +67,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	lighting.Initialize(device);
 
 	Camera camera;
-	camera.Initialize(float(kClientWidth), float(kClientHeight), engine->GetKeyboard(), engine->GetMouse());
+	camera.Initialize(float(kClientWidth), float(kClientHeight), engine->GetKeyboard(), engine->GetMouse(), engine->GetGamePad());
 	Transform cameraTransform{ .scale{1.0f,1.0f,1.0f}, .rotate{0.3f,0.0f,0.0f}, .translate{0.0f,1.5f,-5.0f} };
 
 	// オーディオ
@@ -65,7 +81,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// メインループ
 	//===============
 	// ウィンドウの×ボタンが押されるまでループ
-	while (engine->ProcessMessage()) {		
+	while (engine->ProcessMessage()) {
 		engine->UpdateInput();	// 入力デバイスの更新
 
 		//===============
@@ -83,12 +99,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		camera.Update(cameraTransform);
 
 		// モデル更新
-		model.Update(&camera, modelTransform);
+		model1.Update(&camera, modelTransform);
+		model2.Update(&camera, modelTransform2);
 		skydomeModel.Update(&camera, skydomeTransform);
+		cubeModel.Update(&camera, cubeTransform);
 
 		// スプライト更新
 		sprite.Update(kClientWidth, kClientHeight);
-		
+
 #ifdef USE_IMGUI
 		ImGuiManager::GetInstance()->BeginFrame();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
@@ -142,13 +160,31 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			lighting.Bind(3, commandList);
 
-			model.Draw(commandList, uvTexture);
 			skydomeModel.Draw(commandList, uvTexture);
+			cubeModel.Draw(commandList, uvTexture);
+		}
+
+		{   // 壁越し3Dオブジェクト描画
+			engine->SetPipeline(PipelineType::Object3dThroughWall);
+
+			lighting.Bind(3, commandList);
+
+			throughWallRenderer.Draw(commandList, uvTexture);
+
+		}
+
+		{	// プレイヤー通常描画
+			engine->SetPipeline(PipelineType::Object3dOpaque);
+
+			lighting.Bind(3, commandList);
+
+			model1.Draw(commandList, uvTexture);
+			model2.Draw(commandList, uvTexture);
 		}
 
 		{   // 2Dオブジェクト描画
 			engine->SetPipeline(PipelineType::Object2dOpaque);
-			sprite.Draw(commandList, uvTexture);
+		//	sprite.Draw(commandList, uvTexture);
 		}
 
 		engine->EndFrame();

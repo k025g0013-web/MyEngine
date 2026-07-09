@@ -56,6 +56,16 @@ public:
         return desc;
     }
 
+    // 壁越しオブジェクト用のDepthStencil
+    static D3D12_DEPTH_STENCIL_DESC CreateThroughWallDepthStencil() {
+        D3D12_DEPTH_STENCIL_DESC desc = CreateAlphaDepthStencil();
+        // 書き込みしない
+        desc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+        // 壁より奥だけ描画
+        desc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
+        return desc;
+    }
+
     // 2D不透明用のDepthStencil
     static D3D12_DEPTH_STENCIL_DESC Create2DDepthStencil() {
         D3D12_DEPTH_STENCIL_DESC desc{};
