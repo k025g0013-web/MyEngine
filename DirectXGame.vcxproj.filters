@@ -201,10 +201,10 @@
     <ClCompile Include="Source\Renderer\ThroughWallRenderer.cpp">
       <Filter>Source\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Source\KizunaEngine.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exclusion.dic" />

@@ -14,9 +14,13 @@
 #pragma comment(lib, "mfuuid.lib")
 
 void Audio::Initialize() {
+	// 再生中のSourceVoiceを停止・破棄する
 	XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
+
+	// XAudio2の管理オブジェクトを解放
 	xAudio2_->CreateMasteringVoice(&masterVoice_);
 
+	// Media Foundationを終了
 	MFStartup(MF_VERSION);
 }
 
@@ -42,6 +46,7 @@ void Audio::Finalize() {
 }
 
 AudioData Audio::LoadAudio(const std::string &filename) {
+	// ファイル拡張子から読み込み形式を判定する
 	std::filesystem::path path(filename);
 
 	if (path.extension() == ".wav") {
@@ -122,46 +127,79 @@ AudioData Audio::LoadWav(const char *filename) {
 }
 
 AudioData Audio::LoadMp3(const wchar_t *filename) {
+	// Media FoundationのSourceReaderを生成
 	Microsoft::WRL::ComPtr<IMFSourceReader> reader = nullptr;
 
 	HRESULT hr = MFCreateSourceReaderFromURL(
 		filename, nullptr, &reader);
 	assert(SUCCEEDED(hr));
 
-	// PCMへ変換
+	//=====================================================================
+	// MP3をPCMへデコードするための出力フォーマットを設定
+	//=====================================================================
+	// SourceReaderから取得したMP3データを、
+	// XAudio2で再生可能なPCM形式へ自動変換させる。
 	IMFMediaType *mediaType = nullptr;
 	MFCreateMediaType(&mediaType);
 	mediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
 	mediaType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
 
 	reader->SetCurrentMediaType(
-		static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), nullptr, mediaType);
+		static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
+		nullptr,
+		mediaType
+	);
 	mediaType->Release();
 
-	// 実際のフォーマット取得
+	//=====================================================================
+	// デコード後のPCMフォーマットを取得
+	//=====================================================================
+	// チャンネル数やサンプリングレートなど、
+	// 再生時に必要となるWaveフォーマット情報を取得する。
 	IMFMediaType *currentType = nullptr;
 	reader->GetCurrentMediaType(
-		static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), &currentType);
+		static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
+		&currentType
+	);
 
 	WAVEFORMATEX *waveFormat = nullptr;
 	UINT32 waveFormatSize = 0;
 	MFCreateWaveFormatExFromMFMediaType(
-		currentType, &waveFormat, &waveFormatSize);
+		currentType,
+		&waveFormat,
+		&waveFormatSize
+	);
 	currentType->Release();
 
-	// 音声データの読み込み
+	//=====================================================================
+	// MP3を最後まで読み込み、PCMデータを取得
+	//=====================================================================
 	std::vector<BYTE> audioData;
+
 	while (true) {
 		IMFSample *sample = nullptr;
 		DWORD flags = 0;
 
 		hr = reader->ReadSample(
 			static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
-			0, nullptr, &flags, nullptr, &sample);
+			0,
+			nullptr,
+			&flags,
+			nullptr,
+			&sample
+		);
 
-		if (flags & MF_SOURCE_READERF_ENDOFSTREAM) break;
-		if (!sample) continue;
+		// ファイル終端に到達したら終了
+		if (flags & MF_SOURCE_READERF_ENDOFSTREAM) {
+			break;
+		}
 
+		// サンプルが取得できなかった場合は次へ
+		if (!sample) {
+			continue;
+		}
+
+		// サンプルを連続したバッファへ変換
 		IMFMediaBuffer *buffer = nullptr;
 		sample->ConvertToContiguousBuffer(&buffer);
 
@@ -169,26 +207,34 @@ AudioData Audio::LoadMp3(const wchar_t *filename) {
 		DWORD maxLength = 0;
 		DWORD currentLength = 0;
 
+		// バッファをロックしてPCMデータへアクセス
 		buffer->Lock(&data, &maxLength, &currentLength);
 
-		// データをバッファに追加
+		// デコードしたPCMデータを連結して保存
 		audioData.insert(audioData.end(), data, data + currentLength);
 
+		// 使用したリソースを解放
 		buffer->Unlock();
 		buffer->Release();
 		sample->Release();
 	}
 
-	// 読み込んだデータをヒープへコピー
+	//=====================================================================
+	// 再生用バッファを生成
+	//=====================================================================
+	// std::vectorは関数終了時に破棄されるため、
+	// ヒープ領域へコピーしてAudioDataが保持できるようにする。
 	BYTE *pcmBuffer = new BYTE[audioData.size()];
 	memcpy(pcmBuffer, audioData.data(), audioData.size());
 
+	// AudioDataを構築
 	AudioData soundData{};
 	std::memcpy(&soundData.wfex, waveFormat, waveFormatSize);
 
 	soundData.pBuffer = pcmBuffer;
 	soundData.bufferSize = static_cast<UINT32>(audioData.size());
 
+	// Media Foundationが確保したフォーマット情報を解放
 	CoTaskMemFree(waveFormat);
 
 	return soundData;
@@ -315,28 +361,46 @@ bool Audio::IsPlayingAudio(const AudioData &soundData) const {
 	return false;
 }
 
-// 再生済みの音声を破棄
 void Audio::ClearFinishedVoices() {
+	// 登録されているすべての音声データを走査
 	for (auto it = playVoices_.begin(); it != playVoices_.end();) {
 		auto &voiceVector = it->second;
 
+		//=================================================================
+		// 再生が終了したSourceVoiceを削除
+		//=================================================================
 		voiceVector.erase(
-			std::remove_if(voiceVector.begin(), voiceVector.end(), [](IXAudio2SourceVoice *pSourceVoice) {
-				if (!pSourceVoice) return true;
+			std::remove_if(
+				voiceVector.begin(),
+				voiceVector.end(),
+				[](IXAudio2SourceVoice *pSourceVoice) {
 
-				XAUDIO2_VOICE_STATE state;
-				pSourceVoice->GetState(&state);
-				if (state.BuffersQueued == 0) {
-					pSourceVoice->Stop(0);
-					pSourceVoice->DestroyVoice(); // XAudio2のボイス実体を安全に削除
-					return true;
-				}
-				return false;
+					// nullptrは不要なので削除対象
+					if (!pSourceVoice) {
+						return true;
+					}
+
+					// 現在の再生状態を取得
+					XAUDIO2_VOICE_STATE state;
+					pSourceVoice->GetState(&state);
+
+					// キューに再生データが残っていなければ再生終了
+					if (state.BuffersQueued == 0) {
+						// 念のため停止してからボイスを破棄する
+						pSourceVoice->Stop(0);
+						pSourceVoice->DestroyVoice();
+						return true;
+					}
+
+					// まだ再生中なので保持
+					return false;
 				}),
-			voiceVector.end()
-		);
+			voiceVector.end());
 
-		// この音データに対応するボイス配列が空になったら、mapの要素自体も消す
+		//=================================================================
+		// この音声データに紐づくボイスがすべて無くなった場合は、
+		// 管理用のmapからも削除する。
+		//=================================================================
 		if (voiceVector.empty()) {
 			it = playVoices_.erase(it);
 		} else {

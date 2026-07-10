@@ -9,65 +9,84 @@
 #include <format>
 
 void Logger::Initialize() {
-    // ログをファイル出力
-    std::filesystem::create_directory("logs");	// ログのディレクトリを用意
+	// ログ保存用ディレクトリを作成する
+	std::filesystem::create_directory("logs");
 
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();	// 現在時刻を取得(UTC時刻)
-    std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>		// ログファイルの名前にコンマ何秒はいらないので、削って秒にする
-        nowSeconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
-    std::chrono::zoned_time localTime{ std::chrono::current_zone(), nowSeconds };	// 日本時間(PCの設定時間)に変換
-    std::string dateString = std::format("{:%Y%m%d_%H%M%S}", localTime);			// formatを使って年月日_時分秒の文字列に変換
-    std::string logFilePath = std::string("logs/") + dateString + ".log";			// 時刻を使ってファイル名を決定
+	// 現在時刻を取得する（UTC）
+	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 
-    stream_.open(logFilePath);
+	// ファイル名には秒単位まで使用する
+	auto nowSeconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
 
-    // CrashHandlerの登録
-    SetUnhandledExceptionFilter(Logger::ExportDump);
+	// ローカルタイムへ変換する
+	std::chrono::zoned_time localTime{ std::chrono::current_zone(), nowSeconds };
+
+	// 「YYYYMMDD_HHMMSS.log」の形式でログファイル名を作成する
+	std::string dateString = std::format("{:%Y%m%d_%H%M%S}", localTime);
+	std::string logFilePath = "logs/" + dateString + ".log";
+
+	stream_.open(logFilePath);
+
+	// クラッシュ時にMiniDumpを生成できるよう例外ハンドラを登録する
+	SetUnhandledExceptionFilter(Logger::ExportDump);
 }
 
 void Logger::Finalize() {
-    if (stream_.is_open()) {
-        stream_.close();
-    }
+	if (stream_.is_open()) {
+		// ログファイルを閉じる
+		stream_.close();
+	}
 }
 
-void Logger::Log(const std::string& message) {
-    stream_ << message << std::endl;
-    OutputDebugStringA(message.c_str());
+void Logger::Log(const std::string &message) {
+	// ログファイルへ書き込む
+	stream_ << message << std::endl;
+	// デバッグ出力ウィンドウにも表示する
+	OutputDebugStringA(message.c_str());
 }
-
 
 LONG WINAPI Logger::ExportDump(EXCEPTION_POINTERS *exception) {
-	// Dumpsディレクトリを用意
+	// Dumpファイル保存用ディレクトリを作成する
 	CreateDirectory(L"./Dumps", nullptr);
 
+	// 現在時刻を取得し、Dumpファイル名に利用する
 	SYSTEMTIME time;
 	GetLocalTime(&time);
 	wchar_t filePath[MAX_PATH] = { 0 };
 
+	// 日時を含むDumpファイル名を生成する
 	StringCchPrintfW(filePath, MAX_PATH, L"./Dumps/%04d-%02d%02d-%02d%02d.dmp",
 		time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute);
 
+	// Dump出力に必要な例外情報を設定する
 	HANDLE dumpFileHandle = CreateFile(filePath, GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
-	
-    if (dumpFileHandle != INVALID_HANDLE_VALUE) {
-        // processId(このexeのID)とクラッシュ(例外)の発生したthreadIdを取得
-        DWORD processId = GetCurrentProcessId();
-        DWORD threadId = GetCurrentThreadId();
-        // 設定情報を入力
-        MINIDUMP_EXCEPTION_INFORMATION minidumpInformation{ 0 };
-        minidumpInformation.ThreadId = threadId;
-        minidumpInformation.ExceptionPointers = exception;
-        minidumpInformation.ClientPointers = TRUE;
 
-        // Dumpを出力。MiniDumpNormalは最低限の情報を出力するフラグ
-        MiniDumpWriteDump(GetCurrentProcess(), processId, dumpFileHandle,
-            MiniDumpNormal, &minidumpInformation, nullptr, nullptr);
+	if (dumpFileHandle != INVALID_HANDLE_VALUE) {
+		// クラッシュ時の例外情報をMiniDumpへ出力するための設定を行う
+		DWORD processId = GetCurrentProcessId();
+		DWORD threadId = GetCurrentThreadId();
 
-        CloseHandle(dumpFileHandle);
-    }
+		MINIDUMP_EXCEPTION_INFORMATION minidumpInformation{};
+		minidumpInformation.ThreadId = threadId;
+		minidumpInformation.ExceptionPointers = exception;
+		minidumpInformation.ClientPointers = TRUE;
 
-	// 他に関連づけられているSEH例外ハンドラがあれば実行。通常はプロセスを終了する
+		// クラッシュ解析用のMiniDumpファイルを出力する
+		MiniDumpWriteDump(
+			GetCurrentProcess(),
+			processId,
+			dumpFileHandle,
+			MiniDumpNormal,
+			&minidumpInformation,
+			nullptr,
+			nullptr
+		);
+
+		// ファイルハンドルを閉じる
+		CloseHandle(dumpFileHandle);
+	}
+
+	// 標準の例外処理へ制御を戻す
 	return EXCEPTION_EXECUTE_HANDLER;
 }

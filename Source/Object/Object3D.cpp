@@ -2,99 +2,117 @@
 
 #include "Math/FunctionMatrix.h"
 
-void Object3D::CreatePlaneTriangle(		// 平面三角形
+void Object3D::CreatePlaneTriangle(
 	ID3D12Device *device,
 	Vector3 left, Vector3 top, Vector3 right,
 	uint32_t color, bool enableLighting
 ) {
-	// モデル
+	// 三角形の頂点データを生成する
 	render_.CreateTriangle(vertices_, left, top, right);
 
-	// 頂点データ
+	// メッシュを生成する
 	mesh_.Create(device, vertices_);
 
-	// TransformationMatrix
+	// WVP・World行列用定数バッファを生成する
 	render_.CreateTransformationMatrixBuffer(
 		device, transformationMatrixBuffer_, transformationMatrixData_);
 
-	// マテリアル
+	// 通常描画用マテリアルを生成する
 	material_.Initialize(device, color, enableLighting);
+
+	// 壁越し描画用マテリアルも同時に生成する
 	throughWallMaterial_.Initialize(device, color, enableLighting);
 }
 
-void Object3D::CreateSphere(			// 球
+void Object3D::CreateSphere(
 	ID3D12Device *device,
 	uint32_t subdivision,
 	uint32_t color, bool enableLighting
 ) {
-	// モデル
+	// 球体の頂点・インデックスを生成する
 	render_.CreateSphere(vertices_, indices_, subdivision);
 
-	// 頂点データ
+	// 球体メッシュを生成する
 	mesh_.Create(device, vertices_, indices_);
 
-	// TransformationMatrix
+	// WVP・World行列用定数バッファを生成する
 	render_.CreateTransformationMatrixBuffer(
 		device, transformationMatrixBuffer_, transformationMatrixData_);
 
-	// マテリアル
+	// 通常描画用マテリアルを生成する
 	material_.Initialize(device, color, enableLighting);
+
+	// 壁越し描画用マテリアルも生成する
 	throughWallMaterial_.Initialize(device, color, enableLighting);
 }
 
-void Object3D::CreateModel(				// モデル
+void Object3D::CreateModel(
 	ID3D12Device *device,
 	const std::string &fileName,
 	uint32_t color, bool enableLighting
 ) {
-	// モデル読み込み
+	// objモデルを読み込む
 	modelData_ = ModelLoader::LoadObjFile(fileName);
 
-	// 頂点データ
+	// 読み込んだ頂点データからメッシュを生成する
 	mesh_.Create(device, modelData_.vertices);
 
-	// TransformationMatrix
+	// WVP・World行列用定数バッファを生成する
 	render_.CreateTransformationMatrixBuffer(
 		device, transformationMatrixBuffer_, transformationMatrixData_
 	);
 
-	// マテリアル
+	// 通常描画用マテリアルを生成する
 	material_.Initialize(device, color, enableLighting);
+
+	// 壁越し描画用マテリアルも生成する
 	throughWallMaterial_.Initialize(device, color, enableLighting);
 }
 
 void Object3D::Update(Camera *camera, Transform transform) {
-	Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+	// ワールド行列を生成する
+	Matrix4x4 worldMatrix =
+		Math::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 
+	// WVP行列を生成する
 	Matrix4x4 worldViewProjectionMatrix =
 		Math::Multiply(worldMatrix, camera->GetViewProjectionMatrix());
 
+	// GPUへ行列を書き込む
 	transformationMatrixData_->WVP = worldViewProjectionMatrix;
 	transformationMatrixData_->World = worldMatrix;
 }
 
 void Object3D::Draw(ID3D12GraphicsCommandList *commandList, TextureData &texture) {
-	// マテリアルCBufferの場所を設定
-    commandList->SetGraphicsRootConstantBufferView(0, material_.GetGPUVirtualAddress());
+	// 通常描画用マテリアルを設定する
+	commandList->SetGraphicsRootConstantBufferView(
+		0, material_.GetGPUVirtualAddress());
 
-	// wvp用のCBufferの場所を設定
-    commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixBuffer_.GetGPUVirtualAddress());
+	// WVP・World行列を設定する
+	commandList->SetGraphicsRootConstantBufferView(
+		1, transformationMatrixBuffer_.GetGPUVirtualAddress());
 
-	// SRVのDescriptorTableの先頭を設定
-    commandList->SetGraphicsRootDescriptorTable(2, texture.gpuHandle);
+	// 描画に使用するテクスチャを設定する
+	commandList->SetGraphicsRootDescriptorTable(
+		2, texture.gpuHandle);
 
-    mesh_.Bind(commandList);
+	// メッシュを描画する
+	mesh_.Bind(commandList);
 }
 
 void Object3D::DrawThroughWall(ID3D12GraphicsCommandList *commandList, TextureData &texture) {
-	// マテリアルCBufferの場所を設定
-	commandList->SetGraphicsRootConstantBufferView(0, throughWallMaterial_.GetGPUVirtualAddress());
+	// 壁越し描画専用マテリアルを設定する
+	commandList->SetGraphicsRootConstantBufferView(
+		0, throughWallMaterial_.GetGPUVirtualAddress());
 
-	// wvp用のCBufferの場所を設定
-	commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixBuffer_.GetGPUVirtualAddress());
+	// WVP・World行列を設定する
+	commandList->SetGraphicsRootConstantBufferView(
+		1, transformationMatrixBuffer_.GetGPUVirtualAddress());
 
-	// SRVのDescriptorTableの先頭を設定
-	commandList->SetGraphicsRootDescriptorTable(2, texture.gpuHandle);
+	// 描画に使用するテクスチャを設定する
+	commandList->SetGraphicsRootDescriptorTable(
+		2, texture.gpuHandle);
 
+	// メッシュを描画する
 	mesh_.Bind(commandList);
 }
