@@ -5,113 +5,207 @@
 #include <cassert>
 
 MaterialSource ModelLoader::LoadMaterialTemplateFile(const std::string &modelDirectory, const std::string &fileName) {
-	// 中で必要となる変数の宣言
-	MaterialSource materialData;	// 構築するMaterialData
-	std::string line;	// ファイルから読んだ1行を格納するもの
+	//=================================================================
+	// 使用する変数
+	//=================================================================
 
-	// ファイルを開く
+	// 読み込んだマテリアル情報
+	MaterialSource materialData;
+
+	// ファイルから読み込んだ1行
+	std::string line;
+
+	//=================================================================
+	// mtlファイルを開く
+	//=================================================================
+
 	std::ifstream file(modelDirectory + "/" + fileName);
-	assert(file.is_open());	// とりあえず開けなかったら止める
 
-	// 実際にファイルを読み、MaterialDataを構築していく
+	// ファイルが開けなければ停止
+	assert(file.is_open());
+
+	//=================================================================
+	// mtlファイルを解析
+	//=================================================================
+
 	while (std::getline(file, line)) {
+
+		// 行の識別子
 		std::string identifier;
+
 		std::istringstream s(line);
 		s >> identifier;
 
-		// identifierに応じた処理
+		// テクスチャファイル名
 		if (identifier == "map_Kd") {
+
 			std::string textureFileName;
 			s >> textureFileName;
 
-			// 連結してファイルパスにする
-			materialData.textureFilePath = modelDirectory + "/" + textureFileName;
+			// モデルフォルダと結合してフルパスを作成
+			materialData.textureFilePath =
+				modelDirectory + "/" + textureFileName;
 		}
 	}
 
-	// materialDataを返す
+	// 構築したマテリアル情報を返す
 	return materialData;
 }
 
 ModelData ModelLoader::LoadObjFile(const std::string &modelName) {
+
+	//=================================================================
+	// 読み込み対象のパス生成
+	//=================================================================
+
 	std::string modelDirectory = "Resources/Models/" + modelName;
 	std::string objFilePath = modelDirectory + "/" + modelName + ".obj";
 
-	// 中で必要となる変数の宣言
+	//=================================================================
+	// 使用する変数
+	//=================================================================
 
-	ModelData modelData;	// 構築するModelData
-	std::vector<Vector4> positions;	// 位置
-	std::vector<Vector3> normals;	// 法線
-	std::vector<Vector2> texcoords;	// テクスチャ座標
-	std::string line;	// ファイルから読んだ1行を格納するもの
+	// 最終的に返すモデルデータ
+	ModelData modelData;
 
-	// 自動生成したパスでファイルを開く
+	// 頂点位置
+	std::vector<Vector4> positions;
+
+	// 法線
+	std::vector<Vector3> normals;
+
+	// UV座標
+	std::vector<Vector2> texcoords;
+
+	// 読み込んだ1行
+	std::string line;
+
+	//=================================================================
+	// objファイルを開く
+	//=================================================================
+
 	std::ifstream file(objFilePath);
-	assert(file.is_open());	// とりあえず開けなかったら止める
 
-	// 実際にファイルを読み、ModelDataを構築していく
+	// ファイルが開けなければ停止
+	assert(file.is_open());
+
+	//=================================================================
+	// objファイル解析
+	//=================================================================
+
 	while (std::getline(file, line)) {
+
 		std::string identifier;
 		std::istringstream s(line);
-		s >> identifier;	// 先頭の識別子を読む
 
-		// identifierに応じた処理
-		if (identifier == "v") {		// 位置 
+		// 行頭識別子を取得
+		s >> identifier;
+
+		//-------------------------------------------------------------
+		// 頂点座標
+		//-------------------------------------------------------------
+		if (identifier == "v") {
+
 			Vector4 position;
 			s >> position.x >> position.y >> position.z;
+
+			// 左手座標系へ変換
 			position.x *= -1.0f;
 			position.w = 1.0f;
-			positions.push_back(position);
 
-		} else if (identifier == "vt") {	// テクスチャ座標
+			positions.push_back(position);
+		}
+
+		//-------------------------------------------------------------
+		// UV座標
+		//-------------------------------------------------------------
+		else if (identifier == "vt") {
+
 			Vector2 texcoord;
 			s >> texcoord.x >> texcoord.y;
-			texcoord.y = 1.0f - texcoord.y;
-			texcoords.push_back(texcoord);
 
-		} else if (identifier == "vn") {	// 法線
+			// DirectX用に上下反転
+			texcoord.y = 1.0f - texcoord.y;
+
+			texcoords.push_back(texcoord);
+		}
+
+		//-------------------------------------------------------------
+		// 法線
+		//-------------------------------------------------------------
+		else if (identifier == "vn") {
+
 			Vector3 normal;
 			s >> normal.x >> normal.y >> normal.z;
-			normal.x *= -1.0f;
-			normals.push_back(normal);
 
-		} else if (identifier == "f") {	// 面
+			// 左手座標系へ変換
+			normal.x *= -1.0f;
+
+			normals.push_back(normal);
+		}
+
+		//-------------------------------------------------------------
+		// 面情報（三角形のみ対応）
+		//-------------------------------------------------------------
+		else if (identifier == "f") {
+
+			// 三角形1枚分の頂点
 			VertexData triangle[3];
-			// 面は三角形限定。その他は未対応
+
 			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
+
 				std::string vertexDefinition;
 				s >> vertexDefinition;
-				// 頂点の要素へのIndexは「位置/UV/法線」で格納されているので、分解してIndexを取得する
+
+				// 「位置/UV/法線」を分割
 				std::istringstream v(vertexDefinition);
+
 				uint32_t elementIndices[3];
+
 				for (int32_t element = 0; element < 3; ++element) {
+
 					std::string index;
-					std::getline(v, index, '/');	// 区切りでインデックスを読んでいく
+
+					// '/'区切りで取得
+					std::getline(v, index, '/');
+
 					elementIndices[element] = std::stoi(index);
 				}
-				// 要素へのIndexから、実際の要素の値を取得して、頂点を構築する
+
+				// インデックスから各要素を取得
 				Vector4 position = positions[elementIndices[0] - 1];
 				Vector2 texcoord = texcoords[elementIndices[1] - 1];
 				Vector3 normal = normals[elementIndices[2] - 1];
+
 				VertexData vertex = { position, texcoord, normal };
+
+				// 頂点リストへ追加
 				modelData.vertices.push_back(vertex);
-				triangle[faceVertex] = { position, texcoord, normal };
+
+				triangle[faceVertex] = vertex;
 			}
-			// 頂点を逆順で登録することで周り順を逆にする
+
+			// 頂点順を反転して表裏を合わせる
 			modelData.vertices.push_back(triangle[2]);
 			modelData.vertices.push_back(triangle[1]);
 			modelData.vertices.push_back(triangle[0]);
+		}
 
-		} else if (identifier == "mtllib") {	// Material読み込み
-			// materialTemplateLibraryファイルの名前を取得する
-			std::string  materialFileName;
+		//-------------------------------------------------------------
+		// マテリアルファイル
+		//-------------------------------------------------------------
+		else if (identifier == "mtllib") {
+
+			// mtlファイル名
+			std::string materialFileName;
 			s >> materialFileName;
 
-			// 基本的にobjファイルと同一階層にmtlは存在させるのでディレクトリ名とファイル名を探す
-			modelData.material = LoadMaterialTemplateFile(modelDirectory, materialFileName);
+			// マテリアル情報を読み込む
+			modelData.material =
+				LoadMaterialTemplateFile(modelDirectory, materialFileName);
 		}
 	}
 
-	// modelDataを返す
+	// 読み込んだモデルを返す
 	return modelData;
 }

@@ -1,13 +1,9 @@
 #include "KizunaEngine.h"
-
 #include "RenderCore/Camera.h"
 #include "RenderCore/Lighting.h"
-
 #include "Object/Object3D.h"
-
 #include "Renderer/Sprite.h"
 #include "Renderer/ThroughWallRenderer.h"
-
 #include "External/ImGuiManager.h"
 
 #include <cstdint>
@@ -21,73 +17,76 @@ const int32_t kClientHeight = 720;
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
+	//-------------------------------------------------------------------------
 	// 基盤初期化
+	//-------------------------------------------------------------------------
 	auto engine = std::make_unique<KizunaEngine>();
 	engine->Initialize(L"CG2", kClientWidth, kClientHeight);
 
 	ID3D12Device *device = engine->GetDevice();
 	ID3D12GraphicsCommandList *commandList = engine->GetCommandList();
 
-	// データ生成
-	//===============
-	// 球1
-	Object3D model1;
-	model1.CreateSphere(device, kSubdivision, 0xFFFFFFFF, true);
-	Transform modelTransform{ {0.5f, 0.5f, 0.5f}, {}, {} };
+	//-------------------------------------------------------------------------
+	// データ生成・初期リソースのセットアップ
+	//-------------------------------------------------------------------------
+	// 球（壁越し描画の検証用ターゲット）
+	Object3D sphere[2]{};
+	sphere[0].CreateSphere(device, kSubdivision, 0xFFFFFFFF, true);
+	sphere[1].CreateSphere(device, kSubdivision, 0xFFFFFFFF, true);
 
-	// 球2
-	Object3D model2;
-	model2.CreateSphere(device, kSubdivision, 0xFFFFFFFF, true);
-	Transform modelTransform2{ {0.5f, 0.5f, 0.5f}, {}, {0,0,1} };
+	// 天球（背景として最背面に描画されるドーム）
+	Object3D skydome;
+	skydome.CreateModel(device, "skydome", 0xFFFFFFFF, false);
 
-	// 天球
-	Object3D skydomeModel;
-	skydomeModel.CreateModel(device, "skydome", 0xFFFFFFFF, false);
-	Transform skydomeTransform{ {1.0f, 1.0f, 1.0f}, {}, {} };
-
-	// 箱
+	// 箱（障害物。この箱の裏に球が隠れた際に「壁越し描画」を発生させるためのもの）
 	Object3D cubeModel;
 	cubeModel.CreateModel(device, "cube", 0xFFFFFFFF, false);
-	Transform cubeTransform{ {1.0f, 1.0f, 1.0f}, {}, {0,0,-2} };
 
-	// 壁越し描画対象の選別
+	// 各リソース用Transform
+	Transform transform[4]{};
+	transform[0] = { .scale{ 0.5f, 0.5f, 0.5f }, .rotate{}, .translate{0, 0, 0} };	// sphere[0]
+	transform[1] = { .scale{ 0.5f, 0.5f, 0.5f }, .rotate{}, .translate{0, 0, 1} };	// sphere[1]
+	transform[2] = { .scale{ 1.0f, 1.0f, 1.0f }, .rotate{}, .translate{0, 0, 0} };	// skydome
+	transform[3] = { .scale{ 1.0f, 1.0f, 1.0f }, .rotate{}, .translate{0, 0,-2} };	// cube
+
+	// 壁越し描画の対象として2つの球を登録
 	ThroughWallRenderer throughWallRenderer;
-	throughWallRenderer.AddObject(&model1, 0xFFFF00FF);
-	throughWallRenderer.AddObject(&model2, 0x0000FFFF);
+	throughWallRenderer.AddObject(&sphere[0], 0xFF000064);
+	throughWallRenderer.AddObject(&sphere[1], 0xFF000064);
 
-	// スプライト
+	// UI・2D表示用のスプライト
 	Sprite sprite;
 	sprite.Initialize(device, 0.0f, 0.0f, 640.0f, 360.0f, 0xFFFFFFFF);
 
-	// テクスチャ
+	// テクスチャの読み込み
 	TextureData uvTexture = engine->GetTextureManager()->LoadTexture(commandList, "Resources/uvChecker.png");
 
-	// ライト/カメラ
+	// ライト/カメラの初期化
 	Lighting lighting;
 	lighting.Initialize(device);
 
 	Camera camera;
 	camera.Initialize(float(kClientWidth), float(kClientHeight), engine->GetKeyboard(), engine->GetMouse(), engine->GetGamePad());
-	Transform cameraTransform{ .scale{1.0f,1.0f,1.0f}, .rotate{0.3f,0.0f,0.0f}, .translate{0.0f,1.5f,-5.0f} };
+	Transform cameraTransform = { .scale{1.0f,1.0f,1.0f}, .rotate{0.3f,0.0f,0.0f}, .translate{0.0f,1.5f,-5.0f} };
 
 	// オーディオ
 	AudioData audioHandle = engine->GetAudioManager()->LoadAudio("Resources/fanfare.wav");
 	AudioData audioHandleMusic = engine->GetAudioManager()->LoadAudio("Resources/music.mp3");
 
-	// ファンファーレ再生
+	// 起動時のファンファーレを一度だけ再生
 	engine->GetAudioManager()->PlayAudio(audioHandle, 0, 1.0f);
 
-	//===============
+	//-------------------------------------------------------------------------
 	// メインループ
-	//===============
-	// ウィンドウの×ボタンが押されるまでループ
+	//-------------------------------------------------------------------------
+	// OSからの終了メッセージを受け取るまでループ
 	while (engine->ProcessMessage()) {
-		engine->UpdateInput();	// 入力デバイスの更新
+		engine->UpdateInput();	// 入力デバイス（キーボード/マウス/PAD）の最新状態を取得
 
 		//===============
 		// 更新処理
 		//===============
-		// カメラ切り替え
+		// デバッグビルド時のみ、QキーまたはゲームパッドのAボタンで通常カメラ/デバッグカメラを切り替え可能にする
 #ifdef _DEBUG
 		if (engine->GetKeyboard()->TriggerKey(DIK_Q) ||
 			engine->GetGamePad()->TriggerButton(XINPUT_GAMEPAD_A)) {
@@ -95,23 +94,26 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 #endif
 
-		// カメラ
+		// カメラの行列計算
 		camera.Update(cameraTransform);
 
-		// モデル更新
-		model1.Update(&camera, modelTransform);
-		model2.Update(&camera, modelTransform2);
-		skydomeModel.Update(&camera, skydomeTransform);
-		cubeModel.Update(&camera, cubeTransform);
+		// 各3Dモデルのワールド行列更新
+		sphere[0].Update(&camera, transform[0]);
+		sphere[1].Update(&camera, transform[1]);
+		skydome.Update(&camera, transform[2]);
+		cubeModel.Update(&camera, transform[3]);
 
-		// スプライト更新
+		// スプライト（UI）の画面サイズ追従更新
 		sprite.Update(kClientWidth, kClientHeight);
 
+		// デバッグ用メニュー（ImGui）のレンダリング制御
 #ifdef USE_IMGUI
 		ImGuiManager::GetInstance()->BeginFrame();
+		// ImGuiのドッキングフラグを立てる
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 
 		ImGui::Begin("Setting");
+		// デバッグカメラへの切り替え方法を解説
 		if (camera.GetMode() == Camera::Mode::Normal) {
 			ImGui::Text("Camera Mode: NORMAL (Q Key to Toggle)");
 		} else {
@@ -119,34 +121,44 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 		ImGui::Separator();
 
-		ImGui::SliderAngle("SphereRotateX", &modelTransform.rotate.x);
-		ImGui::SliderAngle("SphereRotateY", &modelTransform.rotate.y);
-		ImGui::SliderAngle("SphereRotateZ", &modelTransform.rotate.z);
+		// 中央に配置された球のRotateを操作
+		ImGui::SliderAngle("SphereRotateX", &transform[0].rotate.x);
+		ImGui::SliderAngle("SphereRotateY", &transform[0].rotate.y);
+		ImGui::SliderAngle("SphereRotateZ", &transform[0].rotate.z);
 		ImGui::Separator();
 
+		// 中央に配置された球のTranslateを操作
+		ImGui::SliderAngle("SphereTranslateX", &transform[0].translate.x);
+		ImGui::SliderAngle("SphereTranslateY", &transform[0].translate.y);
+		ImGui::SliderAngle("SphereTranslateZ", &transform[0].translate.z);
+		ImGui::Separator();
+
+		// スプライト（UI）の色や座標を変更
 		ImGui::ColorEdit4("colorSprite", &sprite.GetMaterial().GetMaterialData()->color.x);
 		ImGui::SliderFloat3("translateSprite", &sprite.GetTransform().translate.x, 0.0f, 500.0f);
 
+		// スプライト（UI）のUVをTRSを操作
 		ImGui::DragFloat2("UVTransform", &sprite.GetUVTransform().translate.x, 0.01f, -10.0f, 10.0f);
 		ImGui::DragFloat2("UVScale", &sprite.GetUVTransform().scale.x, 0.01f, -10.0f, 10.0f);
 		ImGui::SliderAngle("UVRotate", &sprite.GetUVTransform().rotate.z);
 		ImGui::Separator();
 
+		// Lightingの種類をComboによって変更
 		Lighting::LightingType currentType = lighting.GetLightType();
 		const char *lightTypeNames[] = { "None", "Lambert", "Half-Lambert" };
 		int currentItem = static_cast<int>(currentType);
-
 		if (ImGui::Combo("Light Type", &currentItem, lightTypeNames, IM_ARRAYSIZE(lightTypeNames))) {
 			lighting.SetLightType(static_cast<Lighting::LightingType>(currentItem));
 		}
 
+		// Lightの色/角度/発光量を操作
 		ImGui::ColorEdit4("LightColor", &lighting.GetLightingData()->color.x);
 		ImGui::SliderFloat3("LightDirection", &lighting.GetLightingData()->direction.x, -1.0f, 1.0f);
-		lighting.Update();
+		lighting.Update();	// 角度操作によって起こるズレを即座に修正
 		ImGui::DragFloat("Intensity", &lighting.GetLightingData()->intensity, 0.05f, 0.0f, 10.0f);
 		ImGui::Separator();
-		ImGui::End();
 
+		ImGui::End();
 		ImGuiManager::GetInstance()->EndFrame();
 #endif
 
@@ -155,16 +167,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		//===============
 		engine->BeginFrame();
 
-		{   // 3Dオブジェクト描画
+		{// === 3D不透明オブジェクト描画（背景・遮蔽物） ===
+			// 壁越し描画の判定基準を作るため、先に背景（天球）や遮蔽物（箱）を描画して深度バッファを確定させる
 			engine->SetPipeline(PipelineType::Object3dOpaque);
 
 			lighting.Bind(3, commandList);
 
-			skydomeModel.Draw(commandList, uvTexture);
+			skydome.Draw(commandList, uvTexture);
 			cubeModel.Draw(commandList, uvTexture);
 		}
 
-		{   // 壁越し3Dオブジェクト描画
+		{// === 壁越し3Dオブジェクト描画パス ===
+			// 遮蔽物の後ろにいると判断された部分に対して、
+			// 独自のパイプラインを適用してレンダリングする
 			engine->SetPipeline(PipelineType::Object3dThroughWall);
 
 			lighting.Bind(3, commandList);
@@ -173,30 +188,34 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		}
 
-		{	// プレイヤー通常描画
+		{// === 対象オブジェクトの通常前面描画パス ===
+			// 遮蔽物に隠れていない部分、または手前に露出している通常部分を上書き描画する
 			engine->SetPipeline(PipelineType::Object3dOpaque);
 
 			lighting.Bind(3, commandList);
 
-			model1.Draw(commandList, uvTexture);
-			model2.Draw(commandList, uvTexture);
+			sphere[0].Draw(commandList, uvTexture);
+			sphere[1].Draw(commandList, uvTexture);
 		}
 
-		{   // 2Dオブジェクト描画
+		{// 2Dオブジェクト（UI・HUDなど）描画パス
+			// すべての3D表現の上に重ねる必要があるため、3Dの描画が完全に終わった後に実行する
 			engine->SetPipeline(PipelineType::Object2dOpaque);
-		//	sprite.Draw(commandList, uvTexture);
+			sprite.Draw(commandList, uvTexture);
 		}
 
 		engine->EndFrame();
 
-		// ESCキーで終了
+		// ESCキーでゲームを安全に終了させるための入力検知
 		if (engine->GetKeyboard()->PushKey(DIK_ESCAPE)) {
 			break;
 		}
 	}
 
+	//-------------------------------------------------------------------------
 	// 後処理
-	//===============
+	//-------------------------------------------------------------------------
+	// DirectXの解放やウィンドウの破棄など、エンジンの終了処理を実行
 	engine->Finalize();
 	return 0;
 }

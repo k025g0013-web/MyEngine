@@ -9,18 +9,54 @@
 #include <dxgidebug.h>
 #include <dxgi1_6.h>
 
+/// <summary>
+/// DirectX12のデバッグ機能を管理するクラス
+/// </summary>
+/// <remarks>
+/// COMライブラリの初期化・終了処理を行うほか、
+/// デバッグレイヤーやGPUベースの検証機能を有効化する。
+/// デバッグビルドでは終了時にLiveObjectを出力し、
+/// リソースリークの検出を支援する。
+/// </remarks>
 class DebugManager {
 public:
+    /// <summary>
+    /// DebugManagerを生成する
+    /// </summary>
+    /// <remarks>
+    /// COMライブラリを初期化する。
+    /// </remarks>
     DebugManager();
+
+    /// <summary>
+    /// DebugManagerを破棄する
+    /// </summary>
+    /// <remarks>
+    /// 初期化したCOMライブラリを終了する。
+    /// </remarks>
     ~DebugManager();
 
-    // デバッグレイヤーおよびGPUベースの検証を有効化する
+    /// <summary>
+    /// DirectX12のデバッグレイヤーを有効化する
+    /// </summary>
+    /// <remarks>
+    /// デバッグビルド時のみデバッグレイヤーおよび
+    /// GPUベースの検証機能を有効にする。
+    /// </remarks>
     void EnableDebugLayer();
 
 private:
+    /// COMライブラリを初期化済みかどうか
     bool isComInitialized_ = false;
 
 #ifdef _DEBUG
+    /// <summary>
+    /// DirectXリソースリークを検出するクラス
+    /// </summary>
+    /// <remarks>
+    /// デバッグビルド終了時にLiveObjectを出力し、
+    /// 解放漏れのあるDirectXリソースを確認できる。
+    /// </remarks>
     struct LeakChecker {
         ~LeakChecker() {
             Microsoft::WRL::ComPtr<IDXGIDebug1> debug;
@@ -30,6 +66,9 @@ private:
                 debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
             }
         }
-    } leakChecker_;
+    };
+
+    /// デバッグ終了時のリークチェックを行うオブジェクト
+    LeakChecker leakChecker_;
 #endif
 };

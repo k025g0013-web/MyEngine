@@ -8,16 +8,18 @@
 #include <cmath>
 
 void Camera::Initialize(float width, float height, Keyboard *keyboard, Mouse *mouse, GamePad *gamePad) {
+    // 描画に使用する画面サイズを保持する
     width_ = width;
     height_ = height;
 
+    // デバッグ操作で利用する入力デバイスを保持する
     keyboard_ = keyboard;
     mouse_ = mouse;
     gamePad_ = gamePad;
 }
 
 void Camera::Update(const Transform &transform) {
-    // モードによって処理を分ける
+    // 現在のカメラモードに応じた更新処理を行う
     switch (mode_) {
     case Mode::Normal:
         UpdateCamera(transform);
@@ -28,11 +30,10 @@ void Camera::Update(const Transform &transform) {
         break;
     }
 
-    // どちらのモードであっても、最終的に共通のViewProjection行列を合成する
+    // 描画で使用するViewProjection行列を生成する
     viewProjectionMatrix_ = Math::Multiply(viewMatrix_, projectionMatrix_);
 }
 
-// モードを交互に切り替え
 void Camera::ToggleMode() {
     if (mode_ == Mode::Normal) {
         mode_ = Mode::Debug;
@@ -41,46 +42,54 @@ void Camera::ToggleMode() {
     }
 }
 
-// --- 通常カメラの更新 ---
 void Camera::UpdateCamera(const Transform &targetTransform) {
+    // Transformからカメラ行列を生成する
     Matrix4x4 cameraMatrix = Math::MakeAffineMatrix(targetTransform.scale, targetTransform.rotate, targetTransform.translate);
+
+    // カメラ行列の逆行列をビュー行列として使用する
     viewMatrix_ = Math::Inverse(cameraMatrix);
 
+    // 透視投影行列を生成する
     projectionMatrix_ = Math::MakePerspectiveFovMatrix(
         fovY_, width_ / height_, nearClip_, farClip_
     );
 }
 
-// --- デバッグカメラの更新 ---
 void Camera::UpdateDebug() {
+    // 入力デバイスが存在しない場合はデバッグ操作できないため停止する
     assert(keyboard_ && "キーボードを検出できませんでした");
     assert(mouse_ && "マウスを検出できませんでした");
+
     if (gamePad_ && gamePad_->IsConnected()) {
+        // BACKボタンで通常カメラへ戻る
         if (gamePad_->TriggerButton(XINPUT_GAMEPAD_BACK)) {
             ToggleMode();
             return;
         }
     }
 
-    // キー・マウス入力による座標更新
+    // 入力に応じて注視点・回転・ズーム量を更新する
     DebugMove();
     DebugZoom();
     DebugRotate();
 
-    // 以前のDebugCamera.cppの計算ロジック
+    // カメラの右方向ベクトルを求める
     Vector3 right = {
         sinf(debugRotation_.y - float(M_PI) / 2.0f),
         0.0f,
         cosf(debugRotation_.y - float(M_PI) / 2.0f)
     };
+    // ワールド座標系の上方向ベクトル
     Vector3 up = { 0, 1, 0 };
 
+    // 画面移動量をワールド座標へ変換する
     Vector3 offsetTarget{
         debugTarget_.x + right.x * debugScreenOffset_.x + up.x * debugScreenOffset_.y,
         debugTarget_.y + right.y * debugScreenOffset_.x + up.y * debugScreenOffset_.y,
         debugTarget_.z + right.z * debugScreenOffset_.x + up.z * debugScreenOffset_.y,
     };
 
+    // カメラの前方向ベクトルを算出する
     Vector3 forwardXZ = { sinf(debugRotation_.y), 0.0f, cosf(debugRotation_.y) };
     Vector3 forward = {
         forwardXZ.x * cosf(debugRotation_.x),
@@ -88,39 +97,42 @@ void Camera::UpdateDebug() {
         forwardXZ.z * cosf(debugRotation_.x)
     };
 
+    // 注視点から距離分だけ離れた位置をカメラ座標とする
     debugTranslation_ = {
         offsetTarget.x + forward.x * debugDistance_,
         offsetTarget.y + forward.y * debugDistance_,
         offsetTarget.z + forward.z * debugDistance_,
     };
 
+    // デバッグカメラ用Transformを作成する
     Transform transform{};
     transform.scale = { 1, 1, 1 };
     transform.rotate = debugRotation_;
     transform.translate = debugTranslation_;
 
+    // 計算したTransformを通常カメラ処理へ渡しビュー行列を更新する
     UpdateCamera(transform);
 }
 
 // デバッグ用操作
 void Camera::DebugMove() {
-    // キーボード入力
+    // WASDキーで注視点を平行移動する
     if (keyboard_->PushKey(DIK_W)) debugScreenOffset_.y += debugMoveSpeed_;
     if (keyboard_->PushKey(DIK_S)) debugScreenOffset_.y -= debugMoveSpeed_;
     if (keyboard_->PushKey(DIK_D)) debugScreenOffset_.x += debugMoveSpeed_;
     if (keyboard_->PushKey(DIK_A)) debugScreenOffset_.x -= debugMoveSpeed_;
 
-    // ゲームパッド入力
+    // 左スティック入力による視点移動
     if (gamePad_ && gamePad_->IsConnected()) {
         float stickX = 0.0f;
         float stickY = 0.0f;
         gamePad_->GetLeftStick(stickX, stickY);
 
-        // スティックの傾きに応じて移動
+        // 左スティックでも平行移動できるようにする
         debugScreenOffset_.x += stickX * debugMoveSpeed_;
         debugScreenOffset_.y += stickY * debugMoveSpeed_;
 
-        // 十字キーでも動かせるようにする場合
+        // 十字キーでも操作できるようにする
         if (gamePad_->PushButton(XINPUT_GAMEPAD_DPAD_UP))    debugScreenOffset_.y += debugMoveSpeed_;
         if (gamePad_->PushButton(XINPUT_GAMEPAD_DPAD_DOWN))  debugScreenOffset_.y -= debugMoveSpeed_;
         if (gamePad_->PushButton(XINPUT_GAMEPAD_DPAD_RIGHT)) debugScreenOffset_.x += debugMoveSpeed_;
@@ -129,47 +141,47 @@ void Camera::DebugMove() {
 }
 
 void Camera::DebugZoom() {
-    // マウスホイール入力
+    // マウスホイールでカメラ距離を変更する
     int wheel = mouse_->GetWheelDelta();
     if (wheel != 0) {
         debugDistance_ -= static_cast<float>(wheel) * 0.0005f;
     }
 
-    // ゲームパッド入力
+    // トリガー入力でズームイン・ズームアウトする
     if (gamePad_ && gamePad_->IsConnected()) {
         float leftTrigger = gamePad_->GetLeftTrigger();
         float rightTrigger = gamePad_->GetRightTrigger();
 
-        // 右トリガーでズームイン、左トリガーでズームアウト（速度は 0.1f 等で調整）
+        // トリガーの入力量に応じてズーム量を加算する
         debugDistance_ += rightTrigger * 0.1f;
         debugDistance_ -= leftTrigger * 0.1f;
     }
 
-    // クランプ処理
+    // カメラが注視点を通り越さないよう距離を制限する
     const float minDistance = -500.0f;
     const float maxDistance = -1.0f;
     debugDistance_ = std::clamp(debugDistance_, minDistance, maxDistance);
 }
 
 void Camera::DebugRotate() {
-    // マウス入力
+    // マウスドラッグで視点を回転させる
     if (mouse_->PushLeft()) {
         debugRotation_.y += mouse_->GetDeltaX() * debugRotateSpeed_;
         debugRotation_.x += mouse_->GetDeltaY() * debugRotateSpeed_;
     }
 
-    // ゲームパッド入力
+    // 右スティック入力による視点回転
     if (gamePad_ && gamePad_->IsConnected()) {
         float stickX = 0.0f;
         float stickY = 0.0f;
         gamePad_->GetRightStick(stickX, stickY);
 
-        // 右スティックの入力を回転角に加算
+        // 右スティックでも視点を回転できるようにする
         debugRotation_.y += stickX * (debugRotateSpeed_ * 4.0f);
         debugRotation_.x += stickY * (debugRotateSpeed_ * 4.0f);
     }
 
-    // クランプ処理（最後に共通で行う）
+    // 真上・真下を向いてジンバルロックに近い状態になることを防ぐ
     const float limit = float(M_PI_2) - 0.01f;
     debugRotation_.x = std::clamp(debugRotation_.x, -limit, limit);
 }
