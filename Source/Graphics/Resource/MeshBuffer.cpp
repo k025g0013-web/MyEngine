@@ -3,19 +3,23 @@
 #include <cassert>
 
 MeshBuffer::~MeshBuffer() {
+    // マッピングを解除する
     Unmap();
 }
 
 void *MeshBuffer::Map() {
+    // 未マッピングの場合のみマッピングする
     if (!mappedData_) {
         HRESULT hr = resource_->Map(0, nullptr, &mappedData_);
         assert(SUCCEEDED(hr));
         (void)hr;
     }
+
     return mappedData_;
 }
 
 void MeshBuffer::Unmap() {
+    // マッピング済みであれば解除する
     if (mappedData_) {
         resource_->Unmap(0, nullptr);
         mappedData_ = nullptr;
@@ -24,10 +28,10 @@ void MeshBuffer::Unmap() {
 
 // VertexBuffer初期化
 void MeshBuffer::InitializeAsVertex(ID3D12Device *device, size_t sizeInBytes, uint32_t strideInBytes) {
-    // Resource生成
+    // VertexBuffer用リソースを生成する
     resource_ = CreateBufferResource(device, sizeInBytes);
 
-    // VBV生成
+    // VertexBufferViewを設定する
     vertexBufferView_.BufferLocation = resource_->GetGPUVirtualAddress();
     vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeInBytes);
     vertexBufferView_.StrideInBytes = strideInBytes;
@@ -35,18 +39,20 @@ void MeshBuffer::InitializeAsVertex(ID3D12Device *device, size_t sizeInBytes, ui
 
 // IndexBuffer初期化
 void MeshBuffer::InitializeAsIndex(ID3D12Device *device, size_t sizeInBytes) {
-    // Resource生成
+    // IndexBuffer用リソースを生成する
     resource_ = CreateBufferResource(device, sizeInBytes);
 
-    // IBV生成
+    // IndexBufferViewを設定する
     indexBufferView_.BufferLocation = resource_->GetGPUVirtualAddress();
     indexBufferView_.SizeInBytes = static_cast<UINT>(sizeInBytes);
-    indexBufferView_.Format = DXGI_FORMAT_R32_UINT; // インデックスはuint32_t固定
+    indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
 }
 
 // ConstantBuffer初期化
 void MeshBuffer::InitializeAsConstant(ID3D12Device *device, size_t sizeInBytes) {
-    // 定数バッファは256バイトの倍数である必要があるため補正
+    // ConstantBufferは256バイト境界へ揃える
     size_t alignmentSize = (sizeInBytes + 255) & ~255;
+
+    // ConstantBuffer用リソースを生成する
     resource_ = CreateBufferResource(device, alignmentSize);
 }

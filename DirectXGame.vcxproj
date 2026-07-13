@@ -284,6 +284,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Image Include="Resources\sample.png" />
     <Image Include="Resources\skydome.png" />
     <Image Include="Resources\uvChecker.png" />
+    <Image Include="Resources\white1x1.png" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="Resources\fanfare.wav" />

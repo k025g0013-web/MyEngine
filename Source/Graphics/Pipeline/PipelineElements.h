@@ -5,9 +5,22 @@
 #include <d3d12.h>
 #include <vector>
 
+/// <summary>
+/// GraphicsPipelineで使用する各種設定要素を生成するクラス
+/// </summary>
+/// <remarks>
+/// Rasterizer、DepthStencil、BlendState、InputLayoutなどの
+/// DirectX12パイプライン設定を生成するためのユーティリティクラス。
+/// </remarks>
 class PipelineElements {
 public:
-    // 標準的なRasterizer
+    /// <summary>
+    /// 標準的なRasterizerStateを生成する
+    /// </summary>
+    /// <remarks>
+    /// 裏面カリングを有効にした通常の3D描画向け設定。
+    /// </remarks>
+    /// <returns>Rasterizer設定</returns>
     static D3D12_RASTERIZER_DESC CreateDefaultRasterizer() {
         D3D12_RASTERIZER_DESC desc{};
         // 裏面(時計回り)を表示しない
@@ -17,7 +30,13 @@ public:
         return desc;
     }
 
-    // 両面描画用のRasterizer
+    /// <summary>
+    /// 両面描画用RasterizerStateを生成する
+    /// </summary>
+    /// <remarks>
+    /// カリングを無効化し、表裏両方のポリゴンを描画する。
+    /// </remarks>
+    /// <returns>Rasterizer設定</returns>
     static D3D12_RASTERIZER_DESC CreateNoCullRasterizer() {
         D3D12_RASTERIZER_DESC desc = CreateDefaultRasterizer();
         // 裏面非表示を無効化し、両面を描画
@@ -25,7 +44,13 @@ public:
         return desc;
     }
 
-    // ワイヤーフレーム描画用のRasterizer
+    /// <summary>
+    /// ワイヤーフレーム描画用RasterizerStateを生成する
+    /// </summary>
+    /// <remarks>
+    /// ポリゴンの面を塗りつぶさず、頂点間の線のみを描画する。
+    /// </remarks>
+    /// <returns>Rasterizer設定</returns>
     static D3D12_RASTERIZER_DESC CreateWireframeRasterizer() {
         D3D12_RASTERIZER_DESC desc = CreateDefaultRasterizer();
         // 裏面非表示を無効化し、両面を描画
@@ -36,7 +61,13 @@ public:
         return desc;
     }
 
-    // 標準的なDepthStencil
+    /// <summary>
+    /// 標準的なDepthStencilStateを生成する
+    /// </summary>
+    /// <remarks>
+    /// 深度書き込みを有効化し、手前のオブジェクトを優先して描画する。
+    /// </remarks>
+    /// <returns>DepthStencil設定</returns>
     static D3D12_DEPTH_STENCIL_DESC CreateDefaultDepthStencil() {
         D3D12_DEPTH_STENCIL_DESC desc{};
         // Depthの機能を有効化する
@@ -48,7 +79,13 @@ public:
         return desc;
     }
 
-    // 半透明用のDepthStencil
+    /// <summary>
+    /// 半透明描画用DepthStencilStateを生成する
+    /// </summary>
+    /// <remarks>
+    /// 深度テストは行うが、深度値を書き込まない設定。
+    /// </remarks>
+    /// <returns>DepthStencil設定</returns>
     static D3D12_DEPTH_STENCIL_DESC CreateAlphaDepthStencil() {
         D3D12_DEPTH_STENCIL_DESC desc = CreateDefaultDepthStencil();
         // 書き込みしない
@@ -56,7 +93,13 @@ public:
         return desc;
     }
 
-    // 壁越しオブジェクト用のDepthStencil
+    /// <summary>
+    /// 壁越し描画用DepthStencilStateを生成する
+    /// </summary>
+    /// <remarks>
+    /// 深度値を書き込まず、壁より奥に存在するオブジェクトのみを描画する。
+    /// </remarks>
+    /// <returns>DepthStencil設定</returns>
     static D3D12_DEPTH_STENCIL_DESC CreateThroughWallDepthStencil() {
         D3D12_DEPTH_STENCIL_DESC desc = CreateAlphaDepthStencil();
         // 書き込みしない
@@ -66,7 +109,13 @@ public:
         return desc;
     }
 
-    // 2D不透明用のDepthStencil
+    /// <summary>
+    /// 2D描画用DepthStencilStateを生成する
+    /// </summary>
+    /// <remarks>
+    /// 深度処理を無効化し、2D描画向けの設定を生成する。
+    /// </remarks>
+    /// <returns>DepthStencil設定</returns>
     static D3D12_DEPTH_STENCIL_DESC Create2DDepthStencil() {
         D3D12_DEPTH_STENCIL_DESC desc{};
         // 2DなのでDepthの機能を無効化する
@@ -76,7 +125,13 @@ public:
         return desc;
     }
 
-    // 標準的なBlendState
+    /// <summary>
+    /// 標準的なBlendStateを生成する
+    /// </summary>
+    /// <remarks>
+    /// ブレンドを使用しない不透明描画向け設定。
+    /// </remarks>
+    /// <returns>Blend設定</returns>
     static D3D12_BLEND_DESC CreateDefaultBlendState() {
         D3D12_BLEND_DESC desc{};
         desc.AlphaToCoverageEnable = FALSE;
@@ -89,7 +144,13 @@ public:
         return desc;
     }
 
-    // 半透明用のBlendState
+    /// <summary>
+    /// 半透明描画用BlendStateを生成する
+    /// </summary>
+    /// <remarks>
+    /// アルファ値を利用した透過合成を有効化する。
+    /// </remarks>
+    /// <returns>Blend設定</returns>
     static D3D12_BLEND_DESC CreateAlphaBlendState() {
         D3D12_BLEND_DESC desc = CreateDefaultBlendState(); 
         // ブレンドを有効化
@@ -105,7 +166,13 @@ public:
         return desc;
     }
 
-    // 3Dモデル用の標準的なInputLayout
+    /// <summary>
+    /// 基本的な3Dモデル用InputLayoutを生成する
+    /// </summary>
+    /// <remarks>
+    /// Position、Texcoord、Normalを持つ頂点形式を定義する。
+    /// </remarks>
+    /// <returns>InputLayout設定</returns>
     static std::vector<D3D12_INPUT_ELEMENT_DESC> CreateDefaultInputLayout() {
         std::vector<D3D12_INPUT_ELEMENT_DESC> descs(3);
 
@@ -140,7 +207,13 @@ public:
     }
 
 
-    // 3Dモデル用の標準的なInputLayout
+    /// <summary>
+    /// モデル描画用InputLayoutを生成する
+    /// </summary>
+    /// <remarks>
+    /// 3Dモデルデータ向けのPosition、Texcoord、Normalを定義する。
+    /// </remarks>
+    /// <returns>InputLayout設定</returns>
     static std::vector<D3D12_INPUT_ELEMENT_DESC> CreateModel3dInputLayout() {
         std::vector<D3D12_INPUT_ELEMENT_DESC> descs(3);
 

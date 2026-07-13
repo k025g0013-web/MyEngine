@@ -3,68 +3,87 @@
 
 #include <cassert>
 
-void CommandContext::Initialize(DirectXDevice* device) {
+void CommandContext::Initialize(DirectXDevice *device) {
 	device_ = device;
 
-	// コマンドキュー生成
+	// GPUへ命令を送信するためのCommandQueueを生成
 	CreateCommandQueue();
 
-	// コマンドアロケータ生成
+	// CommandListが使用するコマンド記録領域を生成
 	CreateCommandAllocator();
 
-	// コマンドリストを生成する
+	// 実際の描画命令を記録するCommandListを生成
 	CreateCommandList();
 }
 
-// コマンドキュー生成
 void CommandContext::CreateCommandQueue() {
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
-	HRESULT hr = device_->GetDevice()->CreateCommandQueue(
-		&commandQueueDesc, IID_PPV_ARGS(&commandQueue_));
 
-	// コマンドキューの生成が上手くいかなかったので起動できない
+	// DirectタイプのCommandQueueを生成する
+	// 描画処理やリソース操作など一般的なGPU処理に使用する
+	HRESULT hr = device_->GetDevice()->CreateCommandQueue(
+		&commandQueueDesc,
+		IID_PPV_ARGS(&commandQueue_)
+	);
+
+	// CommandQueue生成失敗時は描画処理を続行できないため終了する
 	assert(SUCCEEDED(hr));
 	(void)hr;
 }
 
-// コマンドアロケータ生成
 void CommandContext::CreateCommandAllocator() {
 	HRESULT hr = device_->GetDevice()->CreateCommandAllocator(
-		D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator_));
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		IID_PPV_ARGS(&commandAllocator_)
+	);
 
-	// コマンドアロケータの生成が上手くいかなかったので起動できない
+	// CommandAllocator生成失敗時はコマンド記録ができないため終了する
 	assert(SUCCEEDED(hr));
 	(void)hr;
 }
 
-// コマンドリストを生成する
 void CommandContext::CreateCommandList() {
 	HRESULT hr = device_->GetDevice()->CreateCommandList(
-		0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator_.Get(), nullptr,
-		IID_PPV_ARGS(&commandList_));
+		0,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		commandAllocator_.Get(),
+		nullptr,
+		IID_PPV_ARGS(&commandList_)
+	);
 
-	// コマンドリストの生成が上手くいかなかったので起動できない
+	// CommandList生成失敗時は描画処理を行えないため終了する
 	assert(SUCCEEDED(hr));
 	(void)hr;
 }
 
-// コマンドリストの内容を確定させる
 void CommandContext::Close() {
 	HRESULT hr = commandList_->Close();
+
 	assert(SUCCEEDED(hr));
 	(void)hr;
 }
 
 void CommandContext::Execute() {
-	ID3D12CommandList* commandLists[] = { commandList_.Get() };
-	commandQueue_->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList *commandLists[] = {
+		commandList_.Get()
+	};
+
+	commandQueue_->ExecuteCommandLists(
+		1,
+		commandLists
+	);
 }
 
-// 次のフレーム用のコマンドリストを準備
 void CommandContext::Reset() {
+	// コマンド記録領域をリセット
 	HRESULT hr = commandAllocator_->Reset();
 	assert(SUCCEEDED(hr));
 
-	hr = commandList_->Reset(commandAllocator_.Get(), nullptr);
+	// CommandListを新しい記録状態へ戻す
+	hr = commandList_->Reset(
+		commandAllocator_.Get(),
+		nullptr
+	);
+
 	assert(SUCCEEDED(hr));
 }
