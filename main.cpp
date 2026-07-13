@@ -52,7 +52,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// 壁越し描画の対象として2つの球を登録
 	ThroughWallRenderer throughWallRenderer;
 	throughWallRenderer.AddObject(&sphere[0], 0xFF000064);
-	throughWallRenderer.AddObject(&sphere[1], 0xFF000064);
+	throughWallRenderer.AddObject(&sphere[1], 0x0000FF64);
 
 	// UI・2D表示用のスプライト
 	Sprite sprite;
@@ -198,7 +198,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			sphere[1].Draw(commandList, uvTexture);
 		}
 
-		{// 2Dオブジェクト（UI・HUDなど）描画パス
+		{// === 2Dオブジェクト（UI・HUDなど）描画パス ===
 			// すべての3D表現の上に重ねる必要があるため、3Dの描画が完全に終わった後に実行する
 			engine->SetPipeline(PipelineType::Object2dOpaque);
 			sprite.Draw(commandList, uvTexture);
