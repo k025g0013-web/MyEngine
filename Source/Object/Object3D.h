@@ -125,7 +125,7 @@ public:
     /// 壁越し描画用マテリアルを取得する
     /// </summary>
     /// <returns>壁越し描画用マテリアル</returns>
-    Material &GetThroughWallMaterial() { return throughWallMaterial_; }
+    ThroughWallMaterial &GetThroughWallMaterial() { return throughWallMaterial_; }
 
     /// <summary>
     /// 現在の描画レイヤを取得する
@@ -144,7 +144,7 @@ private:
     Material material_;
 
     // 壁越し描画用マテリアル
-    Material throughWallMaterial_;
+    ThroughWallMaterial throughWallMaterial_;
 
     // 描画に使用するメッシュ
     Mesh mesh_;

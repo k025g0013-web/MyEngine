@@ -39,11 +39,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	skydome.CreateModel(device, "skydome", 0xFFFFFFFF, false);
 
 	// 箱（障害物。この箱の裏に球が隠れた際に「壁越し描画」を発生させるためのもの）
-	Object3D cubeModel;
-	cubeModel.CreateModel(device, "cube", 0xFFFFFFFF, false);
+	Object3D cube;
+	cube.CreateModel(device, "cube", 0xFFFFFFFF, true);
 
 	// 各リソース用Transform
-	Transform transform[4]{};
+	Transform transform[5]{};
 	transform[0] = { .scale{ 0.5f, 0.5f, 0.5f }, .rotate{}, .translate{0, 0, 0} };	// sphere[0]
 	transform[1] = { .scale{ 0.5f, 0.5f, 0.5f }, .rotate{}, .translate{0, 0, 1} };	// sphere[1]
 	transform[2] = { .scale{ 1.0f, 1.0f, 1.0f }, .rotate{}, .translate{0, 0, 0} };	// skydome
@@ -51,8 +51,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// 壁越し描画の対象として2つの球を登録
 	ThroughWallRenderer throughWallRenderer;
-	throughWallRenderer.AddObject(&sphere[0], 0xFF000064);
-	throughWallRenderer.AddObject(&sphere[1], 0x0000FF64);
+	throughWallRenderer.AddObject(&sphere[0], 0xFF000064, Style::Solid);
+	throughWallRenderer.AddObject(&sphere[1], 0x00FF0064, Style::Solid);
 
 	// UI・2D表示用のスプライト
 	Sprite sprite;
@@ -60,6 +60,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// テクスチャの読み込み
 	TextureData uvTexture = engine->GetTextureManager()->LoadTexture(commandList, "Resources/uvChecker.png");
+	TextureData cubeTexture = engine->GetTextureManager()->LoadTexture(commandList, "Resources/cube.jpg");
 
 	// ライト/カメラの初期化
 	Lighting lighting;
@@ -74,7 +75,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	AudioData audioHandleMusic = engine->GetAudioManager()->LoadAudio("Resources/music.mp3");
 
 	// 起動時のファンファーレを一度だけ再生
-	engine->GetAudioManager()->PlayAudio(audioHandle, 0, 1.0f);
+	engine->GetAudioManager()->PlayAudio(audioHandle, 0, 0.0f);
 
 	//-------------------------------------------------------------------------
 	// メインループ
@@ -101,7 +102,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		sphere[0].Update(&camera, transform[0]);
 		sphere[1].Update(&camera, transform[1]);
 		skydome.Update(&camera, transform[2]);
-		cubeModel.Update(&camera, transform[3]);
+		cube.Update(&camera, transform[3]);
 
 		// スプライト（UI）の画面サイズ追従更新
 		sprite.Update(kClientWidth, kClientHeight);
@@ -174,7 +175,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			lighting.Bind(3, commandList);
 
 			skydome.Draw(commandList, uvTexture);
-			cubeModel.Draw(commandList, uvTexture);
+			cube.Draw(commandList, cubeTexture);
 		}
 
 		{// === 壁越し3Dオブジェクト描画パス ===

@@ -29,6 +29,24 @@ struct MaterialData {
 };
 
 /// <summary>
+/// 壁越し描画専用マテリアル情報
+/// </summary>
+struct ThroughWallMaterialData {
+
+    /// 描画色
+    Vector4 color;
+
+    /// 描画スタイル
+    int32_t style;
+
+    /// アライメント調整
+    float padding[3];
+
+    /// UV座標変換
+    Matrix4x4 uvTransform;
+};
+
+/// <summary>
 /// マテリアル定数バッファを管理するクラス
 /// </summary>
 /// <remarks>
@@ -69,4 +87,51 @@ private:
 
     /// CPU側から更新するマテリアルデータ
     MaterialData *materialData_ = nullptr;
+};
+
+/// <summary>
+/// 壁越し描画用マテリアル情報
+/// </summary>
+/// <remarks>
+/// 壁越し描画時に使用する色や描画スタイル、
+/// UV変換行列を保持し、ピクセルシェーダで使用される
+/// 定数バッファとして利用する。
+/// </remarks>
+class ThroughWallMaterial {
+public:
+    /// <summary>
+    /// 壁越し描画用マテリアルを初期化する
+    /// </summary>
+    /// <param name="device">Direct3Dデバイス</param>
+    /// <param name="color">初期色（0xRRGGBBAA形式）</param>
+    void Initialize(
+        ID3D12Device *device,
+        uint32_t color
+    );
+
+
+    /// <summary>
+    /// 壁越し描画用マテリアルデータを取得する
+    /// </summary>
+    /// <returns>
+    /// GPUへ転送する壁越し描画用マテリアルデータ
+    /// </returns>
+    ThroughWallMaterialData *GetMaterialData() const {
+        return materialData_;
+    }
+
+
+    /// <summary>
+    /// 定数バッファのGPU仮想アドレスを取得する
+    /// </summary>
+    D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress() const {
+        return constantBuffer_.GetGPUVirtualAddress();
+    }
+
+private:
+    /// 壁越し描画用マテリアル定数バッファ
+    MeshBuffer constantBuffer_;
+
+    /// CPU側から更新する壁越し描画用マテリアルデータ
+    ThroughWallMaterialData *materialData_ = nullptr;
 };
