@@ -205,6 +205,12 @@
     <ClCompile Include="Source\KizunaEngine.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Audio\AudioLoader.cpp">
+      <Filter>Source\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Audio\AudioManager.cpp">
+      <Filter>Source\Audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="exclusion.dic" />
@@ -409,6 +415,18 @@
     </ClInclude>
     <ClInclude Include="Source\RenderCore\ThroughWallMaterial.h">
       <Filter>Source\RenderCore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Audio\AudioData.h">
+      <Filter>Source\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Audio\AudioLoader.h">
+      <Filter>Source\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Audio\AudioManager.h">
+      <Filter>Source\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Audio\AudioFormat.h">
+      <Filter>Source\Audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
