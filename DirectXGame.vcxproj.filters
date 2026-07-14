@@ -407,6 +407,9 @@
     <ClInclude Include="Source\KizunaEngine.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\RenderCore\ThroughWallMaterial.h">
+      <Filter>Source\RenderCore</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

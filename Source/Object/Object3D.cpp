@@ -21,7 +21,7 @@ void Object3D::CreatePlaneTriangle(
 	material_.Initialize(device, color, enableLighting);
 
 	// 壁越し描画用マテリアルも同時に生成する
-	throughWallMaterial_.Initialize(device, color, enableLighting);
+	throughWallMaterial_.Initialize(device, color);
 }
 
 void Object3D::CreateSphere(
@@ -43,7 +43,7 @@ void Object3D::CreateSphere(
 	material_.Initialize(device, color, enableLighting);
 
 	// 壁越し描画用マテリアルも生成する
-	throughWallMaterial_.Initialize(device, color, enableLighting);
+	throughWallMaterial_.Initialize(device, color);
 }
 
 void Object3D::CreateModel(
@@ -66,7 +66,7 @@ void Object3D::CreateModel(
 	material_.Initialize(device, color, enableLighting);
 
 	// 壁越し描画用マテリアルも生成する
-	throughWallMaterial_.Initialize(device, color, enableLighting);
+	throughWallMaterial_.Initialize(device, color);
 }
 
 void Object3D::Update(Camera *camera, Transform transform) {

@@ -260,6 +260,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\RenderCore\Lighting.h" />
     <ClInclude Include="Source\RenderCore\Material.h" />
     <ClInclude Include="Source\RenderCore\Mesh.h" />
+    <ClInclude Include="Source\RenderCore\ThroughWallMaterial.h" />
     <ClInclude Include="Source\RenderCore\TransformationMatrix.h" />
     <ClInclude Include="Source\Renderer\Renderer.h" />
     <ClInclude Include="Source\Renderer\Sprite.h" />

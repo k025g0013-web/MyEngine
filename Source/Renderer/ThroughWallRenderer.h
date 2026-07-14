@@ -11,6 +11,23 @@ class Object3D;
 struct TextureData;
 
 /// <summary>
+/// 壁越し描画を行う際のスタイル
+/// </summary>
+/// <remarks>
+/// 壁越し描画時に使用する描画表現を指定する。
+/// </remarks>
+enum class Style {
+    /// ソリッドパターン表示
+    Solid,
+
+    /// ドットパターン表示
+    Dot,
+
+    /// ストライプパターン表示
+    Stripe,
+};
+
+/// <summary>
 /// 壁越し描画を行う対象オブジェクトの情報
 /// </summary>
 /// <remarks>
@@ -18,12 +35,14 @@ struct TextureData;
 /// 壁越し専用の描画色を保持する。
 /// </remarks>
 struct ThroughWallObject {
-
     /// 描画対象オブジェクト
     Object3D *object;
 
     /// 壁越し描画時に適用する色
     Vector4 color;
+
+    /// 壁越し描画時の描画スタイル
+    Style style;
 };
 
 /// <summary>
@@ -46,7 +65,7 @@ public:
     /// <param name="color">
     /// 壁越し描画時に使用する色（0xRRGGBBAA形式）
     /// </param>
-    void AddObject(Object3D *object, uint32_t color);
+    void AddObject(Object3D *object, uint32_t color, Style style);
 
     /// <summary>
     /// 登録された全オブジェクトを壁越し描画する
