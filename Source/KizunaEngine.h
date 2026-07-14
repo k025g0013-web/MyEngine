@@ -17,7 +17,7 @@
 #include "RenderCore/Lighting.h"
 
 // === Audio ===
-#include "Audio/Audio.h"
+#include "Audio/AudioManager.h"
 
 // === Input ===
 #include "Input/Keyboard.h"
@@ -116,8 +116,8 @@ public:
 	/// <summary>
 	/// オーディオマネージャを取得する
 	/// </summary>
-	/// <returns>Audioクラス</returns>
-	Audio *GetAudioManager() const { return audioManager_.get(); }
+	/// <returns>AudioManagerクラス</returns>
+	AudioManager *GetAudioManager() const { return audioManager_.get(); }
 
 	/// <summary>
 	/// キーボード入力クラスを取得する
@@ -189,5 +189,5 @@ private:
 	std::unique_ptr<Texture> textureManager_;
 
 	/// オーディオ管理クラス
-	std::unique_ptr<Audio> audioManager_;
+	std::unique_ptr<AudioManager> audioManager_;
 };

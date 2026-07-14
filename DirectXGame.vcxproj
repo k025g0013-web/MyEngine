@@ -124,6 +124,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Source\Asset\ModelLoader.cpp" />
     <ClCompile Include="Source\Audio\Audio.cpp" />
+    <ClCompile Include="Source\Audio\AudioLoader.cpp" />
+    <ClCompile Include="Source\Audio\AudioManager.cpp" />
     <ClCompile Include="Source\Core\DebugManager.cpp" />
     <ClCompile Include="Source\Core\Logger.cpp" />
     <ClCompile Include="Source\Core\WinApp.cpp" />
@@ -227,6 +229,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="Source\Asset\ModelLoader.h" />
     <ClInclude Include="Source\Audio\Audio.h" />
+    <ClInclude Include="Source\Audio\AudioData.h" />
+    <ClInclude Include="Source\Audio\AudioFormat.h" />
+    <ClInclude Include="Source\Audio\AudioLoader.h" />
+    <ClInclude Include="Source\Audio\AudioManager.h" />
     <ClInclude Include="Source\Core\DebugManager.h" />
     <ClInclude Include="Source\Core\Logger.h" />
     <ClInclude Include="Source\Core\WinApp.h" />

@@ -43,7 +43,7 @@ void KizunaEngine::Initialize(const std::wstring &title, int32_t width, int32_t 
     textureManager_->Initialize(device, directXCommon_->GetSRVHeap());
 
     // オーディオ
-    audioManager_ = std::make_unique<Audio>();
+    audioManager_ = std::make_unique<AudioManager>();
     audioManager_->Initialize();
 
     //-------------------------------------------------------------------------
@@ -105,7 +105,9 @@ void KizunaEngine::Finalize() {
     textureManager_->Finalize();
 
     // オーディオデバイスおよび読み込み済みサウンドを解放
-    audioManager_->Finalize();
+    if (audioManager_) {
+        audioManager_->Finalize();
+    }
 
     // ウィンドウを閉じる前に各種DirectXリソースが安全に解放されている必要があるため、winAppの解放を最後に行う
     if (winApp_) {

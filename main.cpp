@@ -8,12 +8,16 @@
 
 #include <cstdint>
 
-// 球モデル分割数
-const int32_t kSubdivision = 16;
+namespace {
+	// 球モデル分割数
+	constexpr int32_t kSubdivision = 16;
+	// クライアント領域のサイズ
+	constexpr int32_t kClientWidth = 1280;
+	constexpr int32_t kClientHeight = 720;
 
-// クライアント領域のサイズ
-const int32_t kClientWidth = 1280;
-const int32_t kClientHeight = 720;
+	// ライトバインド用の定数バッファレジスタ番号
+	constexpr UINT kLightRegisterIndex = 3;
+}
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -71,11 +75,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Transform cameraTransform = { .scale{1.0f,1.0f,1.0f}, .rotate{0.3f,0.0f,0.0f}, .translate{0.0f,1.5f,-5.0f} };
 
 	// オーディオ
-	AudioData audioHandle = engine->GetAudioManager()->LoadAudio("Resources/fanfare.wav");
-	AudioData audioHandleMusic = engine->GetAudioManager()->LoadAudio("Resources/music.mp3");
+	engine->GetAudioManager()->Load("fanfare", "Resources/fanfare.wav");
+	engine->GetAudioManager()->Load("bgm_music", "Resources/music.mp3");
 
 	// 起動時のファンファーレを一度だけ再生
-	engine->GetAudioManager()->PlayAudio(audioHandle, 0, 0.0f);
+	engine->GetAudioManager()->Play("fanfare", false, 1.0f);
 
 	//-------------------------------------------------------------------------
 	// メインループ
@@ -172,7 +176,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// 壁越し描画の判定基準を作るため、先に背景（天球）や遮蔽物（箱）を描画して深度バッファを確定させる
 			engine->SetPipeline(PipelineType::Object3dOpaque);
 
-			lighting.Bind(3, commandList);
+			lighting.Bind(kLightRegisterIndex, commandList);
 
 			skydome.Draw(commandList, uvTexture);
 			cube.Draw(commandList, cubeTexture);
@@ -183,7 +187,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// 独自のパイプラインを適用してレンダリングする
 			engine->SetPipeline(PipelineType::Object3dThroughWall);
 
-			lighting.Bind(3, commandList);
+			lighting.Bind(kLightRegisterIndex, commandList);
 
 			throughWallRenderer.Draw(commandList, uvTexture);
 
@@ -193,7 +197,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// 遮蔽物に隠れていない部分、または手前に露出している通常部分を上書き描画する
 			engine->SetPipeline(PipelineType::Object3dOpaque);
 
-			lighting.Bind(3, commandList);
+			lighting.Bind(kLightRegisterIndex, commandList);
 
 			sphere[0].Draw(commandList, uvTexture);
 			sphere[1].Draw(commandList, uvTexture);
