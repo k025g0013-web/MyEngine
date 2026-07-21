@@ -73,9 +73,6 @@
     <Filter Include="Source\External">
       <UniqueIdentifier>{cb60f5ab-4b82-49b5-b098-afef0125bde6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Object">
-      <UniqueIdentifier>{815c6560-b846-468b-80d2-5de0c2830fa5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="externals">
       <UniqueIdentifier>{b4814eb5-6ea5-4c8d-81e5-7b4766c04609}</UniqueIdentifier>
     </Filter>
@@ -84,6 +81,9 @@
     </Filter>
     <Filter Include="Source\Renderer">
       <UniqueIdentifier>{a0ab22f6-dace-40f1-abb7-684a2bbb28e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Object">
+      <UniqueIdentifier>{815c6560-b846-468b-80d2-5de0c2830fa5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

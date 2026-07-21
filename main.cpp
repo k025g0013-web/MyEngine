@@ -8,6 +8,8 @@
 
 #include <cstdint>
 
+using namespace Kizuna;
+
 namespace {
 	// 球モデル分割数
 	constexpr int32_t kSubdivision = 16;
@@ -55,8 +57,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// 壁越し描画の対象として2つの球を登録
 	ThroughWallRenderer throughWallRenderer;
-	throughWallRenderer.AddObject(&sphere[0], 0xFF000064, Style::Solid);
-	throughWallRenderer.AddObject(&sphere[1], 0x00FF0064, Style::Solid);
+	throughWallRenderer.AddObject(&sphere[0], 0xFFFFFFFF, Style::Solid);
+	throughWallRenderer.AddObject(&sphere[1], 0xFFFFFFFF, Style::Solid);
 
 	// UI・2D表示用のスプライト
 	Sprite sprite;
@@ -79,7 +81,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	engine->GetAudioManager()->Load("bgm_music", "Resources/music.mp3");
 
 	// 起動時のファンファーレを一度だけ再生
-	engine->GetAudioManager()->Play("fanfare", false, 1.0f);
+	engine->GetAudioManager()->Play("fanfare", false, 0.0f);
 
 	//-------------------------------------------------------------------------
 	// メインループ
@@ -126,16 +128,45 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 		ImGui::Separator();
 
+		const char *styleNames[] =
+		{
+			"Solid",
+			"Dot",
+			"Stripe"
+		};
+
+		// Sphere0
+		ImGui::DragFloat3("Sphere0 Position", &transform[0].translate.x, 0.1f);
+
 		// 中央に配置された球のRotateを操作
 		ImGui::SliderAngle("SphereRotateX", &transform[0].rotate.x);
 		ImGui::SliderAngle("SphereRotateY", &transform[0].rotate.y);
 		ImGui::SliderAngle("SphereRotateZ", &transform[0].rotate.z);
+
+		ImGui::ColorEdit4("Sphere0", &throughWallRenderer.GetObject(0).color.x);
+
+		int style0 = static_cast<int>(throughWallRenderer.GetObject(0).style);
+		if (ImGui::Combo("Sphere0 Style", &style0, styleNames, IM_ARRAYSIZE(styleNames))) {
+			throughWallRenderer.GetObject(0).style = static_cast<Style>(style0);
+		}
+
 		ImGui::Separator();
+
+		// Sphere1
+		ImGui::DragFloat3("Sphere1 Position", &transform[1].translate.x, 0.1f);
 
 		// 中央に配置された球のTranslateを操作
 		ImGui::SliderAngle("SphereTranslateX", &transform[0].translate.x);
 		ImGui::SliderAngle("SphereTranslateY", &transform[0].translate.y);
 		ImGui::SliderAngle("SphereTranslateZ", &transform[0].translate.z);
+
+		ImGui::ColorEdit4("Sphere1", &throughWallRenderer.GetObject(1).color.x);
+
+		int style1 = static_cast<int>(throughWallRenderer.GetObject(1).style);
+		if (ImGui::Combo("Sphere1 Style", &style1, styleNames, IM_ARRAYSIZE(styleNames))) {
+			throughWallRenderer.GetObject(1).style = static_cast<Style>(style1);
+		}
+
 		ImGui::Separator();
 
 		// スプライト（UI）の色や座標を変更
@@ -175,7 +206,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		{// === 3D不透明オブジェクト描画（背景・遮蔽物） ===
 			// 壁越し描画の判定基準を作るため、先に背景（天球）や遮蔽物（箱）を描画して深度バッファを確定させる
 			engine->SetPipeline(PipelineType::Object3dOpaque);
-
 			lighting.Bind(kLightRegisterIndex, commandList);
 
 			skydome.Draw(commandList, uvTexture);
@@ -187,8 +217,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// 独自のパイプラインを適用してレンダリングする
 			engine->SetPipeline(PipelineType::Object3dThroughWall);
 
-			lighting.Bind(kLightRegisterIndex, commandList);
-
 			throughWallRenderer.Draw(commandList, uvTexture);
 
 		}
@@ -196,7 +224,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		{// === 対象オブジェクトの通常前面描画パス ===
 			// 遮蔽物に隠れていない部分、または手前に露出している通常部分を上書き描画する
 			engine->SetPipeline(PipelineType::Object3dOpaque);
-
 			lighting.Bind(kLightRegisterIndex, commandList);
 
 			sphere[0].Draw(commandList, uvTexture);
@@ -206,7 +233,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		{// === 2Dオブジェクト（UI・HUDなど）描画パス ===
 			// すべての3D表現の上に重ねる必要があるため、3Dの描画が完全に終わった後に実行する
 			engine->SetPipeline(PipelineType::Object2dOpaque);
-			sprite.Draw(commandList, uvTexture);
 		}
 
 		engine->EndFrame();

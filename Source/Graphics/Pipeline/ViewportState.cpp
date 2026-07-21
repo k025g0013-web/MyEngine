@@ -1,5 +1,6 @@
 #include "ViewportState.h"
 
+namespace Kizuna {
 void ViewportState::Initialize(float width, float height) {
 	// ビューポート
 	// クライアント領域のサイズと一緒にして画面全体に表示
@@ -21,4 +22,5 @@ void ViewportState::Initialize(float width, float height) {
 void ViewportState::SetCommand(ID3D12GraphicsCommandList *commandList) {
 	commandList->RSSetViewports(1, &viewport_);			// Viewportを設定
 	commandList->RSSetScissorRects(1, &scissorRect_);	// Scissorを設定
+}
 }

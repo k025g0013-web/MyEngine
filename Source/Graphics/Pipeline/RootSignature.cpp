@@ -5,6 +5,7 @@
 #pragma comment(lib, "dxcompiler.lib")
 #include <cassert>
 
+namespace Kizuna {
 void RootSignature::CreateSkinny3D(ID3D12Device *device, Logger *logger) {
 	// RootSignatureDesc
 	//========================
@@ -259,4 +260,5 @@ void RootSignature::CreateSkinny2D(ID3D12Device *device, Logger *logger) {
 		signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(),
 		IID_PPV_ARGS(&rootSignature_));
 	assert(SUCCEEDED(hr));
+}
 }
