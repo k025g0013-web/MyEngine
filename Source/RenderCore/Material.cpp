@@ -3,38 +3,40 @@
 #include "Math/FunctionMatrix.h"
 #include "Utils/ColorHelper.h"
 
-void Material::Initialize(
-    ID3D12Device *device, uint32_t color, bool enableLighting) {
-    // マテリアル情報を格納する定数バッファを生成する
-    constantBuffer_.InitializeAsConstant(device, sizeof(MaterialData));
+namespace Kizuna {
+    void Material::Initialize(
+        ID3D12Device *device, uint32_t color, bool enableLighting) {
+        // マテリアル情報を格納する定数バッファを生成する
+        constantBuffer_.InitializeAsConstant(device, sizeof(MaterialData));
 
-    // CPUから更新できるようにバッファをマッピングする
-    materialData_ = static_cast<MaterialData *>(constantBuffer_.Map());
+        // CPUから更新できるようにバッファをマッピングする
+        materialData_ = static_cast<MaterialData *>(constantBuffer_.Map());
 
-    // 初期カラーを設定する
-    materialData_->color = UintToVector4(color);
+        // 初期カラーを設定する
+        materialData_->color = UintToVector4(color);
 
-    // ライティングの有効・無効を設定する
-    materialData_->enableLighting = enableLighting ? 1 : 0;
+        // ライティングの有効・無効を設定する
+        materialData_->enableLighting = enableLighting ? 1 : 0;
 
-    // 初期状態ではUV変換を行わないため単位行列を設定する
-    materialData_->uvTransform = Math::MakeIdentity<Matrix4x4>();
-}
+        // 初期状態ではUV変換を行わないため単位行列を設定する
+        materialData_->uvTransform = Math::MakeIdentity<Matrix4x4>();
+    }
 
-void ThroughWallMaterial::Initialize(
-    ID3D12Device *device, uint32_t color) {
-    // マテリアル情報を格納する定数バッファを生成する
-    constantBuffer_.InitializeAsConstant(device, sizeof(ThroughWallMaterialData));
+    void ThroughWallMaterial::Initialize(
+        ID3D12Device *device, uint32_t color) {
+        // マテリアル情報を格納する定数バッファを生成する
+        constantBuffer_.InitializeAsConstant(device, sizeof(ThroughWallMaterialData));
 
-    // CPUから更新できるようにバッファをマッピングする
-    materialData_ = static_cast<ThroughWallMaterialData *>(constantBuffer_.Map());
+        // CPUから更新できるようにバッファをマッピングする
+        materialData_ = static_cast<ThroughWallMaterialData *>(constantBuffer_.Map());
 
-    // 初期カラーを設定する
-    materialData_->color = UintToVector4(color);
+        // 初期カラーを設定する
+        materialData_->color = UintToVector4(color);
 
-    /// 壁越し描画のスタイルをデフォルト値で初期化する
-    materialData_->style = 0;
+        /// 壁越し描画のスタイルをデフォルト値で初期化する
+        materialData_->style = 0;
 
-    // 初期状態ではUV変換を行わないため単位行列を設定する
-    materialData_->uvTransform = Math::MakeIdentity<Matrix4x4>();
+        // 初期状態ではUV変換を行わないため単位行列を設定する
+        materialData_->uvTransform = Math::MakeIdentity<Matrix4x4>();
+    }
 }

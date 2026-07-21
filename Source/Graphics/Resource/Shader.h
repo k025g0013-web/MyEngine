@@ -8,57 +8,59 @@
 #include <dxcapi.h>
 #include <string>
 
-class Logger;
-
-/// <summary>
-/// HLSLシェーダーのコンパイルを管理するクラス
-/// </summary>
-/// <remarks>
-/// DXCコンパイラを利用してHLSLファイルをコンパイルし、
-/// DirectX12で利用可能なシェーダーバイナリを生成・保持する。
-/// </remarks>
-class Shader {
-public:
-    /// <summary>
-    /// DXCコンパイラを初期化する
-    /// </summary>
-    /// <param name="logger">ログ出力クラス</param>
-    static void InitializeCompiler(Logger *logger);
+namespace Kizuna {
+    class Logger;
 
     /// <summary>
-    /// HLSLファイルをコンパイルする
+    /// HLSLシェーダーのコンパイルを管理するクラス
     /// </summary>
-    /// <param name="filePath">シェーダーファイルのパス</param>
-    /// <param name="profile">コンパイルプロファイル</param>
-    void Compile(const std::wstring &filePath, const wchar_t *profile);
+    /// <remarks>
+    /// DXCコンパイラを利用してHLSLファイルをコンパイルし、
+    /// DirectX12で利用可能なシェーダーバイナリを生成・保持する。
+    /// </remarks>
+    class Shader {
+    public:
+        /// <summary>
+        /// DXCコンパイラを初期化する
+        /// </summary>
+        /// <param name="logger">ログ出力クラス</param>
+        static void InitializeCompiler(Logger *logger);
 
-    /// <summary>
-    /// コンパイル済みシェーダーBlobを取得する
-    /// </summary>
-    /// <returns>シェーダーBlob</returns>
-    IDxcBlob *GetBlob() const { return shaderBlob_.Get(); }
+        /// <summary>
+        /// HLSLファイルをコンパイルする
+        /// </summary>
+        /// <param name="filePath">シェーダーファイルのパス</param>
+        /// <param name="profile">コンパイルプロファイル</param>
+        void Compile(const std::wstring &filePath, const wchar_t *profile);
 
-    /// <summary>
-    /// DirectX12で利用するシェーダーバイトコードを取得する
-    /// </summary>
-    /// <returns>シェーダーバイトコード</returns>
-    D3D12_SHADER_BYTECODE GetBytecode() const {
-        return { shaderBlob_->GetBufferPointer(), shaderBlob_->GetBufferSize() };
-    }
+        /// <summary>
+        /// コンパイル済みシェーダーBlobを取得する
+        /// </summary>
+        /// <returns>シェーダーBlob</returns>
+        IDxcBlob *GetBlob() const { return shaderBlob_.Get(); }
 
-private:
-    /// ログ出力クラス
-    static Logger *sLogger_;
+        /// <summary>
+        /// DirectX12で利用するシェーダーバイトコードを取得する
+        /// </summary>
+        /// <returns>シェーダーバイトコード</returns>
+        D3D12_SHADER_BYTECODE GetBytecode() const {
+            return { shaderBlob_->GetBufferPointer(), shaderBlob_->GetBufferSize() };
+        }
 
-    /// DXCユーティリティ
-    static Microsoft::WRL::ComPtr<IDxcUtils> sDxcUtils_;
+    private:
+        /// ログ出力クラス
+        static Logger *sLogger_;
 
-    /// DXCコンパイラ
-    static Microsoft::WRL::ComPtr<IDxcCompiler3> sDxcCompiler_;
+        /// DXCユーティリティ
+        static Microsoft::WRL::ComPtr<IDxcUtils> sDxcUtils_;
 
-    /// Includeファイル管理
-    static IDxcIncludeHandler *sIncludeHandler_;
+        /// DXCコンパイラ
+        static Microsoft::WRL::ComPtr<IDxcCompiler3> sDxcCompiler_;
 
-    /// コンパイル済みシェーダーバイナリ
-    Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob_;
-};
+        /// Includeファイル管理
+        static IDxcIncludeHandler *sIncludeHandler_;
+
+        /// コンパイル済みシェーダーバイナリ
+        Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob_;
+    };
+}

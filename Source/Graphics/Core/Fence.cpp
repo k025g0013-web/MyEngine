@@ -1,5 +1,6 @@
 #include "Fence.h"
 
+namespace Kizuna {
 Fence::~Fence() {
     if (fenceEvent_) {
         CloseHandle(fenceEvent_);
@@ -38,4 +39,5 @@ void Fence::Wait(ID3D12CommandQueue* commandQueue) {
         // GPU完了までCPU側を待機させる
         WaitForSingleObject(fenceEvent_, INFINITE);
     }
+}
 }
