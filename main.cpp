@@ -121,8 +121,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		ImGui::Begin("Setting");
 		// デバッグカメラへの切り替え方法を解説
-		ImGui::Text(
-			"Camera Mode : %s (Q:KeyBoad or A:GamePad to Toggle)", camera.GetStateName());
+		ImGui::Text("Camera Mode : %s (Q:KeyBoad or A:GamePad to Toggle)", camera.GetStateName());
 		ImGui::Separator();
 
 		const char *styleNames[] =
