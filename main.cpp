@@ -121,11 +121,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		ImGui::Begin("Setting");
 		// デバッグカメラへの切り替え方法を解説
-		if (camera.IsDebugCamera()) {
-			ImGui::Text("Camera Mode: DEBUG [WASD / Mouse] (Q Key to Toggle)");
-		} else {
-			ImGui::Text("Camera Mode: NORMAL (Q Key to Toggle)");
-		}
+		ImGui::Text("Camera Mode : %s (Q:KeyBoad or A:GamePad to Toggle)", camera.GetStateName());
 		ImGui::Separator();
 
 		const char *styleNames[] =

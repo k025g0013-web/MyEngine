@@ -2,15 +2,16 @@
 
 #include "NormalCamera.h"
 #include "DebugCamera.h"
+#include "CameraState/CameraState.h"
 
 namespace Kizuna {
     /// <summary>
-    /// シーンを描画するためのカメラを管理するクラス
+    /// カメラの切り替えと更新を管理するクラス
     /// </summary>
     /// <remarks>
-    /// 通常カメラとデバッグカメラの2種類を切り替えて使用できる。
-    /// ビュー行列・射影行列の生成および、入力デバイスによる
-    /// デバッグ操作を担当する。
+    /// 通常カメラとデバッグカメラを保持し、
+    /// 現在使用するカメラの切り替えと更新を行う。
+    /// 外部からは現在有効なカメラの行列を取得できる。
     /// </remarks>
     class CameraManager {
     public:
@@ -22,16 +23,11 @@ namespace Kizuna {
         /// <param name="keyboard">キーボード入力</param>
         /// <param name="mouse">マウス入力</param>
         /// <param name="gamePad">ゲームパッド入力</param>
-        void Initialize(
-            float width,
-            float height,
-            Keyboard *keyboard,
-            Mouse *mouse,
-            GamePad *gamePad
-        );
+        void Initialize(float width, float height,
+            Keyboard *keyboard, Mouse *mouse, GamePad *gamePad);
 
         /// <summary>
-        /// カメラを更新する
+        /// 現在使用中のカメラを更新する
         /// </summary>
         /// <param name="transform">
         /// カメラで使用するTransform
@@ -39,17 +35,7 @@ namespace Kizuna {
         void Update(const Transform &transform);
 
         /// <summary>
-        /// 通常カメラへ切り替え
-        /// </summary>
-        void SetNormalCamera();
-
-        /// <summary>
-        /// デバッグカメラへ切り替え
-        /// </summary>
-        void SetDebugCamera();
-
-        /// <summary>
-        /// カメラ切り替え
+        /// 通常カメラとデバッグカメラを切り替える
         /// </summary>
         void ToggleCamera();
 
@@ -57,6 +43,26 @@ namespace Kizuna {
         /// 現在使用中のカメラを取得する
         /// </summary>
         Camera *GetCamera() { return currentCamera_; }
+
+        /// <summary>
+        /// 通常カメラを取得する
+        /// </summary>
+        NormalCamera *GetNormalCamera() { return &normalCamera_; }
+
+        /// <summary>
+        /// 通常カメラを取得する
+        /// </summary>
+        DebugCamera *GetDebugCamera() { return &debugCamera_; }
+
+        /// <summary>
+        /// 通常カメラを取得する
+        /// </summary>
+        void SetCurrentCamera(Camera *camera) { currentCamera_ = camera; }
+        
+        /// <summary>
+        /// カメラの状態を切り替える
+        /// </summary>
+        void ChangeState(CameraState *state) { state_ = state; }
 
         /// <summary>
         /// ビュー行列を取得する
@@ -78,6 +84,13 @@ namespace Kizuna {
         /// </summary>
         bool IsDebugCamera() const { return currentCamera_ == &debugCamera_; }
 
+        /// <summary>
+        /// 使用しているカメラの名前を取得
+        /// </summary>
+        const char *GetStateName() const {
+            return state_->GetName();
+        }
+
     private:
         // 通常カメラ
         NormalCamera normalCamera_;
@@ -86,5 +99,8 @@ namespace Kizuna {
 
         // 現在使用中のカメラ
         Camera *currentCamera_ = nullptr;
+
+        // カメラの状態
+        CameraState *state_ = nullptr;
     };
 }

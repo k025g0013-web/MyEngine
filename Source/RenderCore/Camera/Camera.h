@@ -5,19 +5,19 @@
 
 namespace Kizuna {
 	/// <summary>
-	/// シーンを描画するためのカメラを管理するクラス
+	/// カメラの基底クラス
 	/// </summary>
 	/// <remarks>
-	/// 通常カメラとデバッグカメラの2種類を切り替えて使用できる。
-	/// ビュー行列・射影行列の生成および、入力デバイスによる
-	/// デバッグ操作を担当する。
+	/// すべてのカメラで共通となる画面サイズ、ビュー行列、
+	/// 射影行列、ViewProjection行列の管理を行う。
+	/// 派生クラスはUpdate()を実装し、カメラ固有の更新処理を行う。
 	/// </remarks>
 	class Camera {
 	public:
 		virtual ~Camera() = default;
 
 		/// <summary>
-		/// カメラを初期化する
+		/// 描画に使用する画面サイズを設定する
 		/// </summary>
 		/// <param name="width">画面幅</param>
 		/// <param name="height">画面高さ</param>
@@ -48,7 +48,7 @@ namespace Kizuna {
 
 	protected:
 		/// <summary>
-		/// カメラに使うMatrix群を更新する
+		/// Transformからビュー行列・射影行列・ViewProjection行列を更新する
 		/// </summary>
 		/// <param name="transform">
 		/// カメラで使用するTransform
