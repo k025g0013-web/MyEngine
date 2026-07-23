@@ -70,7 +70,7 @@ namespace Kizuna {
 		throughWallMaterial_.Initialize(device, color);
 	}
 
-	void Object3D::Update(CameraManager *camera, Transform transform) {
+	void Object3D::Update(Camera *camera, Transform transform) {
 		// ワールド行列を生成する
 		Matrix4x4 worldMatrix =
 			Math::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);

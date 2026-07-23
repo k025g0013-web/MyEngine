@@ -6,7 +6,7 @@
 
 #include "Graphics/Resource/MeshBuffer.h"
 #include "Graphics/Resource/Texture.h"
-#include "RenderCore/Camera/CameraManager.h"
+#include "RenderCore/Camera.h"
 #include "RenderCore/Material.h"
 #include "RenderCore/Mesh.h"
 #include "Renderer/Renderer.h"
@@ -80,7 +80,7 @@ namespace Kizuna {
         /// </summary>
         /// <param name="camera">使用するカメラ</param>
         /// <param name="transform">オブジェクトのTransform</param>
-        void Update(CameraManager *camera, Transform transform);
+        void Update(Camera *camera, Transform transform);
 
         /// <summary>
         /// 通常描画を行う

@@ -2,7 +2,7 @@
 #include <vector>
 #include "Graphics/Resource/MeshBuffer.h"
 #include "Graphics/Resource/Texture.h"
-#include "RenderCore/Camera.h"
+#include "RenderCore/Camera/CameraManager.h"
 #include "RenderCore/Material.h"
 #include "Renderer/Renderer.h"
 #include "Math/Transform.h"

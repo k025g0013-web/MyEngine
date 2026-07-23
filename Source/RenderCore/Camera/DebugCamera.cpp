@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include "DebugCamera.h"
 
 #include "Math/FunctionVector.h"
 #include "Math/FunctionMatrix.h"
@@ -8,66 +8,18 @@
 #include <cmath>
 
 namespace Kizuna {
-    void Camera::Initialize(float width, float height, Keyboard *keyboard, Mouse *mouse, GamePad *gamePad) {
-        // 描画に使用する画面サイズを保持する
-        width_ = width;
-        height_ = height;
-
+    void DebugCamera::SetInputDevice(
+        Keyboard *keyboard, Mouse *mouse, GamePad *gamePad) {
         // デバッグ操作で利用する入力デバイスを保持する
         keyboard_ = keyboard;
         mouse_ = mouse;
         gamePad_ = gamePad;
     }
 
-    void Camera::Update(const Transform &transform) {
-        // 現在のカメラモードに応じた更新処理を行う
-        switch (mode_) {
-        case Mode::Normal:
-            UpdateCamera(transform);
-            break;
-
-        case Mode::Debug:
-            UpdateDebug();
-            break;
-        }
-
-        // 描画で使用するViewProjection行列を生成する
-        viewProjectionMatrix_ = Math::Multiply(viewMatrix_, projectionMatrix_);
-    }
-
-    void Camera::ToggleMode() {
-        if (mode_ == Mode::Normal) {
-            mode_ = Mode::Debug;
-        } else {
-            mode_ = Mode::Normal;
-        }
-    }
-
-    void Camera::UpdateCamera(const Transform &targetTransform) {
-        // Transformからカメラ行列を生成する
-        Matrix4x4 cameraMatrix = Math::MakeAffineMatrix(targetTransform.scale, targetTransform.rotate, targetTransform.translate);
-
-        // カメラ行列の逆行列をビュー行列として使用する
-        viewMatrix_ = Math::Inverse(cameraMatrix);
-
-        // 透視投影行列を生成する
-        projectionMatrix_ = Math::MakePerspectiveFovMatrix(
-            fovY_, width_ / height_, nearClip_, farClip_
-        );
-    }
-
-    void Camera::UpdateDebug() {
+    void DebugCamera::Update(const Transform &) {
         // 入力デバイスが存在しない場合はデバッグ操作できないため停止する
         assert(keyboard_ && "キーボードを検出できませんでした");
         assert(mouse_ && "マウスを検出できませんでした");
-
-        if (gamePad_ && gamePad_->IsConnected()) {
-            // BACKボタンで通常カメラへ戻る
-            if (gamePad_->TriggerButton(XINPUT_GAMEPAD_BACK)) {
-                ToggleMode();
-                return;
-            }
-        }
 
         // 入力に応じて注視点・回転・ズーム量を更新する
         DebugMove();
@@ -75,48 +27,32 @@ namespace Kizuna {
         DebugRotate();
 
         // カメラの右方向ベクトルを求める
-        Vector3 right = {
-            sinf(debugRotation_.y - float(M_PI) / 2.0f),
-            0.0f,
-            cosf(debugRotation_.y - float(M_PI) / 2.0f)
-        };
+        Vector3 right = {sinf(debugRotation_.y - float(M_PI) / 2.0f), 0.0f, cosf(debugRotation_.y - float(M_PI) / 2.0f)};
+
         // ワールド座標系の上方向ベクトル
-        Vector3 up = { 0, 1, 0 };
+        Vector3 up = {0.0f, 1.0f, 0.0f};
 
         // 画面移動量をワールド座標へ変換する
-        Vector3 offsetTarget{
-            debugTarget_.x + right.x * debugScreenOffset_.x + up.x * debugScreenOffset_.y,
-            debugTarget_.y + right.y * debugScreenOffset_.x + up.y * debugScreenOffset_.y,
-            debugTarget_.z + right.z * debugScreenOffset_.x + up.z * debugScreenOffset_.y,
-        };
+        Vector3 offsetTarget = debugTarget_ + right * debugScreenOffset_.x + up * debugScreenOffset_.y;
 
         // カメラの前方向ベクトルを算出する
         Vector3 forwardXZ = { sinf(debugRotation_.y), 0.0f, cosf(debugRotation_.y) };
-        Vector3 forward = {
-            forwardXZ.x * cosf(debugRotation_.x),
-            -sinf(debugRotation_.x),
-            forwardXZ.z * cosf(debugRotation_.x)
-        };
+        Vector3 forward = {forwardXZ.x * cosf(debugRotation_.x), -sinf(debugRotation_.x), forwardXZ.z * cosf(debugRotation_.x)};
 
         // 注視点から距離分だけ離れた位置をカメラ座標とする
-        debugTranslation_ = {
-            offsetTarget.x + forward.x * debugDistance_,
-            offsetTarget.y + forward.y * debugDistance_,
-            offsetTarget.z + forward.z * debugDistance_,
-        };
+        debugTranslation_ = offsetTarget + forward * debugDistance_;
 
         // デバッグカメラ用Transformを作成する
         Transform transform{};
-        transform.scale = { 1, 1, 1 };
+        transform.scale = {1.0f, 1.0f, 1.0f};
         transform.rotate = debugRotation_;
         transform.translate = debugTranslation_;
 
-        // 計算したTransformを通常カメラ処理へ渡しビュー行列を更新する
-        UpdateCamera(transform);
+        // カメラに使うMatrix群の更新
+        UpdateMatrices(transform);
     }
 
-    // デバッグ用操作
-    void Camera::DebugMove() {
+    void DebugCamera::DebugMove() {
         // WASDキーで注視点を平行移動する
         if (keyboard_->PushKey(DIK_W)) debugScreenOffset_.y += debugMoveSpeed_;
         if (keyboard_->PushKey(DIK_S)) debugScreenOffset_.y -= debugMoveSpeed_;
@@ -141,7 +77,7 @@ namespace Kizuna {
         }
     }
 
-    void Camera::DebugZoom() {
+    void DebugCamera::DebugZoom() {
         // マウスホイールでカメラ距離を変更する
         int wheel = mouse_->GetWheelDelta();
         if (wheel != 0) {
@@ -164,7 +100,7 @@ namespace Kizuna {
         debugDistance_ = std::clamp(debugDistance_, minDistance, maxDistance);
     }
 
-    void Camera::DebugRotate() {
+    void DebugCamera::DebugRotate() {
         // マウスドラッグで視点を回転させる
         if (mouse_->PushLeft()) {
             debugRotation_.y += mouse_->GetDeltaX() * debugRotateSpeed_;

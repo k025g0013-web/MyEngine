@@ -1,5 +1,5 @@
 #include "KizunaEngine.h"
-#include "RenderCore/Camera.h"
+#include "RenderCore/Camera/CameraManager.h"
 #include "RenderCore/Lighting.h"
 #include "Object/Object3D.h"
 #include "Renderer/Sprite.h"
@@ -72,7 +72,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Lighting lighting;
 	lighting.Initialize(device);
 
-	Camera camera;
+	CameraManager camera;
 	camera.Initialize(float(kClientWidth), float(kClientHeight), engine->GetKeyboard(), engine->GetMouse(), engine->GetGamePad());
 	Transform cameraTransform = { .scale{1.0f,1.0f,1.0f}, .rotate{0.3f,0.0f,0.0f}, .translate{0.0f,1.5f,-5.0f} };
 
@@ -97,7 +97,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #ifdef _DEBUG
 		if (engine->GetKeyboard()->TriggerKey(DIK_Q) ||
 			engine->GetGamePad()->TriggerButton(XINPUT_GAMEPAD_A)) {
-			camera.ToggleMode();
+			camera.ToggleCamera();
 		}
 #endif
 
@@ -121,10 +121,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		ImGui::Begin("Setting");
 		// デバッグカメラへの切り替え方法を解説
-		if (camera.GetMode() == Camera::Mode::Normal) {
-			ImGui::Text("Camera Mode: NORMAL (Q Key to Toggle)");
-		} else {
+		if (camera.IsDebugCamera()) {
 			ImGui::Text("Camera Mode: DEBUG [WASD / Mouse] (Q Key to Toggle)");
+		} else {
+			ImGui::Text("Camera Mode: NORMAL (Q Key to Toggle)");
 		}
 		ImGui::Separator();
 
