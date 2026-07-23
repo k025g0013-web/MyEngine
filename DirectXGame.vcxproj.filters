@@ -88,6 +88,9 @@
     <Filter Include="Source\RenderCore\Camera">
       <UniqueIdentifier>{ef1540e5-6f0e-4146-bc26-3f1951ec2a0c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\RenderCore\Camera\CameraState">
+      <UniqueIdentifier>{3bdf38db-1e63-4018-8fa7-f30b5b7f72f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externals\imgui\imgui_widgets.cpp">
@@ -222,6 +225,12 @@
     </ClCompile>
     <ClCompile Include="Source\RenderCore\Camera\NormalCamera.cpp">
       <Filter>Source\RenderCore\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderCore\Camera\CameraState\NormalCameraState.cpp">
+      <Filter>Source\RenderCore\Camera\CameraState</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderCore\Camera\CameraState\DebugCameraState.cpp">
+      <Filter>Source\RenderCore\Camera\CameraState</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -448,6 +457,15 @@
     </ClInclude>
     <ClInclude Include="Source\RenderCore\Camera\NormalCamera.h">
       <Filter>Source\RenderCore\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderCore\Camera\CameraState\CameraState.h">
+      <Filter>Source\RenderCore\Camera\CameraState</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderCore\Camera\CameraState\NormalCameraState.h">
+      <Filter>Source\RenderCore\Camera\CameraState</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderCore\Camera\CameraState\DebugCameraState.h">
+      <Filter>Source\RenderCore\Camera\CameraState</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "CameraState/NormalCameraState.h"
+
 namespace Kizuna {
     void CameraManager::Initialize(float width, float height, Keyboard *keyboard, Mouse *mouse, GamePad *gamePad) {
         // 通常カメラの初期化
@@ -16,24 +18,21 @@ namespace Kizuna {
         debugCamera_.SetScreenSize(width, height);
         debugCamera_.SetInputDevice(keyboard, mouse, gamePad);
 
-        // 最初は通常カメラ
+        static NormalCameraState normalState;
+
+        state_ = &normalState;
+
+        // 初期状態は通常カメラ
         currentCamera_ = &normalCamera_;
     }
 
     void CameraManager::Update(const Transform &transform) {
         // 現在使用中のカメラを更新
-        currentCamera_->Update(transform);
+        state_->Update(*this, transform);
     }
 
-    void CameraManager::SetNormalCamera() { currentCamera_ = &normalCamera_; }
-
-    void CameraManager::SetDebugCamera() { currentCamera_ = &debugCamera_; }
-
     void CameraManager::ToggleCamera() {
-        if (currentCamera_ == &normalCamera_) {
-            currentCamera_ = &debugCamera_;
-        } else {
-            currentCamera_ = &normalCamera_;
-        }
+        // 使用するカメラを切り替える
+        state_->Toggle(*this);
     }
 }

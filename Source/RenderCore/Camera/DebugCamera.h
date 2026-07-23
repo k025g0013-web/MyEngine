@@ -8,18 +8,18 @@
 
 namespace Kizuna {
     /// <summary>
-    /// シーンを描画するためのカメラを管理するクラス
+    /// デバッグ操作用のカメラクラス
     /// </summary>
     /// <remarks>
-    /// 通常カメラとデバッグカメラの2種類を切り替えて使用できる。
-    /// ビュー行列・射影行列の生成および、入力デバイスによる
-    /// デバッグ操作を担当する。
+    /// キーボード・マウス・ゲームパッドの入力を用いて
+    /// カメラを自由に移動・回転・ズームさせる。
+    /// 更新したTransformからビュー行列を生成する。
     /// </remarks>
     class DebugCamera : public Camera {
     public:
 
         /// <summary>
-        /// デバッグカメラを初期化する
+        /// デバッグ操作に使用する入力デバイスを設定する
         /// </summary>
         /// <param name="keyboard">キーボード入力</param>
         /// <param name="mouse">マウス入力</param>
@@ -37,17 +37,17 @@ namespace Kizuna {
 
     private:
         /// <summary>
-        /// デバッグカメラの平行移動
+        /// 注視点を平行移動する
         /// </summary>
         void DebugMove();
 
         /// <summary>
-        /// デバッグカメラのズーム
+        /// カメラとの距離を変更する
         /// </summary>
         void DebugZoom();
 
         /// <summary>
-        /// デバッグカメラの回転
+        /// カメラの向きを回転させる
         /// </summary>
         void DebugRotate();
 
