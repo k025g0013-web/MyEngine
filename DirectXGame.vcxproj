@@ -148,7 +148,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\Input\Mouse.cpp" />
     <ClCompile Include="Source\KizunaEngine.cpp" />
     <ClCompile Include="Source\Math\Easing.cpp" />
+    <ClCompile Include="Source\Object\ModelObject.cpp" />
     <ClCompile Include="Source\Object\Object3D.cpp" />
+    <ClCompile Include="Source\Object\SphereObject.cpp" />
+    <ClCompile Include="Source\Object\TriangleObject.cpp" />
     <ClCompile Include="Source\RenderCore\Camera\Camera.cpp" />
     <ClCompile Include="Source\RenderCore\Camera\CameraManager.cpp" />
     <ClCompile Include="Source\RenderCore\Camera\CameraState\DebugCameraState.cpp" />
@@ -266,7 +269,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Math\Matrix.h" />
     <ClInclude Include="Source\Math\Transform.h" />
     <ClInclude Include="Source\Math\Vector.h" />
+    <ClInclude Include="Source\Object\ModelObject.h" />
     <ClInclude Include="Source\Object\Object3D.h" />
+    <ClInclude Include="Source\Object\SphereObject.h" />
+    <ClInclude Include="Source\Object\TriangleObject.h" />
     <ClInclude Include="Source\RenderCore\Camera\Camera.h" />
     <ClInclude Include="Source\RenderCore\Camera\CameraManager.h" />
     <ClInclude Include="Source\RenderCore\Camera\CameraState\CameraState.h" />

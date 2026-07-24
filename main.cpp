@@ -6,6 +6,9 @@
 #include "Renderer/ThroughWallRenderer.h"
 #include "External/ImGuiManager.h"
 
+#include "Object/SphereObject.h"
+#include "Object/ModelObject.h"
+
 #include <cstdint>
 
 using namespace Kizuna;
@@ -36,17 +39,21 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// データ生成・初期リソースのセットアップ
 	//-------------------------------------------------------------------------
 	// 球（壁越し描画の検証用ターゲット）
-	Object3D sphere[2]{};
-	sphere[0].CreateSphere(device, kSubdivision, 0xFFFFFFFF, true);
-	sphere[1].CreateSphere(device, kSubdivision, 0xFFFFFFFF, true);
+	SphereObject sphere[2]{
+		SphereObject(kSubdivision), 
+		SphereObject(kSubdivision)
+	};
+	sphere[0].Create(device, 0xFFFFFFFF, true);
+	sphere[1].Create(device, 0xFFFFFFFF, true);
 
 	// 天球（背景として最背面に描画されるドーム）
-	Object3D skydome;
-	skydome.CreateModel(device, "skydome", 0xFFFFFFFF, false);
+	ModelObject skydome("skydome");
+	skydome.Create(device, 0xFFFFFFFF, false);
 
 	// 箱（障害物。この箱の裏に球が隠れた際に「壁越し描画」を発生させるためのもの）
-	Object3D cube;
-	cube.CreateModel(device, "cube", 0xFFFFFFFF, true);
+	ModelObject cube("cube");
+	cube.Create(device, 0xFFFFFFFF, true);
+
 
 	// 各リソース用Transform
 	Transform transform[5]{};
@@ -214,7 +221,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			// 独自のパイプラインを適用してレンダリングする
 			engine->SetPipeline(PipelineType::Object3dThroughWall);
 
-			throughWallRenderer.Draw(commandList, uvTexture);
+			throughWallRenderer.Draw(commandList);
 
 		}
 
