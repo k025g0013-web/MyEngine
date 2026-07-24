@@ -21,7 +21,7 @@ namespace Kizuna {
     }
 
     void ThroughWallRenderer::Draw(
-        ID3D12GraphicsCommandList *commandList, TextureData &texture) {
+        ID3D12GraphicsCommandList *commandList) {
         // 登録済みの全オブジェクトを壁越し描画する
         for (auto &data : objects_) {
 
@@ -39,7 +39,7 @@ namespace Kizuna {
             material->style = static_cast<int32_t>(data.style);
 
             // 壁越し描画専用パイプラインで描画する
-            data.object->DrawThroughWall(commandList, texture);
+            data.object->DrawThroughWall(commandList);
         }
     }
 }

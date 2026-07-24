@@ -74,14 +74,11 @@ struct TextureData;
         /// <param name="commandList">
         /// 描画コマンドリスト
         /// </param>
-        /// <param name="texture">
-        /// 描画に使用するテクスチャ
-        /// </param>
         /// <remarks>
         /// 登録済みオブジェクトへ壁越し用マテリアルを設定し、
         /// 壁越し描画専用の描画処理を実行する。
         /// </remarks>
-        void Draw(ID3D12GraphicsCommandList *commandList, TextureData &texture);
+        void Draw(ID3D12GraphicsCommandList *commandList);
 
         ThroughWallObject &GetObject(size_t index) {
             return objects_[index];
