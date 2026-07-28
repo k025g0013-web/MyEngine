@@ -117,7 +117,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 
 		ImGui::Begin("Setting");
-
 		static int currentObjectIndex = 0;
 		static int createType = 0;
 
