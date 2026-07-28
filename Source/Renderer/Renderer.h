@@ -81,6 +81,18 @@ namespace Kizuna {
 		);
 
 		/// <summary>
+		/// 四角形メッシュの頂点データを生成する
+		/// </summary>
+		/// <param name="vertices">生成先の頂点データ</param>
+		/// <param name="center">中央座標</param>
+		/// <param name="width">幅</param>
+		/// <param name="depth">深さ</param>
+		void CreatePlane(
+			std::vector<VertexData> &vertices,
+			Vector3 center, float width, float depth
+		);
+
+		/// <summary>
 		/// 球体メッシュの頂点データとインデックスデータを生成する
 		/// </summary>
 		/// <param name="vertices">生成先の頂点配列</param>

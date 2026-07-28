@@ -29,6 +29,15 @@ namespace Kizuna {
 		// GPUへ行列を書き込む
 		transformationMatrixData_->World = worldMatrix;
 		transformationMatrixData_->WVP = wvp;
+
+		// UV座標の変換行列を生成する
+		Matrix4x4 uvTransformMatrix{};
+		uvTransformMatrix = Math::MakeScaleMatrix(uvTransform_.scale);												// UVの拡大縮小
+		uvTransformMatrix = Math::Multiply(uvTransformMatrix, Math::MakeRotateZMatrix(uvTransform_.rotate.z));		// UVの回転
+		uvTransformMatrix = Math::Multiply(uvTransformMatrix, Math::MakeTranslateMatrix(uvTransform_.translate));	// UVの平行移動
+
+		// 更新したUV変換行列をマテリアルへ反映する
+		material_.GetMaterialData()->uvTransform = uvTransformMatrix;
 	}
 
 	void Object3D::Draw(

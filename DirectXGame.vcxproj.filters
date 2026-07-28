@@ -241,6 +241,9 @@
     <ClCompile Include="Source\Object\TriangleObject.cpp">
       <Filter>Source\Object</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Object\PlaneObject.cpp">
+      <Filter>Source\Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="exclusion.dic" />
@@ -483,6 +486,9 @@
       <Filter>Source\Object</Filter>
     </ClInclude>
     <ClInclude Include="Source\Object\TriangleObject.h">
+      <Filter>Source\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\PlaneObject.h">
       <Filter>Source\Object</Filter>
     </ClInclude>
   </ItemGroup>

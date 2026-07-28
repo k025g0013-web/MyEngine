@@ -67,10 +67,28 @@ namespace Kizuna {
             ID3D12GraphicsCommandList *commandList);
 
         /// <summary>
+        /// マテリアルを取得する
+        /// </summary>
+        /// <returns>マテリアル</returns>
+        Material &GetMaterial() { return material_; }
+
+        /// <summary>
         /// 壁越し描画用マテリアルを取得する
         /// </summary>
         /// <returns>壁越し描画用マテリアル</returns>
         ThroughWallMaterial &GetThroughWallMaterial() { return throughWallMaterial_; }
+
+        /// <summary>
+        /// オブジェクト用Transformを取得する
+        /// </summary>
+        /// <returns>オブジェクト用Transform</returns>
+        Transform &GetTransform() { return transform_; }
+
+        /// <summary>
+        /// UV座標用Transformを取得する
+        /// </summary>
+        /// <returns>UV座標用Transform</returns>
+        Transform &GetUVTransform() { return uvTransform_; }
 
     protected:
         /// 派生クラスから呼ぶ共通初期化
@@ -107,5 +125,15 @@ namespace Kizuna {
 
         // 描画方法を切り替えるためのレイヤ
         RenderLayer renderLayer_ = RenderLayer::kDefault;
+
+        // オブジェクト用Transform
+        Transform transform_{
+            {1,1,1}, {0,0,0}, {0,0,0}
+        };
+
+        // UV座標用Transform
+        Transform uvTransform_{
+            {1,1,1}, {0,0,0}, {0,0,0}
+        };
     };
 }

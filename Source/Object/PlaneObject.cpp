@@ -1,10 +1,10 @@
-#include "TriangleObject.h"
+#include "PlaneObject.h"
 
 namespace Kizuna {
-	void TriangleObject::Create(
+	void PlaneObject::Create(
 		ID3D12Device *device, uint32_t color, bool enableLighting) {
 		// 頂点データを生成する
-		renderer_.CreateTriangle(vertices_, wigth_, height_, right_);
+		renderer_.CreatePlane(vertices_, center_, width_, depth_);
 
 		// メッシュを生成する
 		mesh_.Create(device, vertices_);
