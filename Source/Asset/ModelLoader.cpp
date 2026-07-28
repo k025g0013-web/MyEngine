@@ -5,32 +5,22 @@
 #include <cassert>
 
 namespace Kizuna {
-	MaterialSource ModelLoader::LoadMaterialTemplateFile(const std::string &modelDirectory, const std::string &fileName) {
-		//=================================================================
-		// 使用する変数
-		//=================================================================
+	MaterialSource ModelLoader::LoadMaterialTemplateFile(const std::string &directoryPath, const std::string &fileName) {
+		// 中で必要となる変数の宣言
+		MaterialSource materialData;	// 構築するMaterialData
+		std::string line;	// ファイルから読んだ1行を格納するもの
 
-		// 読み込んだマテリアル情報
-		MaterialSource materialData;
+		// ファイルを開く
+		std::ifstream file(directoryPath + "/" + fileName);
 
-		// ファイルから読み込んだ1行
-		std::string line;
+		// mtlファイルが開けなかった場合はデフォルトマテリアルを返す
+		if (!file.is_open()) {
+			materialData.textureFilePath = "";
+			return materialData;
+		}
 
-		//=================================================================
-		// mtlファイルを開く
-		//=================================================================
-
-		std::ifstream file(modelDirectory + "/" + fileName);
-
-		// ファイルが開けなければ停止
-		assert(file.is_open());
-
-		//=================================================================
-		// mtlファイルを解析
-		//=================================================================
-
+		// 実際にファイルを読み、MaterialDataを構築していく
 		while (std::getline(file, line)) {
-
 			// 行の識別子
 			std::string identifier;
 
@@ -39,13 +29,11 @@ namespace Kizuna {
 
 			// テクスチャファイル名
 			if (identifier == "map_Kd") {
-
 				std::string textureFileName;
 				s >> textureFileName;
 
 				// モデルフォルダと結合してフルパスを作成
-				materialData.textureFilePath =
-					modelDirectory + "/" + textureFileName;
+				materialData.textureFilePath = directoryPath + "/" + textureFileName;
 			}
 		}
 
@@ -54,59 +42,31 @@ namespace Kizuna {
 	}
 
 	ModelData ModelLoader::LoadObjFile(const std::string &modelName) {
-
-		//=================================================================
 		// 読み込み対象のパス生成
-		//=================================================================
-
 		std::string modelDirectory = "Resources/Models/" + modelName;
 		std::string objFilePath = modelDirectory + "/" + modelName + ".obj";
 
-		//=================================================================
-		// 使用する変数
-		//=================================================================
+		// 中で必要となる変数の宣言
+		ModelData modelData;	// 最終的に返すモデルデータ
+		std::vector<Vector4> positions;	// 頂点位置
+		std::vector<Vector3> normals;	// 法線
+		std::vector<Vector2> texcoords;	// テクスチャ座標
+		std::string line;	// ファイルから読んだ1行を格納するもの
 
-		// 最終的に返すモデルデータ
-		ModelData modelData;
-
-		// 頂点位置
-		std::vector<Vector4> positions;
-
-		// 法線
-		std::vector<Vector3> normals;
-
-		// UV座標
-		std::vector<Vector2> texcoords;
-
-		// 読み込んだ1行
-		std::string line;
-
-		//=================================================================
-		// objファイルを開く
-		//=================================================================
-
+		// ファイルを開く
 		std::ifstream file(objFilePath);
 
 		// ファイルが開けなければ停止
 		assert(file.is_open());
 
-		//=================================================================
-		// objファイル解析
-		//=================================================================
-
+		// 実際にファイルを読み、ModelDataを構築していく
 		while (std::getline(file, line)) {
-
 			std::string identifier;
 			std::istringstream s(line);
-
 			// 行頭識別子を取得
 			s >> identifier;
 
-			//-------------------------------------------------------------
-			// 頂点座標
-			//-------------------------------------------------------------
-			if (identifier == "v") {
-
+			if (identifier == "v") {		// 位置 
 				Vector4 position;
 				s >> position.x >> position.y >> position.z;
 
@@ -115,27 +75,17 @@ namespace Kizuna {
 				position.w = 1.0f;
 
 				positions.push_back(position);
-			}
 
-			//-------------------------------------------------------------
-			// UV座標
-			//-------------------------------------------------------------
-			else if (identifier == "vt") {
-
-				Vector2 texcoord;
+			} else if (identifier == "vt") {	// テクスチャ座標
+				Vector2 texcoord{};
 				s >> texcoord.x >> texcoord.y;
 
-				// DirectX用に上下反転
+				// DirectX用に上下反転（0.0 〜 1.0 の範囲内のみ反転）
 				texcoord.y = 1.0f - texcoord.y;
 
 				texcoords.push_back(texcoord);
-			}
 
-			//-------------------------------------------------------------
-			// 法線
-			//-------------------------------------------------------------
-			else if (identifier == "vn") {
-
+			} else if (identifier == "vn") {	// 法線
 				Vector3 normal;
 				s >> normal.x >> normal.y >> normal.z;
 
@@ -143,71 +93,51 @@ namespace Kizuna {
 				normal.x *= -1.0f;
 
 				normals.push_back(normal);
-			}
 
-			//-------------------------------------------------------------
-			// 面情報（三角形のみ対応）
-			//-------------------------------------------------------------
-			else if (identifier == "f") {
+			} else if (identifier == "f") {	// 面
+				std::vector<VertexData> faceVertices;
+				std::string vertexDefinition;
 
-				// 三角形1枚分の頂点
-				VertexData triangle[3];
-
-				for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
-
-					std::string vertexDefinition;
-					s >> vertexDefinition;
-
-					// 「位置/UV/法線」を分割
+				while (s >> vertexDefinition) {
 					std::istringstream v(vertexDefinition);
+					std::string indexStr;
 
-					uint32_t elementIndices[3];
+					int32_t posIndex = 0;
+					int32_t texIndex = 0;
+					int32_t normIndex = 0;
 
-					for (int32_t element = 0; element < 3; ++element) {
+					if (std::getline(v, indexStr, '/') && !indexStr.empty()) posIndex = std::stoi(indexStr);
+					if (std::getline(v, indexStr, '/') && !indexStr.empty()) texIndex = std::stoi(indexStr);
+					if (std::getline(v, indexStr, '/') && !indexStr.empty()) normIndex = std::stoi(indexStr);
 
-						std::string index;
+					// インデックスから実データを参照（未定義の場合はデフォルト値）
+					Vector4 pos = (posIndex > 0 && posIndex <= positions.size()) ? positions[posIndex - 1] : Vector4{ 0,0,0,1 };
+					Vector2 uv = (texIndex > 0 && texIndex <= texcoords.size()) ? texcoords[texIndex - 1] : Vector2{ 0,0 };
+					Vector3 norm = (normIndex > 0 && normIndex <= normals.size()) ? normals[normIndex - 1] : Vector3{ 0,1,0 };
 
-						// '/'区切りで取得
-						std::getline(v, index, '/');
-
-						elementIndices[element] = std::stoi(index);
-					}
-
-					// インデックスから各要素を取得
-					Vector4 position = positions[elementIndices[0] - 1];
-					Vector2 texcoord = texcoords[elementIndices[1] - 1];
-					Vector3 normal = normals[elementIndices[2] - 1];
-
-					VertexData vertex = { position, texcoord, normal };
-
-					// 頂点リストへ追加
-					modelData.vertices.push_back(vertex);
-
-					triangle[faceVertex] = vertex;
+					faceVertices.push_back({ pos, uv, norm });
 				}
 
-				// 頂点順を反転して表裏を合わせる
-				modelData.vertices.push_back(triangle[2]);
-				modelData.vertices.push_back(triangle[1]);
-				modelData.vertices.push_back(triangle[0]);
-			}
-
-			//-------------------------------------------------------------
-			// マテリアルファイル
-			//-------------------------------------------------------------
-			else if (identifier == "mtllib") {
-
-				// mtlファイル名
-				std::string materialFileName;
+				// 三角形化して時計回り（左手系）に格納
+				if (faceVertices.size() >= 3) {
+					for (size_t i = 1; i + 1 < faceVertices.size(); ++i) {
+						// 表面を向けるため反転順序で追加
+						modelData.vertices.push_back(faceVertices[0]);
+						modelData.vertices.push_back(faceVertices[i + 1]);
+						modelData.vertices.push_back(faceVertices[i]);
+					}
+				}
+			} else if (identifier == "mtllib") {	// Material読み込み
+				// materialTemplateLibraryファイルの名前を取得する
+				std::string  materialFileName;
 				s >> materialFileName;
 
-				// マテリアル情報を読み込む
-				modelData.material =
-					LoadMaterialTemplateFile(modelDirectory, materialFileName);
+				// 基本的にobjファイルと同一階層にmtlは存在させるのでディレクトリ名とファイル名を探す
+				modelData.material = LoadMaterialTemplateFile(modelDirectory, materialFileName);
 			}
 		}
 
-		// 読み込んだモデルを返す
+		// modelDataを返す
 		return modelData;
 	}
 }

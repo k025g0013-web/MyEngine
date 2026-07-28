@@ -10,7 +10,7 @@ namespace Kizuna {
     public:
         explicit TriangleObject(
             const Vector3 &left, const Vector3 &top, const Vector3 &right)
-            : left_(left), top_(top), right_(right) {}
+            : wigth_(left), height_(top), right_(right) {}
 
         /// <summary>
         /// 平面三角形を生成する
@@ -19,18 +19,12 @@ namespace Kizuna {
         /// <param name="color">描画色</param>
         void Create(ID3D12Device *device, uint32_t color, bool enableLighting) override;
 
-        void CreatePlaneTriangle(
-            ID3D12Device *device,
-            Vector3 left, Vector3 top, Vector3 right,
-            uint32_t color, bool enableLighting
-        );
-
     private:
         /// 左頂点
-        Vector3 left_;
+        Vector3 wigth_;
       
         /// 上頂点
-        Vector3 top_;
+        Vector3 height_;
       
         /// 右頂点
         Vector3 right_;

@@ -6,10 +6,13 @@
 #include "Renderer/ThroughWallRenderer.h"
 #include "External/ImGuiManager.h"
 
+#include "Object/TriangleObject.h"
+#include "Object/PlaneObject.h"
 #include "Object/SphereObject.h"
 #include "Object/ModelObject.h"
 
 #include <cstdint>
+#include <algorithm>
 
 using namespace Kizuna;
 
@@ -38,42 +41,33 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//-------------------------------------------------------------------------
 	// データ生成・初期リソースのセットアップ
 	//-------------------------------------------------------------------------
-	// 球（壁越し描画の検証用ターゲット）
-	SphereObject sphere[2]{
-		SphereObject(kSubdivision), 
-		SphereObject(kSubdivision)
-	};
-	sphere[0].Create(device, 0xFFFFFFFF, true);
-	sphere[1].Create(device, 0xFFFFFFFF, true);
+	// 複数モデルのリソース初期化
+	std::vector<std::unique_ptr<Object3D>> models;
+	std::vector<Transform> transforms;
 
-	// 天球（背景として最背面に描画されるドーム）
-	ModelObject skydome("skydome");
-	skydome.Create(device, 0xFFFFFFFF, false);
+	// 複数スプライトのリソース初期化
+	std::vector<std::unique_ptr<Sprite>> sprites;
+	std::vector<int> textureIndices;
 
-	// 箱（障害物。この箱の裏に球が隠れた際に「壁越し描画」を発生させるためのもの）
-	ModelObject cube("cube");
-	cube.Create(device, 0xFFFFFFFF, true);
+	{	/// 初期オブジェクト（Sphere）
+		auto object = std::make_unique<SphereObject>(kSubdivision);
+		object->Create(device, 0xFFFFFFFF, true);
 
+		models.push_back(std::move(object));
 
-	// 各リソース用Transform
-	Transform transform[5]{};
-	transform[0] = { .scale{ 0.5f, 0.5f, 0.5f }, .rotate{}, .translate{0, 0, 0} };	// sphere[0]
-	transform[1] = { .scale{ 0.5f, 0.5f, 0.5f }, .rotate{}, .translate{0, 0, 1} };	// sphere[1]
-	transform[2] = { .scale{ 1.0f, 1.0f, 1.0f }, .rotate{}, .translate{0, 0, 0} };	// skydome
-	transform[3] = { .scale{ 1.0f, 1.0f, 1.0f }, .rotate{}, .translate{0, 0,-2} };	// cube
-
-	// 壁越し描画の対象として2つの球を登録
-	ThroughWallRenderer throughWallRenderer;
-	throughWallRenderer.AddObject(&sphere[0], 0xFFFFFFFF, Style::Solid);
-	throughWallRenderer.AddObject(&sphere[1], 0xFFFFFFFF, Style::Solid);
-
-	// UI・2D表示用のスプライト
-	Sprite sprite;
-	sprite.Initialize(device, 0.0f, 0.0f, 640.0f, 360.0f, 0xFFFFFFFF);
+		transforms.push_back({
+			.scale		{1.0f, 1.0f, 1.0f},
+			.rotate		{0.0f, 0.0f, 0.0f},
+			.translate	{0.0f, 0.0f, 0.0f},
+			});
+	}
 
 	// テクスチャの読み込み
-	TextureData uvTexture = engine->GetTextureManager()->LoadTexture(commandList, "Resources/uvChecker.png");
-	TextureData cubeTexture = engine->GetTextureManager()->LoadTexture(commandList, "Resources/cube.jpg");
+	TextureData textures[4];
+	textures[0] = engine->GetTextureManager()->LoadTexture(commandList, "resources/uvChecker.png");
+	textures[1] = engine->GetTextureManager()->LoadTexture(commandList, "resources/monsterBall.png");
+	textures[2] = engine->GetTextureManager()->LoadTexture(commandList, "resources/cube.jpg");
+	textures[3] = engine->GetTextureManager()->LoadTexture(commandList, "resources/axis.jpg");
 
 	// ライト/カメラの初期化
 	Lighting lighting;
@@ -112,13 +106,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		camera.Update(cameraTransform);
 
 		// 各3Dモデルのワールド行列更新
-		sphere[0].Update(&camera, transform[0]);
-		sphere[1].Update(&camera, transform[1]);
-		skydome.Update(&camera, transform[2]);
-		cube.Update(&camera, transform[3]);
-
-		// スプライト（UI）の画面サイズ追従更新
-		sprite.Update(kClientWidth, kClientHeight);
+		for (size_t i = 0; i < models.size(); i++) {
+			models[i]->Update(&camera, transforms[i]);
+		}
 
 		// デバッグ用メニュー（ImGui）のレンダリング制御
 #ifdef USE_IMGUI
@@ -127,75 +117,241 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 
 		ImGui::Begin("Setting");
-		// デバッグカメラへの切り替え方法を解説
-		ImGui::Text("Camera Mode : %s (Q:KeyBoad or A:GamePad to Toggle)", camera.GetStateName());
-		ImGui::Separator();
+		static int currentObjectIndex = 0;
+		static int createType = 0;
 
-		const char *styleNames[] =
-		{
-			"Solid",
-			"Dot",
-			"Stripe"
+		const char *createItems[] = {
+			"Triangle",
+			"Plane",
+			"Cube",
+			"Sphere",
+			"Teapot",
 		};
 
-		// Sphere0
-		ImGui::DragFloat3("Sphere0 Position", &transform[0].translate.x, 0.1f);
+		// 作成するモデル種類
+		ImGui::Combo("Model", &createType,
+			createItems, IM_ARRAYSIZE(createItems));
 
-		// 中央に配置された球のRotateを操作
-		ImGui::SliderAngle("SphereRotateX", &transform[0].rotate.x);
-		ImGui::SliderAngle("SphereRotateY", &transform[0].rotate.y);
-		ImGui::SliderAngle("SphereRotateZ", &transform[0].rotate.z);
+		// Create
+		if (ImGui::Button("Create Model")) {
+			std::unique_ptr<Object3D> object;
 
-		ImGui::ColorEdit4("Sphere0", &throughWallRenderer.GetObject(0).color.x);
+			switch (createType) {
+			case 0:	// Triangle
+				object = std::make_unique<TriangleObject>(
+					Vector3{ -0.5f,-0.5f,0.0f },
+					Vector3{ 0.0f, 0.5f,0.0f },
+					Vector3{ 0.5f,-0.5f,0.0f });
+				break;
 
-		int style0 = static_cast<int>(throughWallRenderer.GetObject(0).style);
-		if (ImGui::Combo("Sphere0 Style", &style0, styleNames, IM_ARRAYSIZE(styleNames))) {
-			throughWallRenderer.GetObject(0).style = static_cast<Style>(style0);
+			case 1:	// Plane
+				object = std::make_unique<PlaneObject>(
+					Vector3{ 0,0,0 }, 1.0f, 1.0f);
+				break;
+
+			case 2:	// Cube
+				object = std::make_unique<ModelObject>("cube");
+				break;
+
+			case 3:	// Sphere
+				object = std::make_unique<SphereObject>(kSubdivision);
+				break;
+
+			case 4: // Teapot
+				object = std::make_unique<ModelObject>("teapot");
+				break;
+			}
+
+			object->Create(device, 0xFFFFFFFF, true);
+
+			models.push_back(std::move(object));
+
+			transforms.push_back({
+				{1,1,1}, {0,0,0}, {0,0,0}
+				});
+
+			currentObjectIndex = static_cast<int>(models.size()) - 1;
 		}
 
-		ImGui::Separator();
+		// Object
+		if (ImGui::BeginListBox("Objects")) {
+			for (int i = 0; i < static_cast<int>(models.size()); i++) {
+				char label[32];
+				sprintf_s(label, "Object %d", i);
 
-		// Sphere1
-		ImGui::DragFloat3("Sphere1 Position", &transform[1].translate.x, 0.1f);
+				bool selected =
+					(currentObjectIndex == i);
 
-		// 中央に配置された球のTranslateを操作
-		ImGui::SliderAngle("SphereTranslateX", &transform[0].translate.x);
-		ImGui::SliderAngle("SphereTranslateY", &transform[0].translate.y);
-		ImGui::SliderAngle("SphereTranslateZ", &transform[0].translate.z);
+				if (ImGui::Selectable(label, selected)) {
+					currentObjectIndex = i;
+				}
+			}
 
-		ImGui::ColorEdit4("Sphere1", &throughWallRenderer.GetObject(1).color.x);
-
-		int style1 = static_cast<int>(throughWallRenderer.GetObject(1).style);
-		if (ImGui::Combo("Sphere1 Style", &style1, styleNames, IM_ARRAYSIZE(styleNames))) {
-			throughWallRenderer.GetObject(1).style = static_cast<Style>(style1);
+			ImGui::EndListBox();
 		}
 
-		ImGui::Separator();
+		// 選択中オブジェクト
+		//
+		if (!models.empty()) {
 
-		// スプライト（UI）の色や座標を変更
-		ImGui::ColorEdit4("colorSprite", &sprite.GetMaterial().GetMaterialData()->color.x);
-		ImGui::SliderFloat3("translateSprite", &sprite.GetTransform().translate.x, 0.0f, 500.0f);
+			currentObjectIndex = std::clamp(currentObjectIndex, 0, static_cast<int>(models.size()) - 1);
 
-		// スプライト（UI）のUVをTRSを操作
-		ImGui::DragFloat2("UVTransform", &sprite.GetUVTransform().translate.x, 0.01f, -10.0f, 10.0f);
-		ImGui::DragFloat2("UVScale", &sprite.GetUVTransform().scale.x, 0.01f, -10.0f, 10.0f);
-		ImGui::SliderAngle("UVRotate", &sprite.GetUVTransform().rotate.z);
-		ImGui::Separator();
+			// Object
+			if (ImGui::CollapsingHeader("Object", ImGuiTreeNodeFlags_DefaultOpen)) {
+				Transform &transform = transforms[currentObjectIndex];
 
-		// Lightingの種類をComboによって変更
-		Lighting::LightingType currentType = lighting.GetLightType();
-		const char *lightTypeNames[] = { "None", "Lambert", "Half-Lambert" };
-		int currentItem = static_cast<int>(currentType);
-		if (ImGui::Combo("Light Type", &currentItem, lightTypeNames, IM_ARRAYSIZE(lightTypeNames))) {
-			lighting.SetLightType(static_cast<Lighting::LightingType>(currentItem));
+				// オブジェクト本体のTransformの調整
+				ImGui::DragFloat3("Translate", &transform.translate.x, 0.1f);
+				ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
+				ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);
+
+				// Delete
+				if (models.size() > 1) {
+					if (ImGui::Button("Delete")) {
+
+						models.erase(
+							models.begin() + currentObjectIndex
+						);
+
+						transforms.erase(
+							transforms.begin() + currentObjectIndex
+						);
+
+						if (!models.empty()) {
+
+							currentObjectIndex =
+								(std::min)(
+									currentObjectIndex,
+									static_cast<int>(models.size()) - 1
+									);
+						} else {
+
+							currentObjectIndex = 0;
+						}
+					}
+				} else {
+					ImGui::BeginDisabled();
+					ImGui::Button("Delete");
+					ImGui::EndDisabled();
+				}
+
+				if (ImGui::CollapsingHeader(
+					"Material",
+					ImGuiTreeNodeFlags_DefaultOpen)) {
+					auto &object = models[currentObjectIndex];
+					auto &material = object->GetMaterial();
+
+					// 色
+					ImGui::ColorEdit4("Color", &material.GetMaterialData()->color.x);
+
+					// UV
+					Transform &uv = object->GetUVTransform();
+					ImGui::DragFloat2("UV Translate", &uv.translate.x, 0.01f);
+					ImGui::SliderAngle("UV Rotate", &uv.rotate.z);
+					ImGui::DragFloat2("UV Scale", &uv.scale.x, 0.01f);
+
+					// Lightingの種類をComboによって変更
+					Lighting::LightingType currentType = lighting.GetLightType();
+					const char *lightTypeNames[] = { "None", "Lambert", "Half-Lambert" };
+					int currentItem = static_cast<int>(currentType);
+					if (ImGui::Combo("Light Type", &currentItem, lightTypeNames, IM_ARRAYSIZE(lightTypeNames))) {
+						lighting.SetLightType(static_cast<Lighting::LightingType>(currentItem));
+					}
+				}
+			}
 		}
 
-		// Lightの色/角度/発光量を操作
-		ImGui::ColorEdit4("LightColor", &lighting.GetLightingData()->color.x);
-		ImGui::SliderFloat3("LightDirection", &lighting.GetLightingData()->direction.x, -1.0f, 1.0f);
-		lighting.Update();	// 角度操作によって起こるズレを即座に修正
-		ImGui::DragFloat("Intensity", &lighting.GetLightingData()->intensity, 0.05f, 0.0f, 10.0f);
-		ImGui::Separator();
+		// Light
+		if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::ColorEdit4("LightColor", &lighting.GetLightingData()->color.x);
+			ImGui::SliderFloat3("Direction", &lighting.GetLightingData()->direction.x, -1.0f, 1.0f);
+			ImGui::DragFloat("Intensity", &lighting.GetLightingData()->intensity, 0.05f, 0.0f, 10.0f);
+		}
+		lighting.Update();
+
+		ImGui::End();
+
+
+
+		ImGui::Begin("Sprite");
+		// Create Sprite
+		if (ImGui::Button("Create")) {
+			auto sprite = std::make_unique<Sprite>();
+
+			sprite->Initialize(device, 0.0f, 0.0f,
+				float(kClientWidth / 2), float(kClientHeight / 2), 0xFFFFFFFF);
+
+			sprites.push_back(std::move(sprite));
+			textureIndices.push_back(0);
+		}
+
+		static int currentSpriteIndex = 0;
+		if (ImGui::BeginListBox("Sprites")) {
+			for (int i = 0; i < sprites.size(); i++) {
+				char label[32];
+				sprintf_s(label, "Sprite %d", i);
+
+				if (ImGui::Selectable(label, currentSpriteIndex == i)) {
+					currentSpriteIndex = i;
+				}
+			}
+
+			ImGui::EndListBox();
+		}
+
+		if (!sprites.empty()) {
+			currentSpriteIndex = std::clamp(
+				currentSpriteIndex, 0, (int)sprites.size() - 1);
+
+			Sprite &sprite = *sprites[currentSpriteIndex];
+
+			const char *textureItems[] = {
+				"UVChecker",
+				"Cube",
+				"MonsterBall",
+			};
+
+			ImGui::Combo("Texture", &textureIndices[currentSpriteIndex],
+				textureItems, IM_ARRAYSIZE(textureItems));
+
+			if (ImGui::CollapsingHeader("Sprite", ImGuiTreeNodeFlags_DefaultOpen)){
+				Transform &transform = sprite.GetTransform();
+
+				ImGui::DragFloat3("Translate", &transform.translate.x, 0.1f);
+				ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
+				ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);
+
+				if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
+					auto &material = sprite.GetMaterial();
+
+					ImGui::ColorEdit4("Color", &material.GetMaterialData()->color.x);
+
+					Transform &uv = sprite.GetUVTransform();
+					ImGui::DragFloat2("UV Translate", &uv.translate.x, 0.01f);
+					ImGui::SliderAngle("UV Rotate", &uv.rotate.z);
+					ImGui::DragFloat2("UV Scale", &uv.scale.x, 0.01f);
+				}
+			}
+
+			// Delete
+			if (sprites.size() > 1) {
+				if (ImGui::Button("Delete")) {
+					sprites.erase(sprites.begin() + currentSpriteIndex);
+					textureIndices.erase(textureIndices.begin() + currentSpriteIndex);
+
+					if (!models.empty()) {
+						currentObjectIndex =(std::min)
+							(currentObjectIndex, static_cast<int>(models.size()) - 1);
+					} else {
+						currentObjectIndex = 0;
+					}
+				}
+			} else {
+				ImGui::BeginDisabled();
+				ImGui::Button("Delete");
+				ImGui::EndDisabled();
+			}
+		}
 
 		ImGui::End();
 		ImGuiManager::GetInstance()->EndFrame();
@@ -211,31 +367,21 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			engine->SetPipeline(PipelineType::Object3dOpaque);
 			lighting.Bind(kLightRegisterIndex, commandList);
 
-			skydome.Draw(commandList, uvTexture);
-			cube.Draw(commandList, cubeTexture);
-		}
-
-		{// === 壁越し3Dオブジェクト描画パス ===
-			// 遮蔽物の後ろにいると判断された部分に対して、
-			// 独自のパイプラインを適用してレンダリングする
-			engine->SetPipeline(PipelineType::Object3dThroughWall);
-
-			throughWallRenderer.Draw(commandList);
-
-		}
-
-		{// === 対象オブジェクトの通常前面描画パス ===
-			// 遮蔽物に隠れていない部分、または手前に露出している通常部分を上書き描画する
-			engine->SetPipeline(PipelineType::Object3dOpaque);
-			lighting.Bind(kLightRegisterIndex, commandList);
-
-			sphere[0].Draw(commandList, uvTexture);
-			sphere[1].Draw(commandList, uvTexture);
+			for (auto &object : models) {
+				object->Draw(commandList, textures[0]);
+			}
 		}
 
 		{// === 2Dオブジェクト（UI・HUDなど）描画パス ===
 			// すべての3D表現の上に重ねる必要があるため、3Dの描画が完全に終わった後に実行する
 			engine->SetPipeline(PipelineType::Object2dOpaque);
+
+			for (size_t i = 0; i < sprites.size(); i++) {
+
+				sprites[i]->Update(kClientWidth, kClientHeight);
+
+				sprites[i]->Draw(commandList, textures[textureIndices[i]]);
+			}
 		}
 
 		engine->EndFrame();
