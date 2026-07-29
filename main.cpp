@@ -105,11 +105,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		// カメラの行列計算
 		camera.Update(cameraTransform);
 
-		// 各3Dモデルのワールド行列更新
-		for (size_t i = 0; i < models.size(); i++) {
-			models[i]->Update(&camera, transforms[i]);
-		}
-
 		// デバッグ用メニュー（ImGui）のレンダリング制御
 #ifdef USE_IMGUI
 		ImGuiManager::GetInstance()->BeginFrame();
@@ -127,6 +122,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			"Cube",
 			"Sphere",
 			"Teapot",
+			"Bunny",
+			"Suzanne",
 		};
 
 		// 作成するモデル種類
@@ -160,6 +157,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			case 4: // Teapot
 				object = std::make_unique<ModelObject>("teapot");
+				break;
+			case 5: // Bunny
+				object = std::make_unique<ModelObject>("bunny");
+				break;
+
+			case 6: // Suzanne
+				object = std::make_unique<ModelObject>("suzanne");
 				break;
 			}
 
@@ -322,6 +326,25 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
 				ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);
 
+				// Delete
+				if (sprites.size() > 1) {
+					if (ImGui::Button("Delete")) {
+						sprites.erase(sprites.begin() + currentSpriteIndex);
+						textureIndices.erase(textureIndices.begin() + currentSpriteIndex);
+
+						if (!sprites.empty()) {
+							currentSpriteIndex = (std::min)(
+								currentSpriteIndex, static_cast<int>(sprites.size()) - 1);
+						} else {
+							currentSpriteIndex = 0;
+						}
+					}
+				} else {
+					ImGui::BeginDisabled();
+					ImGui::Button("Delete");
+					ImGui::EndDisabled();
+				}
+
 				if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
 					auto &material = sprite.GetMaterial();
 
@@ -332,25 +355,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					ImGui::SliderAngle("UV Rotate", &uv.rotate.z);
 					ImGui::DragFloat2("UV Scale", &uv.scale.x, 0.01f);
 				}
-			}
-
-			// Delete
-			if (sprites.size() > 1) {
-				if (ImGui::Button("Delete")) {
-					sprites.erase(sprites.begin() + currentSpriteIndex);
-					textureIndices.erase(textureIndices.begin() + currentSpriteIndex);
-
-					if (!models.empty()) {
-						currentObjectIndex =(std::min)
-							(currentObjectIndex, static_cast<int>(models.size()) - 1);
-					} else {
-						currentObjectIndex = 0;
-					}
-				}
-			} else {
-				ImGui::BeginDisabled();
-				ImGui::Button("Delete");
-				ImGui::EndDisabled();
 			}
 		}
 
@@ -368,7 +372,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			engine->SetPipeline(PipelineType::Object3dOpaque);
 			lighting.Bind(kLightRegisterIndex, commandList);
 
-			for (auto &object : models) {
+			for (size_t i = 0; i < models.size(); ++i) {
+				auto &object = models[i];
+
+				// オブジェクトの行列等を更新
+				object->Update(&camera, transforms[i]);
+
 				object->Draw(commandList, textures[0]);
 			}
 		}
