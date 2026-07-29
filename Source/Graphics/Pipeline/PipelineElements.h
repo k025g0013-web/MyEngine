@@ -221,7 +221,7 @@ namespace Kizuna {
             // position
             descs[0].SemanticName = "POSITION";
             descs[0].SemanticIndex = 0;
-            descs[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+            descs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
             descs[0].InputSlot = 0;
             descs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
             descs[0].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
