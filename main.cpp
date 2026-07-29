@@ -44,10 +44,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// 複数モデルのリソース初期化
 	std::vector<std::unique_ptr<Object3D>> models;
 	std::vector<Transform> transforms;
+	std::vector<int> objectTextureIndices;
 
 	// 複数スプライトのリソース初期化
 	std::vector<std::unique_ptr<Sprite>> sprites;
-	std::vector<int> textureIndices;
+	std::vector<int> spriteTextureIndices;
 
 	{	/// 初期オブジェクト（Sphere）
 		auto object = std::make_unique<SphereObject>(kSubdivision);
@@ -60,14 +61,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			.rotate		{0.0f, 0.0f, 0.0f},
 			.translate	{0.0f, 0.0f, 0.0f},
 			});
+
+		objectTextureIndices.push_back(0);
 	}
 
 	// テクスチャの読み込み
-	TextureData textures[4];
+	TextureData textures[6];
 	textures[0] = engine->GetTextureManager()->LoadTexture(commandList, "resources/uvChecker.png");
 	textures[1] = engine->GetTextureManager()->LoadTexture(commandList, "resources/monsterBall.png");
 	textures[2] = engine->GetTextureManager()->LoadTexture(commandList, "resources/cube.jpg");
 	textures[3] = engine->GetTextureManager()->LoadTexture(commandList, "resources/axis.jpg");
+	textures[4] = engine->GetTextureManager()->LoadTexture(commandList, "resources/checkerBoard.png");
+	textures[5] = engine->GetTextureManager()->LoadTexture(commandList, "resources/white1x1.png");
 
 	// ライト/カメラの初期化
 	Lighting lighting;
@@ -117,13 +122,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		static int createType = 0;
 
 		const char *createItems[] = {
-			"Triangle",
-			"Plane",
-			"Cube",
-			"Sphere",
-			"Teapot",
-			"Bunny",
-			"Suzanne",
+			"Triangle", "Plane", "Cube", "Sphere",
+			"Teapot", "Bunny", "Suzanne",
 		};
 
 		// 作成するモデル種類
@@ -140,30 +140,44 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					Vector3{ -0.5f,-0.5f,0.0f },
 					Vector3{ 0.0f, 0.5f,0.0f },
 					Vector3{ 0.5f,-0.5f,0.0f });
+
+				objectTextureIndices.push_back(0);
 				break;
 
 			case 1:	// Plane
 				object = std::make_unique<PlaneObject>(
 					Vector3{ 0,0,0 }, 1.0f, 1.0f);
+
+				objectTextureIndices.push_back(0);
 				break;
 
 			case 2:	// Cube
 				object = std::make_unique<ModelObject>("cube");
+
+				objectTextureIndices.push_back(0);
 				break;
 
 			case 3:	// Sphere
 				object = std::make_unique<SphereObject>(kSubdivision);
+
+				objectTextureIndices.push_back(0);
 				break;
 
 			case 4: // Teapot
 				object = std::make_unique<ModelObject>("teapot");
+
+				objectTextureIndices.push_back(4);
 				break;
 			case 5: // Bunny
 				object = std::make_unique<ModelObject>("bunny");
+
+				objectTextureIndices.push_back(0);
 				break;
 
 			case 6: // Suzanne
 				object = std::make_unique<ModelObject>("suzanne");
+
+				objectTextureIndices.push_back(5);
 				break;
 			}
 
@@ -214,13 +228,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				if (models.size() > 1) {
 					if (ImGui::Button("Delete")) {
 
-						models.erase(
-							models.begin() + currentObjectIndex
-						);
-
-						transforms.erase(
-							transforms.begin() + currentObjectIndex
-						);
+						models.erase(models.begin() + currentObjectIndex);
+						transforms.erase(transforms.begin() + currentObjectIndex);
+						objectTextureIndices.erase(objectTextureIndices.begin() + currentObjectIndex);
 
 						if (!models.empty()) {
 
@@ -287,7 +297,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				float(kClientWidth / 2), float(kClientHeight / 2), 0xFFFFFFFF);
 
 			sprites.push_back(std::move(sprite));
-			textureIndices.push_back(0);
+			spriteTextureIndices.push_back(0);
 		}
 
 		static int currentSpriteIndex = 0;
@@ -311,15 +321,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			Sprite &sprite = *sprites[currentSpriteIndex];
 
 			const char *textureItems[] = {
-				"UVChecker",
-				"Cube",
-				"MonsterBall",
+				"UVChecker", "Cube", "MonsterBall",
 			};
 
-			ImGui::Combo("Texture", &textureIndices[currentSpriteIndex],
+			ImGui::Combo("Texture", &spriteTextureIndices[currentSpriteIndex],
 				textureItems, IM_ARRAYSIZE(textureItems));
 
-			if (ImGui::CollapsingHeader("Sprite", ImGuiTreeNodeFlags_DefaultOpen)){
+			if (ImGui::CollapsingHeader("Sprite", ImGuiTreeNodeFlags_DefaultOpen)) {
 				Transform &transform = sprite.GetTransform();
 
 				ImGui::DragFloat3("Translate", &transform.translate.x, 0.1f);
@@ -330,7 +338,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				if (sprites.size() > 1) {
 					if (ImGui::Button("Delete")) {
 						sprites.erase(sprites.begin() + currentSpriteIndex);
-						textureIndices.erase(textureIndices.begin() + currentSpriteIndex);
+						spriteTextureIndices.erase(spriteTextureIndices.begin() + currentSpriteIndex);
 
 						if (!sprites.empty()) {
 							currentSpriteIndex = (std::min)(
@@ -378,7 +386,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				// オブジェクトの行列等を更新
 				object->Update(&camera, transforms[i]);
 
-				object->Draw(commandList, textures[0]);
+				int texIndex = objectTextureIndices[i];
+				object->Draw(commandList, textures[texIndex]);
 			}
 		}
 
@@ -390,7 +399,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 				sprites[i]->Update(kClientWidth, kClientHeight);
 
-				sprites[i]->Draw(commandList, textures[textureIndices[i]]);
+				sprites[i]->Draw(commandList, textures[spriteTextureIndices[i]]);
 			}
 		}
 

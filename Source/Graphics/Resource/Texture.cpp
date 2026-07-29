@@ -93,7 +93,11 @@ namespace Kizuna {
 			image.GetImages(), image.GetImageCount(), image.GetMetadata(),
 			DirectX::TEX_FILTER_SRGB, 0, context.mipImages
 		);
-		if (FAILED(hr)) return false;
+
+		if (FAILED(hr)) {
+			// ミップマップ生成に失敗した場合は元の画像をそのままコピー
+			context.mipImages = std::move(image);
+		}
 
 		// テクスチャ情報を保存する
 		context.metadata = context.mipImages.GetMetadata();
