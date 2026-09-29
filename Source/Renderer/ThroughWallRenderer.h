@@ -68,6 +68,8 @@ struct TextureData;
         /// </param>
         void AddObject(Object3D *object, uint32_t color, Style style);
 
+        void RemoveObject(Object3D *object);
+
         /// <summary>
         /// 登録された全オブジェクトを壁越し描画する
         /// </summary>
