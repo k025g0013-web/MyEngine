@@ -41,6 +41,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//-------------------------------------------------------------------------
 	// データ生成・初期リソースのセットアップ
 	//-------------------------------------------------------------------------
+	// 壁越し描画の対象
+	ThroughWallRenderer throughWallRenderer;
+	static bool isThroughWall = true;
+
 	// 複数モデルのリソース初期化
 	std::vector<std::unique_ptr<Object3D>> models;
 	std::vector<Transform> transforms;
@@ -51,7 +55,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	std::vector<int> spriteTextureIndices;
 
 	{	/// 初期オブジェクト（Sphere）
-		auto object = std::make_unique<SphereObject>(kSubdivision);
+		auto object = std::make_unique<ModelObject>("fence");
 		object->Create(device, 0xFFFFFFFF, true);
 
 		models.push_back(std::move(object));
@@ -63,11 +67,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			});
 
 		objectTextureIndices.push_back(0);
+
+		throughWallRenderer.AddObject(models.back().get(), 0x00000000, Style::Solid);
 	}
 
 	// テクスチャの読み込み
 	TextureData textures[6];
-	textures[0] = engine->GetTextureManager()->LoadTexture(commandList, "resources/uvChecker.png");
+	textures[0] = engine->GetTextureManager()->LoadTexture(commandList, "resources/Models/fence/fence.png");
 	textures[1] = engine->GetTextureManager()->LoadTexture(commandList, "resources/monsterBall.png");
 	textures[2] = engine->GetTextureManager()->LoadTexture(commandList, "resources/cube.jpg");
 	textures[3] = engine->GetTextureManager()->LoadTexture(commandList, "resources/axis.jpg");
@@ -87,7 +93,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	engine->GetAudioManager()->Load("bgm_music", "Resources/music.mp3");
 
 	// 起動時のファンファーレを一度だけ再生
-	engine->GetAudioManager()->Play("fanfare", false, 0.0f);
+	engine->GetAudioManager()->Play("fanfare", false, 1.0f);
 
 	//-------------------------------------------------------------------------
 	// メインループ
@@ -118,9 +124,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		ImGui::Begin("Setting");
 
+		ImGui::Text(
+			"Camera Mode : %s (Q:KeyBoad or A:GamePad to Toggle)", camera.GetStateName());
+		ImGui::Separator();
+
 		static int currentObjectIndex = 0;
 		static int createType = 0;
-
+		
 		const char *createItems[] = {
 			"Triangle", "Plane", "Cube", "Sphere",
 			"Teapot", "Bunny", "Suzanne",
@@ -130,66 +140,72 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		ImGui::Combo("Model", &createType,
 			createItems, IM_ARRAYSIZE(createItems));
 
+		ImGui::Checkbox("Enable Through-Wall", &isThroughWall);
+
 		// Create
 		if (ImGui::Button("Create Model")) {
 			std::unique_ptr<Object3D> object;
+			int defaultTexIndex = 0;
 
-			switch (createType) {
+
+			switch(createType) {
 			case 0:	// Triangle
 				object = std::make_unique<TriangleObject>(
 					Vector3{ -0.5f,-0.5f,0.0f },
 					Vector3{ 0.0f, 0.5f,0.0f },
 					Vector3{ 0.5f,-0.5f,0.0f });
-
-				objectTextureIndices.push_back(0);
+				defaultTexIndex = 0;
 				break;
 
 			case 1:	// Plane
-				object = std::make_unique<PlaneObject>(
-					Vector3{ 0,0,0 }, 1.0f, 1.0f);
-
-				objectTextureIndices.push_back(0);
+				object = std::make_unique<ModelObject>("plane");
+				defaultTexIndex = 0;
 				break;
 
 			case 2:	// Cube
 				object = std::make_unique<ModelObject>("cube");
-
-				objectTextureIndices.push_back(0);
+				defaultTexIndex = 0;
 				break;
 
 			case 3:	// Sphere
 				object = std::make_unique<SphereObject>(kSubdivision);
-
-				objectTextureIndices.push_back(0);
+				defaultTexIndex = 0;
 				break;
 
 			case 4: // Teapot
 				object = std::make_unique<ModelObject>("teapot");
-
-				objectTextureIndices.push_back(4);
+				defaultTexIndex = 4;
 				break;
+
 			case 5: // Bunny
 				object = std::make_unique<ModelObject>("bunny");
-
-				objectTextureIndices.push_back(0);
+				defaultTexIndex = 0;
 				break;
 
 			case 6: // Suzanne
 				object = std::make_unique<ModelObject>("suzanne");
-
-				objectTextureIndices.push_back(5);
+				defaultTexIndex = 5;
 				break;
 			}
 
-			object->Create(device, 0xFFFFFFFF, true);
+			if (object) {
+				// オブジェクトの初期化
+				object->Create(device, 0xFFFFFFFF, true);
 
-			models.push_back(std::move(object));
+				// 1. 配列に所有権を移動
+				models.push_back(std::move(object));
 
-			transforms.push_back({
-				{1,1,1}, {0,0,0}, {0,0,0}
-				});
+				// 2. Transformとテクスチャインデックスを追加
+				transforms.push_back({ {1,1,1}, {0,0,0}, {0,0,0} });
+				objectTextureIndices.push_back(defaultTexIndex);
 
-			currentObjectIndex = static_cast<int>(models.size()) - 1;
+				// 3. チェックボックスがONの場合のみ ThroughWallRenderer に登録
+				if (isThroughWall) {
+					throughWallRenderer.AddObject(models.back().get(), 0xFFFFFFFF, Style::Solid);
+				}
+
+				currentObjectIndex = static_cast<int>(models.size()) - 1;
+			}
 		}
 
 		// Object
@@ -228,6 +244,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				if (models.size() > 1) {
 					if (ImGui::Button("Delete")) {
 
+						// 削除するオブジェクト
+						Object3D *deleteObject = models[currentObjectIndex].get();
+
+						// ThroughWallRendererに登録されている場合は先に削除
+						throughWallRenderer.RemoveObject(deleteObject);
+
+						// 通常の配列から削除
 						models.erase(models.begin() + currentObjectIndex);
 						transforms.erase(transforms.begin() + currentObjectIndex);
 						objectTextureIndices.erase(objectTextureIndices.begin() + currentObjectIndex);
@@ -239,6 +262,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 									currentObjectIndex,
 									static_cast<int>(models.size()) - 1
 									);
+
 						} else {
 
 							currentObjectIndex = 0;
@@ -261,9 +285,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 					// UV
 					Transform &uv = object->GetUVTransform();
-					ImGui::DragFloat2("UV Translate", &uv.translate.x, 0.01f);
-					ImGui::SliderAngle("UV Rotate", &uv.rotate.z);
-					ImGui::DragFloat2("UV Scale", &uv.scale.x, 0.01f);
+					ImGui::DragFloat2("UV-Translate", &uv.translate.x, 0.01f);
+					ImGui::SliderAngle("UV-Rotate", &uv.rotate.z);
+					ImGui::DragFloat2("UV-Scale", &uv.scale.x, 0.01f);
 
 					// Lightingの種類をComboによって変更
 					Lighting::LightingType currentType = lighting.GetLightType();
@@ -284,13 +308,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 		lighting.Update();
 
-		ImGui::End();
+
+		ImGui::Separator();
 
 
-
-		ImGui::Begin("Sprite");
 		// Create Sprite
-		if (ImGui::Button("Create")) {
+		if (ImGui::Button("Create Sprite")) {
 			auto sprite = std::make_unique<Sprite>();
 
 			sprite->Initialize(device, 0.0f, 0.0f,
@@ -330,40 +353,82 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			if (ImGui::CollapsingHeader("Sprite", ImGuiTreeNodeFlags_DefaultOpen)) {
 				Transform &transform = sprite.GetTransform();
 
-				ImGui::DragFloat3("Translate", &transform.translate.x, 0.1f);
-				ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
-				ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);
+				ImGui::DragFloat3("Translate Sprite", &transform.translate.x, 0.1f);
+				ImGui::DragFloat3("Rotate Sprite", &transform.rotate.x, 0.01f);
+				ImGui::DragFloat3("Scale Sprite", &transform.scale.x, 0.01f);
 
 				// Delete
-				if (sprites.size() > 1) {
-					if (ImGui::Button("Delete")) {
-						sprites.erase(sprites.begin() + currentSpriteIndex);
-						spriteTextureIndices.erase(spriteTextureIndices.begin() + currentSpriteIndex);
+				if (ImGui::Button("Delete Sprite")) {
+					sprites.erase(sprites.begin() + currentSpriteIndex);
+					spriteTextureIndices.erase(spriteTextureIndices.begin() + currentSpriteIndex);
 
-						if (!sprites.empty()) {
-							currentSpriteIndex = (std::min)(
-								currentSpriteIndex, static_cast<int>(sprites.size()) - 1);
-						} else {
-							currentSpriteIndex = 0;
-						}
+					if (!sprites.empty()) {
+						currentSpriteIndex = (std::min)(
+							currentSpriteIndex, static_cast<int>(sprites.size()) - 1);
+					} else {
+						currentSpriteIndex = 0;
 					}
-				} else {
-					ImGui::BeginDisabled();
-					ImGui::Button("Delete");
-					ImGui::EndDisabled();
 				}
 
-				if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
+				if (ImGui::CollapsingHeader("Sprite Material", ImGuiTreeNodeFlags_DefaultOpen)) {
 					auto &material = sprite.GetMaterial();
 
-					ImGui::ColorEdit4("Color", &material.GetMaterialData()->color.x);
+					ImGui::ColorEdit4("Sprite Color", &material.GetMaterialData()->color.x);
 
 					Transform &uv = sprite.GetUVTransform();
-					ImGui::DragFloat2("UV Translate", &uv.translate.x, 0.01f);
-					ImGui::SliderAngle("UV Rotate", &uv.rotate.z);
-					ImGui::DragFloat2("UV Scale", &uv.scale.x, 0.01f);
+					ImGui::DragFloat2("Sprite UV-Translate", &uv.translate.x, 0.01f);
+					ImGui::SliderAngle("Sprite UV-Rotate", &uv.rotate.z);
+					ImGui::DragFloat2("Sprite UV-Scale", &uv.scale.x, 0.01f);
 				}
 			}
+		}
+
+
+		ImGui::Separator();
+
+		ImGui::ColorEdit4("ThroughWall-Object Color", &throughWallRenderer.GetObject(0).color.x);
+
+		const char *styleNames[] = { "Solid", "Dot", "Stripe" };
+		int style0 = static_cast<int>(throughWallRenderer.GetObject(0).style);
+		if (ImGui::Combo("ThroughWall Style", &style0, styleNames, IM_ARRAYSIZE(styleNames))) {
+			throughWallRenderer.GetObject(0).style = static_cast<Style>(style0);
+		}
+
+		//====================
+		// Pipeline
+		//====================
+
+		ImGui::SeparatorText("Pipeline");
+
+		auto &pipelineConfig =
+			engine->GetPipelineConfig(
+				PipelineType::Object3dOpaque
+			);
+
+		const char *blendModeNames[] = {
+			"Default",
+			"Alpha",
+			"Add",
+			"Subtract",
+			"Multiply",
+			"Screen"
+		};
+
+		int blendMode =
+			static_cast<int>(pipelineConfig.blend);
+
+		if (ImGui::Combo(
+			"Blend Mode",
+			&blendMode,
+			blendModeNames,
+			IM_ARRAYSIZE(blendModeNames)
+		)) {
+			pipelineConfig.blend =
+				static_cast<BlendMode>(blendMode);
+
+			engine->RebuildPipeline(
+				PipelineType::Object3dOpaque
+			);
 		}
 
 		ImGui::End();
@@ -375,15 +440,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		//===============
 		engine->BeginFrame();
 
-		{// === 3D不透明オブジェクト描画（背景・遮蔽物） ===
-			// 壁越し描画の判定基準を作るため、先に背景（天球）や遮蔽物（箱）を描画して深度バッファを確定させる
+		{// === 3Dオブジェクト描画 ===
+		// 背景や遮蔽物を先に描画し、深度バッファを構築する
 			engine->SetPipeline(PipelineType::Object3dOpaque);
 			lighting.Bind(kLightRegisterIndex, commandList);
 
 			for (size_t i = 0; i < models.size(); ++i) {
 				auto &object = models[i];
 
-				// オブジェクトの行列等を更新
+				// オブジェクトの状態を更新
 				object->Update(&camera, transforms[i]);
 
 				int texIndex = objectTextureIndices[i];
@@ -391,15 +456,23 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			}
 		}
 
-		{// === 2Dオブジェクト（UI・HUDなど）描画パス ===
-			// すべての3D表現の上に重ねる必要があるため、3Dの描画が完全に終わった後に実行する
+		{// === 壁越し3Dオブジェクト描画 ===
+			// 深度バッファを利用して、遮蔽物の後ろにあるオブジェクトを描画する
+			engine->SetPipeline(PipelineType::Object3dThroughWall);
+
+			throughWallRenderer.Draw(commandList);
+		}
+
+		{// === 2Dオブジェクト描画 ===
+			// 3Dオブジェクトの上に重ねてUIやHUDを描画する
 			engine->SetPipeline(PipelineType::Object2dOpaque);
 
-			for (size_t i = 0; i < sprites.size(); i++) {
-
+			for (size_t i = 0; i < sprites.size(); ++i) {
 				sprites[i]->Update(kClientWidth, kClientHeight);
-
-				sprites[i]->Draw(commandList, textures[spriteTextureIndices[i]]);
+				sprites[i]->Draw(
+					commandList,
+					textures[spriteTextureIndices[i]]
+				);
 			}
 		}
 

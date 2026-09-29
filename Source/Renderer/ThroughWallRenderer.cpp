@@ -3,6 +3,7 @@
 #include "Utils/ColorHelper.h"
 
 #include <iostream>
+#include <algorithm>
 
 namespace Kizuna {
     void ThroughWallRenderer::AddObject(Object3D *object, uint32_t color, Style style) {
@@ -41,5 +42,19 @@ namespace Kizuna {
             // 壁越し描画専用パイプラインで描画する
             data.object->DrawThroughWall(commandList);
         }
+    }
+
+    void ThroughWallRenderer::RemoveObject(Object3D *object) {
+
+        objects_.erase(
+            std::remove_if(
+                objects_.begin(),
+                objects_.end(),
+                [object](const ThroughWallObject &data) {
+                    return data.object == object;
+                }
+            ),
+            objects_.end()
+        );
     }
 }

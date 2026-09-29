@@ -30,40 +30,58 @@ PixelShaderOutput main(VertexShaderOutput input)
     PixelShaderOutput output;
 
     // UV変換とテクスチャサンプリング
-    float32_t4 transformedUV = mul(float32_t4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
-    float32_t4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
+    float32_t4 transformedUV =
+        mul(
+            float32_t4(input.texcoord, 0.0f, 1.0f),
+            gMaterial.uvTransform
+        );
 
-    // ベースカラー（マテリアルカラー × テクスチャカラー）
-    float32_t4 baseColor = gMaterial.color * textureColor;
+    float32_t4 textureColor =
+        gTexture.Sample(gSampler, transformedUV.xy);
 
-    // --- ライティングが無効（0）または None の場合 ---
-    if (gMaterial.enableLighting == 0 || gDirectionalLight.lightType == 0)
+    //========================================
+    // 2値抜き
+    //========================================
+
+    if (textureColor.a < 0.5f)
     {
-        // ライトの色・輝度などを無視してベースカラーを返す
+        discard;
+    }
+
+    float32_t4 baseColor =
+        gMaterial.color * textureColor;
+    
+    if (gMaterial.enableLighting == 0 ||
+        gDirectionalLight.lightType == 0)
+    {
         output.color = baseColor;
     }
     else
     {
-        // --- ライティングが有効な場合 ---
         float32_t3 N = normalize(input.normal);
-        float32_t3 L = normalize(-gDirectionalLight.direction);
+        float32_t3 L =
+            normalize(-gDirectionalLight.direction);
+
         float32_t NdotL = dot(N, L);
-        
+
         float32_t diffuseFactor = 1.0f;
 
-        // 1: Lambert
         if (gDirectionalLight.lightType == 1)
         {
             diffuseFactor = saturate(NdotL);
         }
-        // 2: Half-Lambert
         else if (gDirectionalLight.lightType == 2)
         {
-            diffuseFactor = pow(NdotL * 0.5f + 0.5f, 2.0f);
+            diffuseFactor =
+                pow(NdotL * 0.5f + 0.5f, 2.0f);
         }
 
-        // ライトカラー・輝度を反映
-        output.color.rgb = baseColor.rgb * gDirectionalLight.color.rgb * diffuseFactor * gDirectionalLight.intensity;
+        output.color.rgb =
+            baseColor.rgb *
+            gDirectionalLight.color.rgb *
+            diffuseFactor *
+            gDirectionalLight.intensity;
+
         output.color.a = baseColor.a;
     }
 

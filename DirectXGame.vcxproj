@@ -137,6 +137,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\Graphics\DirectXCommon.cpp" />
     <ClCompile Include="Source\Graphics\Frame\RenderOutput.cpp" />
     <ClCompile Include="Source\Graphics\Pipeline\GraphicsPipeline.cpp" />
+    <ClCompile Include="Source\Graphics\Pipeline\PipelineList.cpp" />
     <ClCompile Include="Source\Graphics\Pipeline\PipelineManager.cpp" />
     <ClCompile Include="Source\Graphics\Pipeline\RootSignature.cpp" />
     <ClCompile Include="Source\Graphics\Pipeline\ViewportState.cpp" />
@@ -167,7 +168,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\Renderer\ThroughWallRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include=".editorconfig" />
     <None Include=".gitignore" />
     <None Include="exclusion.dic" />
     <None Include="Resources\Models\axis\axis.blend">
@@ -253,7 +253,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Graphics\DirectXCommon.h" />
     <ClInclude Include="Source\Graphics\Frame\RenderOutput.h" />
     <ClInclude Include="Source\Graphics\Pipeline\GraphicsPipeline.h" />
+    <ClInclude Include="Source\Graphics\Pipeline\PipelineConfig.h" />
     <ClInclude Include="Source\Graphics\Pipeline\PipelineElements.h" />
+    <ClInclude Include="Source\Graphics\Pipeline\PipelineList.h" />
     <ClInclude Include="Source\Graphics\Pipeline\PipelineManager.h" />
     <ClInclude Include="Source\Graphics\Pipeline\RootSignature.h" />
     <ClInclude Include="Source\Graphics\Pipeline\ViewportState.h" />
