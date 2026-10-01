@@ -15,9 +15,14 @@ namespace Kizuna {
         /// <summary>
         /// 平面四角形を生成する
         /// </summary>
-        /// <param name="device">DirectXデバイス</param>
+         /// <param name="device">DirectXデバイス</param>
+        /// <param name="commandList">コマンドリスト</param>
         /// <param name="color">描画色</param>
-        void Create(ID3D12Device *device, uint32_t color, bool enableLighting) override;
+        /// <param name="enableLighting">ライティングを有効にするか</param>
+        void Create(
+            ID3D12Device *device, ID3D12GraphicsCommandList *commandList,
+            uint32_t color, bool enableLighting) override;
+        // commandListはプリミティブでは使用しない
 
     private:
         /// 中央座標

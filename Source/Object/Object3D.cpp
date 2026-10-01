@@ -41,18 +41,16 @@ namespace Kizuna {
 	}
 
 	void Object3D::Draw(
-		ID3D12GraphicsCommandList *commandList, TextureData &texture) {
+		ID3D12GraphicsCommandList *commandList) {
 		// 通常描画用マテリアルを設定する
 		commandList->SetGraphicsRootConstantBufferView(
-			0, material_.GetGPUVirtualAddress());
+			0,
+			material_.GetGPUVirtualAddress());
 
 		// WVP・World行列を設定する
 		commandList->SetGraphicsRootConstantBufferView(
-			1, transformationMatrixBuffer_.GetGPUVirtualAddress());
-
-		// 描画に使用するテクスチャを設定する
-		commandList->SetGraphicsRootDescriptorTable(
-			2, texture.gpuHandle);
+			1,
+			transformationMatrixBuffer_.GetGPUVirtualAddress());
 
 		// メッシュを描画する
 		mesh_.Bind(commandList);

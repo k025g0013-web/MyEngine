@@ -44,7 +44,8 @@ namespace Kizuna {
         /// 各形状固有の生成処理
         /// </summary>
         virtual void Create(
-            ID3D12Device *device, uint32_t color, bool enableLighting) = 0;
+            ID3D12Device *device, ID3D12GraphicsCommandList *commandList,
+            uint32_t color, bool enableLighting) = 0;
 
         /// <summary>
         /// ワールド行列とWVP行列を更新する
@@ -58,9 +59,8 @@ namespace Kizuna {
         /// 通常描画を行う
         /// </summary>
         /// <param name="commandList">コマンドリスト</param>
-        /// <param name="texture">使用するテクスチャ</param>
         virtual void Draw(
-            ID3D12GraphicsCommandList *commandList, TextureData &texture);
+            ID3D12GraphicsCommandList *commandList);
 
         /// 共通壁越し描画
         virtual void DrawThroughWall(
@@ -105,17 +105,12 @@ namespace Kizuna {
         // 通常描画用マテリアル
         Material material_;
 
+        ModelData modelData_;
+        std::vector<VertexData> vertices_;
+        std::vector<uint32_t> indices_;
+
         // 壁越し描画用マテリアル
         ThroughWallMaterial throughWallMaterial_;
-
-        // 読み込んだモデルデータ
-        ModelData modelData_;
-
-        // プリミティブ生成用頂点データ
-        std::vector<VertexData> vertices_;
-
-        // インデックスバッファ用データ
-        std::vector<uint32_t> indices_;
 
         // WVP・World行列用定数バッファ
         MeshBuffer transformationMatrixBuffer_;
