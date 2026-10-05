@@ -9,7 +9,7 @@ namespace Kizuna {
         (void)commandList;
 
         // 球体の頂点・インデックス生成
-        renderer_.CreateSphere(
+        meshGenerator_.CreateSphere(
             vertices_, indices_, subdivision_);
 
         // メッシュ生成

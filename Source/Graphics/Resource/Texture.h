@@ -1,12 +1,15 @@
 #pragma once
 
+
 #include <d3d12.h>
 #include <wrl.h>
 #include <DirectXTex/DirectXTex.h>
 
+#include <cassert>
+#include <cstdint>
 #include <map>
+#include <memory>
 #include <string>
-#include <fstream>
 
 namespace Kizuna {
 	class DescriptorHeap;

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "Graphics/Resource/MeshBuffer.h"
+#include "MeshBuffer.h"
 
 namespace Kizuna {
     /// <summary>

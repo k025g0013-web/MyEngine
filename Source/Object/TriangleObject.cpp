@@ -9,7 +9,7 @@ namespace Kizuna {
 		(void)commandList;
 
 		// 頂点データを生成する
-		renderer_.CreateTriangle(vertices_, wigth_, height_, right_);
+		meshGenerator_.CreateTriangle(vertices_, wigth_, height_, right_);
 
 		// メッシュを生成する
 		mesh_.Create(device, vertices_);

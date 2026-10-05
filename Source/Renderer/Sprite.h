@@ -3,8 +3,9 @@
 #include "Graphics/Resource/MeshBuffer.h"
 #include "Graphics/Resource/Texture.h"
 #include "RenderCore/Camera/CameraManager.h"
-#include "RenderCore/Material.h"
-#include "Renderer/Renderer.h"
+#include "Graphics/Material/Material.h"
+#include "Graphics/Renderer/Renderer.h"
+#include "Graphics/Renderer/MeshGenerator.h"
 #include "Math/Transform.h"
 
 namespace Kizuna {
@@ -80,6 +81,7 @@ namespace Kizuna {
 	private:
 		// 描画処理共通クラス
 		Renderer render_;
+		MeshGenerator meshGenerator_;
 
 		// スプライト頂点
 		std::vector<VertexData> vertices_;

@@ -9,7 +9,7 @@ namespace Kizuna {
 		(void)commandList;
 
 		// 頂点データを生成する
-		renderer_.CreatePlane(vertices_, center_, width_, depth_);
+		meshGenerator_.CreatePlane(vertices_, center_, width_, depth_);
 
 		// メッシュを生成する
 		mesh_.Create(device, vertices_);

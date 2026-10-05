@@ -1,56 +1,10 @@
-#include "Renderer.h"
+#include "MeshGenerator.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include "Math/FunctionMatrix.h"
 
 namespace Kizuna {
-	void Renderer::CreateVertexBuffer(
-		ID3D12Device *device,
-		MeshBuffer &vertexBuffer,
-		const std::vector<VertexData> &vertices
-	) {
-		// GPU上に頂点バッファを生成する
-		vertexBuffer.InitializeAsVertex(device, sizeof(VertexData) * vertices.size(), sizeof(VertexData));
-
-		// CPUから書き込むためにバッファをマッピングする
-		VertexData *vertexData = static_cast<VertexData *>(vertexBuffer.Map());
-
-		// CPU側で生成した頂点データをGPUリソースへコピーする
-		std::memcpy(vertexData, vertices.data(), sizeof(VertexData) * vertices.size());
-	}
-
-	void Renderer::CreateIndexBuffer(
-		ID3D12Device *device,
-		MeshBuffer &indexBuffer,
-		const std::vector<uint32_t> &indices
-	) {
-		// GPU上にインデックスバッファを生成する
-		indexBuffer.InitializeAsIndex(device, sizeof(uint32_t) * indices.size());
-
-		// CPUから書き込むためにバッファをマッピングする
-		uint32_t *indexData = static_cast<uint32_t *>(indexBuffer.Map());
-
-		// CPU側で生成したインデックスデータをGPUリソースへコピーする
-		std::memcpy(indexData, indices.data(), sizeof(uint32_t) * indices.size());
-	}
-
-	void Renderer::CreateTransformationMatrixBuffer(
-		ID3D12Device *device,
-		MeshBuffer &constantBuffer,
-		TransformationMatrix *&data
-	) {
-		// ワールド行列・WVP行列を格納する定数バッファを生成する
-		constantBuffer.InitializeAsConstant(device, sizeof(TransformationMatrix));
-
-		// CPUから更新できるようにバッファをマッピングする
-		data = static_cast<TransformationMatrix *>(constantBuffer.Map());
-
-		// 初期状態では変換を行わないよう単位行列で初期化する
-		data->WVP = Math::MakeIdentity<Matrix4x4>();
-		data->World = Math::MakeIdentity<Matrix4x4>();
-	}
-
-	void Renderer::CreateSprite(
+	void MeshGenerator::CreateSprite(
 		std::vector<VertexData> &vertices,
 		std::vector<uint32_t> &indices,
 		float left,
@@ -73,7 +27,7 @@ namespace Kizuna {
 		};
 	}
 
-	void Renderer::CreateTriangle(
+	void MeshGenerator::CreateTriangle(
 		std::vector<VertexData> &vertices,
 		Vector3 left,
 		Vector3 top,
@@ -87,7 +41,7 @@ namespace Kizuna {
 		};
 	}
 
-	void Renderer::CreatePlane(
+	void MeshGenerator::CreatePlane(
 		std::vector<VertexData> &vertices,
 		Vector3 center, float width, float depth) {
 		float hx = width * 0.5f;
@@ -103,7 +57,7 @@ namespace Kizuna {
 		};
 	}
 
-	void Renderer::CreateSphere(
+	void MeshGenerator::CreateSphere(
 		std::vector<VertexData> &vertices, std::vector<uint32_t> &indices,
 		uint32_t subdivision) {
 		// 分割数から必要な頂点数を算出する
