@@ -11,22 +11,14 @@
 namespace Kizuna {
 
     /// <summary>
-    /// 描画方法を切り替えるためのレンダーレイヤ
-    /// </summary>
-    enum class RenderLayer {
-        kDefault,      // 通常描画
-        kThroughWall   // 壁越し描画対象
-    };
-
-    /// <summary>
-    /// 3Dオブジェクト共通の基底クラス
+    /// プリミティブ3Dオブジェクト共通の基底クラス
     /// </summary>
     class Object3D {
     public:
         virtual ~Object3D() = default;
 
         /// <summary>
-        /// 各オブジェクト固有の生成処理
+        /// 各プリミティブ固有の生成処理
         /// </summary>
         virtual void Create(
             ID3D12Device *device,
@@ -116,9 +108,6 @@ namespace Kizuna {
 
         // GPUへ送信する行列データ
         TransformationMatrix *transformationMatrixData_ = nullptr;
-
-        // 描画方法を切り替えるためのレイヤ
-        RenderLayer renderLayer_ = RenderLayer::kDefault;
 
         // オブジェクト用Transform
         Transform transform_{

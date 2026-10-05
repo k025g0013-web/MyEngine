@@ -67,9 +67,6 @@
     <Filter Include="Source\RenderCore">
       <UniqueIdentifier>{fb4032d0-8005-4adc-ba25-fceaa8089cf9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Asset">
-      <UniqueIdentifier>{2ffb522b-4949-4f7b-9e12-6c917169fc2c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\External">
       <UniqueIdentifier>{cb60f5ab-4b82-49b5-b098-afef0125bde6}</UniqueIdentifier>
     </Filter>
@@ -78,9 +75,6 @@
     </Filter>
     <Filter Include="externals\imgui">
       <UniqueIdentifier>{74ffc2b9-539a-444a-b3c1-08d874188f12}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Renderer">
-      <UniqueIdentifier>{a0ab22f6-dace-40f1-abb7-684a2bbb28e2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Object">
       <UniqueIdentifier>{815c6560-b846-468b-80d2-5de0c2830fa5}</UniqueIdentifier>
@@ -102,6 +96,18 @@
     </Filter>
     <Filter Include="Source\Object\Primitive">
       <UniqueIdentifier>{8a4f6480-d187-45b9-88e2-875c9ecae87c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Object\Model">
+      <UniqueIdentifier>{211ff023-35c6-4eca-855b-20c5cf48e4e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Object\Sprite">
+      <UniqueIdentifier>{3deaf17e-8c6c-4d84-95ad-3d75de8230d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Object\ThroughWall">
+      <UniqueIdentifier>{869f1ee1-3361-4155-ae69-2871f22159bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Object\Manager">
+      <UniqueIdentifier>{48c385f0-bf15-438d-b90c-8b26f0bcbb0a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -125,9 +131,6 @@
     </ClCompile>
     <ClCompile Include="externals\imgui\imgui_tables.cpp">
       <Filter>externals\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Asset\ModelLoader.cpp">
-      <Filter>Source\Asset</Filter>
     </ClCompile>
     <ClCompile Include="Source\Audio\Audio.cpp">
       <Filter>Source\Audio</Filter>
@@ -198,12 +201,6 @@
     <ClCompile Include="Source\RenderCore\Lighting.cpp">
       <Filter>Source\RenderCore</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Renderer\Sprite.cpp">
-      <Filter>Source\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\ThroughWallRenderer.cpp">
-      <Filter>Source\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Source\KizunaEngine.cpp">
       <Filter>Source</Filter>
@@ -232,9 +229,6 @@
     <ClCompile Include="Source\RenderCore\Camera\CameraState\DebugCameraState.cpp">
       <Filter>Source\RenderCore\Camera\CameraState</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Object\ModelObject.cpp">
-      <Filter>Source\Object</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Graphics\Pipeline\PipelineList.cpp">
       <Filter>Source\Graphics\Pipeline</Filter>
     </ClCompile>
@@ -261,6 +255,21 @@
     </ClCompile>
     <ClCompile Include="Source\Object\Primitive\TriangleObject.cpp">
       <Filter>Source\Object\Primitive</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Object\Model\Model.cpp">
+      <Filter>Source\Object\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Object\Model\ModelLoader.cpp">
+      <Filter>Source\Object\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Object\Sprite\Sprite.cpp">
+      <Filter>Source\Object\Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Object\ThroughWall\ThroughWallObject.cpp">
+      <Filter>Source\Object\ThroughWall</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Object\Manager\ThroughWallManager.cpp">
+      <Filter>Source\Object\Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -333,9 +342,6 @@
     </ClInclude>
     <ClInclude Include="externals\imgui\imgui_internal.h">
       <Filter>externals\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Asset\ModelLoader.h">
-      <Filter>Source\Asset</Filter>
     </ClInclude>
     <ClInclude Include="Source\Audio\Audio.h">
       <Filter>Source\Audio</Filter>
@@ -424,12 +430,6 @@
     <ClInclude Include="Source\RenderCore\Lighting.h">
       <Filter>Source\RenderCore</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Renderer\ThroughWallRenderer.h">
-      <Filter>Source\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\Sprite.h">
-      <Filter>Source\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Utils\ColorHelper.h">
       <Filter>Source\Utils</Filter>
     </ClInclude>
@@ -478,9 +478,6 @@
     <ClInclude Include="Source\RenderCore\Camera\CameraState\DebugCameraState.h">
       <Filter>Source\RenderCore\Camera\CameraState</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Object\ModelObject.h">
-      <Filter>Source\Object</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Graphics\Pipeline\PipelineList.h">
       <Filter>Source\Graphics\Pipeline</Filter>
     </ClInclude>
@@ -516,6 +513,27 @@
     </ClInclude>
     <ClInclude Include="Source\Object\Primitive\SphereObject.h">
       <Filter>Source\Object\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Model\Model.h">
+      <Filter>Source\Object\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Model\ModelLoader.h">
+      <Filter>Source\Object\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Model\ModelData.h">
+      <Filter>Source\Object\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Sprite\Sprite.h">
+      <Filter>Source\Object\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\ThroughWall\ThroughWallObject.h">
+      <Filter>Source\Object\ThroughWall</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\ThroughWall\ThroughWallStyle.h">
+      <Filter>Source\Object\ThroughWall</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Manager\ThroughWallManager.h">
+      <Filter>Source\Object\Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

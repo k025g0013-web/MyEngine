@@ -177,7 +177,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Asset\ModelLoader.cpp" />
     <ClCompile Include="Source\Audio\Audio.cpp" />
     <ClCompile Include="Source\Audio\AudioLoader.cpp" />
     <ClCompile Include="Source\Audio\AudioManager.cpp" />
@@ -209,10 +208,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\KizunaEngine.cpp" />
     <ClCompile Include="Source\Math\Easing.cpp" />
     <ClCompile Include="Source\Object\Common\Object3D.cpp" />
-    <ClCompile Include="Source\Object\ModelObject.cpp" />
+    <ClCompile Include="Source\Object\Manager\ThroughWallManager.cpp" />
+    <ClCompile Include="Source\Object\Model\ModelLoader.cpp" />
+    <ClCompile Include="Source\Object\Model\Model.cpp" />
     <ClCompile Include="Source\Object\Primitive\PlaneObject.cpp" />
     <ClCompile Include="Source\Object\Primitive\SphereObject.cpp" />
     <ClCompile Include="Source\Object\Primitive\TriangleObject.cpp" />
+    <ClCompile Include="Source\Object\Sprite\Sprite.cpp" />
+    <ClCompile Include="Source\Object\ThroughWall\ThroughWallObject.cpp" />
     <ClCompile Include="Source\RenderCore\Camera\Camera.cpp" />
     <ClCompile Include="Source\RenderCore\Camera\CameraManager.cpp" />
     <ClCompile Include="Source\RenderCore\Camera\CameraState\DebugCameraState.cpp" />
@@ -220,8 +223,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\RenderCore\Camera\DebugCamera.cpp" />
     <ClCompile Include="Source\RenderCore\Camera\NormalCamera.cpp" />
     <ClCompile Include="Source\RenderCore\Lighting.cpp" />
-    <ClCompile Include="Source\Renderer\Sprite.cpp" />
-    <ClCompile Include="Source\Renderer\ThroughWallRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -306,7 +307,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_rectpack.h" />
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
-    <ClInclude Include="Source\Asset\ModelLoader.h" />
     <ClInclude Include="Source\Audio\Audio.h" />
     <ClInclude Include="Source\Audio\AudioData.h" />
     <ClInclude Include="Source\Audio\AudioFormat.h" />
@@ -349,10 +349,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Math\Vector.h" />
     <ClInclude Include="Source\Object\Common\Object3D.h" />
     <ClInclude Include="Source\Object\Common\ObjectTypes.h" />
-    <ClInclude Include="Source\Object\ModelObject.h" />
+    <ClInclude Include="Source\Object\Manager\ThroughWallManager.h" />
+    <ClInclude Include="Source\Object\Model\ModelData.h" />
+    <ClInclude Include="Source\Object\Model\ModelLoader.h" />
+    <ClInclude Include="Source\Object\Model\Model.h" />
     <ClInclude Include="Source\Object\Primitive\PlaneObject.h" />
     <ClInclude Include="Source\Object\Primitive\SphereObject.h" />
     <ClInclude Include="Source\Object\Primitive\TriangleObject.h" />
+    <ClInclude Include="Source\Object\Sprite\Sprite.h" />
+    <ClInclude Include="Source\Object\ThroughWall\ThroughWallObject.h" />
+    <ClInclude Include="Source\Object\ThroughWall\ThroughWallStyle.h" />
     <ClInclude Include="Source\RenderCore\Camera\Camera.h" />
     <ClInclude Include="Source\RenderCore\Camera\CameraManager.h" />
     <ClInclude Include="Source\RenderCore\Camera\CameraState\CameraState.h" />
@@ -361,8 +367,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\RenderCore\Camera\DebugCamera.h" />
     <ClInclude Include="Source\RenderCore\Camera\NormalCamera.h" />
     <ClInclude Include="Source\RenderCore\Lighting.h" />
-    <ClInclude Include="Source\Renderer\Sprite.h" />
-    <ClInclude Include="Source\Renderer\ThroughWallRenderer.h" />
     <ClInclude Include="Source\Utils\ColorHelper.h" />
     <ClInclude Include="Source\Utils\ConvertString.h" />
     <ClInclude Include="Source\Utils\RandomHelper.h" />

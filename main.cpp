@@ -2,14 +2,16 @@
 #include "RenderCore/Camera/CameraManager.h"
 #include "RenderCore/Lighting.h"
 #include "Object/Common/Object3D.h"
-#include "Renderer/Sprite.h"
-#include "Renderer/ThroughWallRenderer.h"
+#include "Object/Manager/ThroughWallManager.h"
 #include "External/ImGuiManager.h"
 
 #include "Object/Primitive/TriangleObject.h"
 #include "Object/Primitive/PlaneObject.h"
 #include "Object/Primitive/SphereObject.h"
-#include "Object/ModelObject.h"
+
+#include "Object/Model/Model.h"
+
+#include "Object/Sprite/Sprite.h"
 
 #include <cstdint>
 #include <algorithm>
@@ -47,13 +49,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
     //-------------------------------------------------------------------------
 
     // 壁越し描画
-    ThroughWallRenderer throughWallRenderer;
+    ThroughWallManager throughWallManager;
 
     static bool isThroughWall = true;
-
-    // 複数モデルのリソース初期化
-    std::vector<std::unique_ptr<Object3D>> models;
-    std::vector<Transform> transforms;
 
     //-------------------------------------------------------------------------
     // テクスチャの読み込み
@@ -67,7 +65,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
     textures[0] =
         textureManager->LoadTexture(
             commandList,
-            "resources/Models/fence/fence.png");
+            "resources/uvChecker.png");
 
     textures[1] =
         textureManager->LoadTexture(
@@ -98,11 +96,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
     // 初期オブジェクト
     //-------------------------------------------------------------------------
 
+    // プリミティブ
+    std::vector<std::unique_ptr<Object3D>> primitives;
+
+    // モデル
+    std::vector<std::unique_ptr<Model>> models;
+
+    std::vector<Transform> primitiveTransforms;
+    std::vector<Transform> modelTransforms;
+
     {
-        // fenceはModelObject側で
-        // fence.pngを自動的に読み込む
         auto object =
-            std::make_unique<ModelObject>(
+            std::make_unique<Model>(
                 "fence",
                 textureManager);
 
@@ -115,16 +120,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
         models.push_back(
             std::move(object));
 
-        transforms.push_back({
+        modelTransforms.push_back({
             .scale = {1.0f, 1.0f, 1.0f},
             .rotate = {0.0f, 0.0f, 0.0f},
             .translate = {0.0f, 0.0f, 0.0f}
             });
 
-        throughWallRenderer.AddObject(
-            models.back().get(),
-            0x00000000,
-            Style::Solid);
     }
 
     //-------------------------------------------------------------------------
@@ -242,106 +243,186 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
         if (ImGui::Button("Create Model")) {
 
-            std::unique_ptr<Object3D> object;
-
             switch (createType) {
 
-            case 0:
+            case 0: {
                 // Triangle
-                object =
+                auto object =
                     std::make_unique<TriangleObject>(
                         Vector3{ -0.5f, -0.5f, 0.0f },
                         Vector3{ 0.0f, 0.5f, 0.0f },
                         Vector3{ 0.5f, -0.5f, 0.0f });
-                break;
 
-            case 1:
-                // Plane
-                // plane.pngを自動読み込み
-                object =
-                    std::make_unique<ModelObject>(
-                        "plane",
-                        textureManager);
-                break;
-
-            case 2:
-                // Cube
-                // cube.pngを自動読み込み
-                object =
-                    std::make_unique<ModelObject>(
-                        "cube",
-                        textureManager);
-                break;
-
-            case 3:
-                // Sphere
-                object =
-                    std::make_unique<SphereObject>(
-                        kSubdivision);
-                break;
-
-            case 4:
-                // Teapot
-                // 外部テクスチャを使用
-                object =
-                    std::make_unique<ModelObject>(
-                        "teapot",
-                        textureManager,
-                        textures[4]);
-                break;
-
-            case 5:
-                // Bunny
-                // 外部テクスチャを使用
-                object =
-                    std::make_unique<ModelObject>(
-                        "bunny",
-                        textureManager,
-                        textures[0]);
-                break;
-
-            case 6:
-                // Suzanne
-                // 外部テクスチャを使用
-                object =
-                    std::make_unique<ModelObject>(
-                        "suzanne",
-                        textureManager,
-                        textures[5]);
-                break;
-            }
-
-            if (object) {
-
-                // オブジェクトの初期化
                 object->Create(
                     device,
                     commandList,
                     0xFFFFFFFF,
                     true);
 
-                // 所有権を移動
-                models.push_back(
+                primitives.push_back(
                     std::move(object));
 
-                // Transformを追加
-                transforms.push_back({
+                primitiveTransforms.push_back({
                     {1, 1, 1},
                     {0, 0, 0},
                     {0, 0, 0}
                     });
 
-                // ThroughWall登録
-                if (isThroughWall) {
+                break;
+            }
 
-                    throughWallRenderer.AddObject(
-                        models.back().get(),
-                        0xFFFFFFFF,
-                        Style::Solid);
-                }
+            case 1: {
+                // Plane
+                auto model =
+                    std::make_unique<Model>(
+                        "plane",
+                        textureManager,
+                        textures[0]);
 
-                currentObjectIndex =
-                    static_cast<int>(models.size()) - 1;
+                model->Create(
+                    device,
+                    commandList,
+                    0xFFFFFFFF,
+                    true);
+
+                models.push_back(
+                    std::move(model));
+
+                modelTransforms.push_back({
+                    {1, 1, 1},
+                    {0, 0, 0},
+                    {0, 0, 0}
+                    });
+
+                break;
+            }
+
+            case 2: {
+                // Cube
+                auto model =
+                    std::make_unique<Model>(
+                        "cube",
+                        textureManager);
+
+                model->Create(
+                    device,
+                    commandList,
+                    0xFFFFFFFF,
+                    true);
+
+                models.push_back(
+                    std::move(model));
+
+                modelTransforms.push_back({
+                    {1, 1, 1},
+                    {0, 0, 0},
+                    {0, 0, 0}
+                    });
+
+                break;
+            }
+
+            case 3: {
+                // Sphere
+                auto object =
+                    std::make_unique<SphereObject>(
+                        kSubdivision);
+
+                object->Create(
+                    device,
+                    commandList,
+                    0xFFFFFFFF,
+                    true);
+
+                primitives.push_back(
+                    std::move(object));
+
+                primitiveTransforms.push_back({
+                    {1, 1, 1},
+                    {0, 0, 0},
+                    {0, 0, 0}
+                    });
+
+                break;
+            }
+
+            case 4: {
+                // Teapot
+                auto model =
+                    std::make_unique<Model>(
+                        "teapot",
+                        textureManager,
+                        textures[0]);
+
+                model->Create(
+                    device,
+                    commandList,
+                    0xFFFFFFFF,
+                    true);
+
+                models.push_back(
+                    std::move(model));
+
+                modelTransforms.push_back({
+                    {1, 1, 1},
+                    {0, 0, 0},
+                    {0, 0, 0}
+                    });
+
+                break;
+            }
+
+            case 5: {
+                // Bunny
+                auto model =
+                    std::make_unique<Model>(
+                        "bunny",
+                        textureManager,
+                        textures[0]);
+
+                model->Create(
+                    device,
+                    commandList,
+                    0xFFFFFFFF,
+                    true);
+
+                models.push_back(
+                    std::move(model));
+
+                modelTransforms.push_back({
+                    {1, 1, 1},
+                    {0, 0, 0},
+                    {0, 0, 0}
+                    });
+
+                break;
+            }
+
+            case 6: {
+                // Suzanne
+                auto model =
+                    std::make_unique<Model>(
+                        "suzanne",
+                        textureManager,
+                        textures[5]);
+
+                model->Create(
+                    device,
+                    commandList,
+                    0xFFFFFFFF,
+                    true);
+
+                models.push_back(
+                    std::move(model));
+
+                modelTransforms.push_back({
+                    {1, 1, 1},
+                    {0, 0, 0},
+                    {0, 0, 0}
+                    });
+
+                break;
+            }
             }
         }
 
@@ -389,11 +470,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                     static_cast<int>(models.size()) - 1);
 
             if (ImGui::CollapsingHeader(
-                "Object",
+                "Model",
                 ImGuiTreeNodeFlags_DefaultOpen)) {
 
                 Transform &transform =
-                    transforms[currentObjectIndex];
+                    modelTransforms[currentObjectIndex];
 
                 ImGui::DragFloat3(
                     "Translate",
@@ -415,17 +496,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
                     if (ImGui::Button("Delete")) {
 
-                        Object3D *deleteObject =
-                            models[currentObjectIndex].get();
-
-                        throughWallRenderer.RemoveObject(
-                            deleteObject);
-
                         models.erase(
                             models.begin() + currentObjectIndex);
 
-                        transforms.erase(
-                            transforms.begin() + currentObjectIndex);
+                        modelTransforms.erase(
+                            modelTransforms.begin() + currentObjectIndex);
 
                         if (!models.empty()) {
 
@@ -433,11 +508,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                                 (std::min)(
                                     currentObjectIndex,
                                     static_cast<int>(models.size()) - 1);
+
                         } else {
 
                             currentObjectIndex = 0;
                         }
                     }
+
                 } else {
 
                     ImGui::BeginDisabled();
@@ -450,18 +527,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                     "Material",
                     ImGuiTreeNodeFlags_DefaultOpen)) {
 
-                    auto &object =
+                    auto &model =
                         models[currentObjectIndex];
 
                     auto &material =
-                        object->GetMaterial();
+                        model->GetMaterial();
 
                     ImGui::ColorEdit4(
                         "Color",
                         &material.GetMaterialData()->color.x);
 
                     Transform &uv =
-                        object->GetUVTransform();
+                        model->GetUVTransform();
 
                     ImGui::DragFloat2(
                         "UV-Translate",
@@ -503,7 +580,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                 }
             }
         }
-
         //-------------------------------------------------------------------------
         // Light
         //-------------------------------------------------------------------------
@@ -688,28 +764,31 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
         // ThroughWall
         //-------------------------------------------------------------------------
 
-        ImGui::ColorEdit4(
-            "ThroughWall-Object Color",
-            &throughWallRenderer.GetObject(0).color.x);
+        if (!throughWallManager.Empty()) {
 
-        const char *styleNames[] = {
-            "Solid",
-            "Dot",
-            "Stripe"
-        };
+            ImGui::ColorEdit4(
+                "ThroughWall-Object Color",
+                &throughWallManager.GetObject(0).GetColor().x);
 
-        int style0 =
-            static_cast<int>(
-                throughWallRenderer.GetObject(0).style);
+            const char *styleNames[] = {
+                "Solid",
+                "Dot",
+                "Stripe"
+            };
 
-        if (ImGui::Combo(
-            "ThroughWall Style",
-            &style0,
-            styleNames,
-            IM_ARRAYSIZE(styleNames))) {
+            int style0 =
+                static_cast<int>(
+                    throughWallManager.GetObject(0).GetStyle());
 
-            throughWallRenderer.GetObject(0).style =
-                static_cast<Style>(style0);
+            if (ImGui::Combo(
+                "ThroughWall Style",
+                &style0,
+                styleNames,
+                IM_ARRAYSIZE(styleNames))) {
+
+                throughWallManager.GetObject(0).SetStyle(
+                    static_cast<Style>(style0));
+            }
         }
 
         //-------------------------------------------------------------------------
@@ -768,18 +847,25 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                 kLightRegisterIndex,
                 commandList);
 
-            for (size_t i = 0;
-                i < models.size();
-                ++i) {
+            // プリミティブ
+            for (size_t i = 0; i < primitives.size(); ++i) {
 
-                auto &object =
-                    models[i];
-
-                object->Update(
+                primitives[i]->Update(
                     &camera,
-                    transforms[i]);
+                    primitiveTransforms[i]);
 
-                object->Draw(
+                primitives[i]->Draw(
+                    commandList);
+            }
+
+            // モデル
+            for (size_t i = 0; i < models.size(); ++i) {
+
+                models[i]->Update(
+                    &camera,
+                    modelTransforms[i]);
+
+                models[i]->Draw(
                     commandList);
             }
         }
@@ -789,7 +875,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
             engine->SetPipeline(
                 PipelineType::Object3dThroughWall);
 
-            throughWallRenderer.Draw(
+            throughWallManager.Draw(
                 commandList);
         }
 
