@@ -97,6 +97,12 @@
     <Filter Include="Source\Graphics\Material">
       <UniqueIdentifier>{d81e25c7-38ae-4cd5-a66b-216ae65a4fe9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Object\Common">
+      <UniqueIdentifier>{a237530c-241a-4738-8635-daec9d6e5485}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Object\Primitive">
+      <UniqueIdentifier>{8a4f6480-d187-45b9-88e2-875c9ecae87c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externals\imgui\imgui_widgets.cpp">
@@ -189,9 +195,6 @@
     <ClCompile Include="Source\Math\Easing.cpp">
       <Filter>Source\Math</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Object\Object3D.cpp">
-      <Filter>Source\Object</Filter>
-    </ClCompile>
     <ClCompile Include="Source\RenderCore\Lighting.cpp">
       <Filter>Source\RenderCore</Filter>
     </ClCompile>
@@ -229,16 +232,7 @@
     <ClCompile Include="Source\RenderCore\Camera\CameraState\DebugCameraState.cpp">
       <Filter>Source\RenderCore\Camera\CameraState</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Object\SphereObject.cpp">
-      <Filter>Source\Object</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Object\ModelObject.cpp">
-      <Filter>Source\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Object\TriangleObject.cpp">
-      <Filter>Source\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Object\PlaneObject.cpp">
       <Filter>Source\Object</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\Pipeline\PipelineList.cpp">
@@ -255,6 +249,18 @@
     </ClCompile>
     <ClCompile Include="Source\Graphics\Resource\Mesh.cpp">
       <Filter>Source\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Object\Common\Object3D.cpp">
+      <Filter>Source\Object\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Object\Primitive\PlaneObject.cpp">
+      <Filter>Source\Object\Primitive</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Object\Primitive\SphereObject.cpp">
+      <Filter>Source\Object\Primitive</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Object\Primitive\TriangleObject.cpp">
+      <Filter>Source\Object\Primitive</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -415,12 +421,6 @@
     <ClInclude Include="Source\Math\Matrix.h">
       <Filter>Source\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Object\Object3D.h">
-      <Filter>Source\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\RenderCore\TransformationMatrix.h">
-      <Filter>Source\RenderCore</Filter>
-    </ClInclude>
     <ClInclude Include="Source\RenderCore\Lighting.h">
       <Filter>Source\RenderCore</Filter>
     </ClInclude>
@@ -478,16 +478,7 @@
     <ClInclude Include="Source\RenderCore\Camera\CameraState\DebugCameraState.h">
       <Filter>Source\RenderCore\Camera\CameraState</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Object\SphereObject.h">
-      <Filter>Source\Object</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Object\ModelObject.h">
-      <Filter>Source\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Object\TriangleObject.h">
-      <Filter>Source\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Object\PlaneObject.h">
       <Filter>Source\Object</Filter>
     </ClInclude>
     <ClInclude Include="Source\Graphics\Pipeline\PipelineList.h">
@@ -507,6 +498,24 @@
     </ClInclude>
     <ClInclude Include="Source\Graphics\Resource\Mesh.h">
       <Filter>Source\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Common\Object3D.h">
+      <Filter>Source\Object\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Common\ObjectTypes.h">
+      <Filter>Source\Object\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics\Resource\TransformationMatrix.h">
+      <Filter>Source\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Primitive\TriangleObject.h">
+      <Filter>Source\Object\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Primitive\PlaneObject.h">
+      <Filter>Source\Object\Primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Primitive\SphereObject.h">
+      <Filter>Source\Object\Primitive</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

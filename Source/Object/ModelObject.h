@@ -3,7 +3,7 @@
 #include <string>
 #include <utility>
 
-#include "Object3D.h"
+#include "Common/Object3D.h"
 #include "Asset/ModelLoader.h"
 #include "Graphics/Resource/Texture.h"
 

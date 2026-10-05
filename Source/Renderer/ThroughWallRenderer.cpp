@@ -1,5 +1,5 @@
 #include "ThroughWallRenderer.h"
-#include "Object/Object3D.h"
+#include "Object/Common/Object3D.h"
 #include "Utils/ColorHelper.h"
 
 #include <iostream>

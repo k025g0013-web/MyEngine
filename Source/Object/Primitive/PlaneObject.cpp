@@ -1,18 +1,22 @@
-#include "TriangleObject.h"
+#include "PlaneObject.h"
 
 namespace Kizuna {
-	void TriangleObject::Create(
+	void PlaneObject::Create(
 		ID3D12Device *device, ID3D12GraphicsCommandList *commandList,
 		uint32_t color, bool enableLighting) {
-
 		// commandListはプリミティブでは使用しない
 		(void)commandList;
 
-		// 頂点データを生成する
-		meshGenerator_.CreateTriangle(vertices_, wigth_, height_, right_);
+		std::vector<VertexData> vertices;
+
+		meshGenerator_.CreatePlane(
+			vertices,
+			center_,
+			width_,
+			depth_);
 
 		// メッシュを生成する
-		mesh_.Create(device, vertices_);
+		mesh_.Create(device, vertices);
 
 		// 共通初期化
 		InitializeMaterial(device, color, enableLighting);
