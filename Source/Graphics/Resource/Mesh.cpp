@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-#include "Renderer/Renderer.h"
+#include "Graphics/Renderer/Renderer.h"
 
 namespace Kizuna {
     void Mesh::Create(

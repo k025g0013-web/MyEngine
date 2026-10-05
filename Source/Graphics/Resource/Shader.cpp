@@ -85,10 +85,6 @@ namespace Kizuna {
         // コンパイル成功をログへ出力する
         sLogger_->Log(ConvertString(std::format(L"Compile Succeeded, path:{}, profile:{}\n", filePath, profile)));
 
-        // 一時リソースを解放する
-        shaderSource->Release();
-        shaderResult->Release();
-
         (void)hr;
     }
 }

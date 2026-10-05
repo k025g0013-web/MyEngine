@@ -136,11 +136,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\Graphics\Core\Fence.cpp" />
     <ClCompile Include="Source\Graphics\DirectXCommon.cpp" />
     <ClCompile Include="Source\Graphics\Frame\RenderOutput.cpp" />
+    <ClCompile Include="Source\Graphics\Material\Material.cpp" />
     <ClCompile Include="Source\Graphics\Pipeline\GraphicsPipeline.cpp" />
     <ClCompile Include="Source\Graphics\Pipeline\PipelineList.cpp" />
     <ClCompile Include="Source\Graphics\Pipeline\PipelineManager.cpp" />
     <ClCompile Include="Source\Graphics\Pipeline\RootSignature.cpp" />
     <ClCompile Include="Source\Graphics\Pipeline\ViewportState.cpp" />
+    <ClCompile Include="Source\Graphics\Renderer\MeshGenerator.cpp" />
+    <ClCompile Include="Source\Graphics\Renderer\Renderer.cpp" />
+    <ClCompile Include="Source\Graphics\Resource\Mesh.cpp" />
     <ClCompile Include="Source\Graphics\Resource\MeshBuffer.cpp" />
     <ClCompile Include="Source\Graphics\Resource\Shader.cpp" />
     <ClCompile Include="Source\Graphics\Resource\Texture.cpp" />
@@ -161,9 +165,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\RenderCore\Camera\DebugCamera.cpp" />
     <ClCompile Include="Source\RenderCore\Camera\NormalCamera.cpp" />
     <ClCompile Include="Source\RenderCore\Lighting.cpp" />
-    <ClCompile Include="Source\RenderCore\Material.cpp" />
-    <ClCompile Include="Source\RenderCore\Mesh.cpp" />
-    <ClCompile Include="Source\Renderer\Renderer.cpp" />
     <ClCompile Include="Source\Renderer\Sprite.cpp" />
     <ClCompile Include="Source\Renderer\ThroughWallRenderer.cpp" />
   </ItemGroup>
@@ -252,6 +253,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Graphics\Core\Fence.h" />
     <ClInclude Include="Source\Graphics\DirectXCommon.h" />
     <ClInclude Include="Source\Graphics\Frame\RenderOutput.h" />
+    <ClInclude Include="Source\Graphics\Material\Material.h" />
     <ClInclude Include="Source\Graphics\Pipeline\GraphicsPipeline.h" />
     <ClInclude Include="Source\Graphics\Pipeline\PipelineConfig.h" />
     <ClInclude Include="Source\Graphics\Pipeline\PipelineElements.h" />
@@ -259,6 +261,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Graphics\Pipeline\PipelineManager.h" />
     <ClInclude Include="Source\Graphics\Pipeline\RootSignature.h" />
     <ClInclude Include="Source\Graphics\Pipeline\ViewportState.h" />
+    <ClInclude Include="Source\Graphics\Renderer\MeshGenerator.h" />
+    <ClInclude Include="Source\Graphics\Renderer\Renderer.h" />
+    <ClInclude Include="Source\Graphics\Resource\Mesh.h" />
     <ClInclude Include="Source\Graphics\Resource\MeshBuffer.h" />
     <ClInclude Include="Source\Graphics\Resource\Shader.h" />
     <ClInclude Include="Source\Graphics\Resource\Texture.h" />
@@ -285,11 +290,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\RenderCore\Camera\DebugCamera.h" />
     <ClInclude Include="Source\RenderCore\Camera\NormalCamera.h" />
     <ClInclude Include="Source\RenderCore\Lighting.h" />
-    <ClInclude Include="Source\RenderCore\Material.h" />
-    <ClInclude Include="Source\RenderCore\Mesh.h" />
-    <ClInclude Include="Source\RenderCore\ThroughWallMaterial.h" />
     <ClInclude Include="Source\RenderCore\TransformationMatrix.h" />
-    <ClInclude Include="Source\Renderer\Renderer.h" />
     <ClInclude Include="Source\Renderer\Sprite.h" />
     <ClInclude Include="Source\Renderer\ThroughWallRenderer.h" />
     <ClInclude Include="Source\Utils\ColorHelper.h" />

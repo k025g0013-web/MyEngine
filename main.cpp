@@ -29,27 +29,18 @@ namespace {
 }
 
 // Windowsアプリでのエントリーポイント
-int WINAPI WinMain(
-    _In_ HINSTANCE,
-    _In_opt_ HINSTANCE,
-    _In_ LPSTR,
-    _In_ int) {
+int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
     //-------------------------------------------------------------------------
     // 基盤初期化
     //-------------------------------------------------------------------------
     auto engine = std::make_unique<KizunaEngine>();
 
-    engine->Initialize(
-        L"CG2",
-        kClientWidth,
-        kClientHeight);
+    engine->Initialize(L"CG2", kClientWidth, kClientHeight);
 
-    ID3D12Device *device =
-        engine->GetDevice();
+    ID3D12Device *device = engine->GetDevice();
 
-    ID3D12GraphicsCommandList *commandList =
-        engine->GetCommandList();
+    ID3D12GraphicsCommandList *commandList = engine->GetCommandList();
 
     //-------------------------------------------------------------------------
     // データ生成・初期リソースのセットアップ

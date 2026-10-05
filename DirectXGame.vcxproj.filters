@@ -91,6 +91,12 @@
     <Filter Include="Source\RenderCore\Camera\CameraState">
       <UniqueIdentifier>{3bdf38db-1e63-4018-8fa7-f30b5b7f72f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Graphics\Renderer">
+      <UniqueIdentifier>{58600f63-48dc-4498-aa01-d2fd3b320c35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Graphics\Material">
+      <UniqueIdentifier>{d81e25c7-38ae-4cd5-a66b-216ae65a4fe9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externals\imgui\imgui_widgets.cpp">
@@ -189,15 +195,6 @@
     <ClCompile Include="Source\RenderCore\Lighting.cpp">
       <Filter>Source\RenderCore</Filter>
     </ClCompile>
-    <ClCompile Include="Source\RenderCore\Material.cpp">
-      <Filter>Source\RenderCore</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\RenderCore\Mesh.cpp">
-      <Filter>Source\RenderCore</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\Renderer.cpp">
-      <Filter>Source\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Renderer\Sprite.cpp">
       <Filter>Source\Renderer</Filter>
     </ClCompile>
@@ -246,6 +243,18 @@
     </ClCompile>
     <ClCompile Include="Source\Graphics\Pipeline\PipelineList.cpp">
       <Filter>Source\Graphics\Pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Renderer\MeshGenerator.cpp">
+      <Filter>Source\Graphics\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Renderer\Renderer.cpp">
+      <Filter>Source\Graphics\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Material\Material.cpp">
+      <Filter>Source\Graphics\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Resource\Mesh.cpp">
+      <Filter>Source\Graphics\Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -415,16 +424,7 @@
     <ClInclude Include="Source\RenderCore\Lighting.h">
       <Filter>Source\RenderCore</Filter>
     </ClInclude>
-    <ClInclude Include="Source\RenderCore\Material.h">
-      <Filter>Source\RenderCore</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\RenderCore\Mesh.h">
-      <Filter>Source\RenderCore</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Renderer\ThroughWallRenderer.h">
-      <Filter>Source\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\Renderer.h">
       <Filter>Source\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Source\Renderer\Sprite.h">
@@ -444,9 +444,6 @@
     </ClInclude>
     <ClInclude Include="Source\KizunaEngine.h">
       <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\RenderCore\ThroughWallMaterial.h">
-      <Filter>Source\RenderCore</Filter>
     </ClInclude>
     <ClInclude Include="Source\Audio\AudioData.h">
       <Filter>Source\Audio</Filter>
@@ -498,6 +495,18 @@
     </ClInclude>
     <ClInclude Include="Source\Graphics\Pipeline\PipelineConfig.h">
       <Filter>Source\Graphics\Pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics\Renderer\MeshGenerator.h">
+      <Filter>Source\Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics\Renderer\Renderer.h">
+      <Filter>Source\Graphics\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics\Material\Material.h">
+      <Filter>Source\Graphics\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics\Resource\Mesh.h">
+      <Filter>Source\Graphics\Resource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

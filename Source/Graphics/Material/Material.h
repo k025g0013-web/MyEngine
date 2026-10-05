@@ -7,6 +7,7 @@
 #include "Math/Matrix.h"
 
 namespace Kizuna {
+
     /// <summary>
     /// マテリアル情報をGPUへ転送するための構造体
     /// </summary>
@@ -32,7 +33,7 @@ namespace Kizuna {
     /// <summary>
     /// 壁越し描画専用マテリアル情報
     /// </summary>
-    /// /// <remarks>
+    /// <remarks>
     /// 色・描画スタイル・UV変換行列を保持し、
     /// ピクセルシェーダで使用される定数バッファとして利用する。
     /// </remarks>
@@ -44,7 +45,7 @@ namespace Kizuna {
         /// 描画スタイル
         int32_t style;
 
-        /// アライメント調整
+        /// ConstantBufferのアライメント調整用
         float padding[3];
 
         /// UV座標変換
@@ -76,7 +77,9 @@ namespace Kizuna {
         /// <summary>
         /// マテリアルデータを取得する
         /// </summary>
-        MaterialData *GetMaterialData() const { return materialData_; }
+        MaterialData *GetMaterialData() const {
+            return materialData_;
+        }
 
         /// <summary>
         /// 定数バッファのGPU仮想アドレスを取得する
@@ -94,16 +97,17 @@ namespace Kizuna {
         MaterialData *materialData_ = nullptr;
     };
 
+
     /// <summary>
-    /// 壁越し描画用マテリアル情報
+    /// 壁越し描画用マテリアル情報を管理するクラス
     /// </summary>
     /// <remarks>
     /// 壁越し描画時に使用する色や描画スタイル、
-    /// UV変換行列を保持し、ピクセルシェーダで使用される
-    /// 定数バッファとして利用する。
+    /// UV変換を管理し、GPUへ定数バッファとして転送する。
     /// </remarks>
     class ThroughWallMaterial {
     public:
+
         /// <summary>
         /// 壁越し描画用マテリアルを初期化する
         /// </summary>
@@ -117,13 +121,9 @@ namespace Kizuna {
         /// <summary>
         /// 壁越し描画用マテリアルデータを取得する
         /// </summary>
-        /// <returns>
-        /// GPUへ転送する壁越し描画用マテリアルデータ
-        /// </returns>
         ThroughWallMaterialData *GetMaterialData() const {
             return materialData_;
         }
-
 
         /// <summary>
         /// 定数バッファのGPU仮想アドレスを取得する
@@ -133,6 +133,7 @@ namespace Kizuna {
         }
 
     private:
+
         /// 壁越し描画用マテリアル定数バッファ
         MeshBuffer constantBuffer_;
 

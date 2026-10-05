@@ -8,7 +8,7 @@ namespace Kizuna {
 		uint32_t color
 	) {
 		// 指定された矩形サイズからスプライトの頂点情報を生成する
-		render_.CreateSprite(vertices_, indices_, left, top, right, bottom);
+		meshGenerator_.CreateSprite(vertices_, indices_, left, top, right, bottom);
 
 		// GPUへ転送する頂点バッファを生成する
 		render_.CreateVertexBuffer(device, vertexBuffer_, vertices_);

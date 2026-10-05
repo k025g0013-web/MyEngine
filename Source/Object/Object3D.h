@@ -7,9 +7,10 @@
 #include "Graphics/Resource/MeshBuffer.h"
 #include "Graphics/Resource/Texture.h"
 #include "RenderCore/Camera/CameraManager.h"
-#include "RenderCore/Material.h"
+#include "Graphics/Material/Material.h"
 #include "RenderCore/Mesh.h"
-#include "Renderer/Renderer.h"
+#include "Graphics/Renderer/Renderer.h"
+#include "Graphics/Renderer/MeshGenerator.h"
 
 namespace Kizuna {
     enum class RenderPass {
@@ -98,6 +99,7 @@ namespace Kizuna {
     protected:
         // 描画データ生成補助クラス
         Renderer renderer_;
+        MeshGenerator meshGenerator_;
 
         // 描画に使用するメッシュ
         Mesh mesh_;
