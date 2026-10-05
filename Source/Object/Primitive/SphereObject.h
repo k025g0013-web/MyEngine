@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Object3D.h"
+#include "Object/Common/Object3D.h"
 
 namespace Kizuna {
 

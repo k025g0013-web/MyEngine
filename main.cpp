@@ -1,14 +1,14 @@
 #include "KizunaEngine.h"
 #include "RenderCore/Camera/CameraManager.h"
 #include "RenderCore/Lighting.h"
-#include "Object/Object3D.h"
+#include "Object/Common/Object3D.h"
 #include "Renderer/Sprite.h"
 #include "Renderer/ThroughWallRenderer.h"
 #include "External/ImGuiManager.h"
 
-#include "Object/TriangleObject.h"
-#include "Object/PlaneObject.h"
-#include "Object/SphereObject.h"
+#include "Object/Primitive/TriangleObject.h"
+#include "Object/Primitive/PlaneObject.h"
+#include "Object/Primitive/SphereObject.h"
 #include "Object/ModelObject.h"
 
 #include <cstdint>

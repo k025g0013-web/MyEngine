@@ -1,19 +1,19 @@
 #pragma once
 
-#include "Object3D.h"
+#include "Object/Common/Object3D.h"
 
 namespace Kizuna {
     /// <summary>
-    /// 三角平面オブジェクト
+    /// 平面四角形オブジェクト
     /// </summary>
-    class TriangleObject : public Object3D {
+    class PlaneObject : public Object3D {
     public:
-        explicit TriangleObject(
-            const Vector3 &left, const Vector3 &top, const Vector3 &right)
-            : wigth_(left), height_(top), right_(right) {}
+        explicit PlaneObject(
+            const Vector3 center, const float width, const float depth)
+            : center_(center), width_(width), depth_(depth){}
 
         /// <summary>
-        /// 平面三角形を生成する
+        /// 平面四角形を生成する
         /// </summary>
          /// <param name="device">DirectXデバイス</param>
         /// <param name="commandList">コマンドリスト</param>
@@ -25,13 +25,13 @@ namespace Kizuna {
         // commandListはプリミティブでは使用しない
 
     private:
-        /// 左頂点
-        Vector3 wigth_;
-      
-        /// 上頂点
-        Vector3 height_;
-      
-        /// 右頂点
-        Vector3 right_;
+        /// 中央座標
+        Vector3 center_;
+        
+        /// 幅
+        float width_;
+        
+        /// 深さ
+        float depth_;
     };
 }

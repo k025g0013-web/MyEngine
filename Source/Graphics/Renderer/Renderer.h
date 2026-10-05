@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include "Graphics/Resource/MeshBuffer.h"
-#include "RenderCore/TransformationMatrix.h"
+#include "Graphics/Resource/TransformationMatrix.h"
 
 namespace Kizuna {
 	/// <summary>
