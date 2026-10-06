@@ -26,16 +26,15 @@ namespace Kizuna {
         // モデルと同名のテクスチャを読み込む
         if (!useExternalTexture_) {
 
-            assert(texture_ != nullptr);
+            assert(textureManager_ != nullptr);
 
             std::string texturePath =
                 FindTexturePath();
 
-            // 同名テクスチャが存在する場合のみ読み込む
             if (!texturePath.empty()) {
 
                 textureData_ =
-                    texture_->LoadTexture(
+                    textureManager_->LoadTexture(
                         commandList,
                         texturePath);
             }

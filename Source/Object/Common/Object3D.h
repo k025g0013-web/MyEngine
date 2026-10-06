@@ -5,6 +5,7 @@
 #include "Graphics/Renderer/MeshGenerator.h"
 #include "Graphics/Resource/Mesh.h"
 #include "Graphics/Resource/MeshBuffer.h"
+#include "Graphics/Resource/Texture.h"
 #include "Graphics/Resource/TransformationMatrix.h"
 #include "RenderCore/Camera/CameraManager.h"
 
@@ -41,13 +42,14 @@ namespace Kizuna {
         virtual void Draw(
             ID3D12GraphicsCommandList *commandList
         );
-
+        /*
         /// <summary>
         /// 壁越し描画を行う
         /// </summary>
         virtual void DrawThroughWall(
             ID3D12GraphicsCommandList *commandList
         );
+        */
 
         /// <summary>
         /// 通常描画用マテリアルを取得する
@@ -56,12 +58,14 @@ namespace Kizuna {
             return material_;
         }
 
+        /*
         /// <summary>
         /// 壁越し描画用マテリアルを取得する
         /// </summary>
         ThroughWallMaterial &GetThroughWallMaterial() {
             return throughWallMaterial_;
         }
+        */
 
         /// <summary>
         /// オブジェクト用Transformを取得する
@@ -77,6 +81,13 @@ namespace Kizuna {
             return uvTransform_;
         }
 
+        /// <summary>
+        /// 使用するテクスチャを設定する
+        /// </summary>
+        void SetTexture(
+            const TextureData &textureData) {
+            textureData_ = textureData;
+        }
     protected:
         /// <summary>
         /// 3Dオブジェクト共通の初期化処理
@@ -100,8 +111,11 @@ namespace Kizuna {
         // 通常描画用マテリアル
         Material material_;
 
+        // 使用するテクスチャ
+        TextureData textureData_{};
+
         // 壁越し描画用マテリアル
-        ThroughWallMaterial throughWallMaterial_;
+        // ThroughWallMaterial throughWallMaterial_;
 
         // WVP・World行列用定数バッファ
         MeshBuffer transformationMatrixBuffer_;

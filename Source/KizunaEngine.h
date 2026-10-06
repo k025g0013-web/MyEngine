@@ -7,23 +7,26 @@
 // === Core ===
 #include "Core/WinApp.h"
 #include "Core/Logger.h"
-#include "Core/DebugManager.h"
+#include "Manager/DebugManager.h"
 
 // === Graphics ===
 #include "Graphics/DirectXCommon.h"
 #include "Graphics/Pipeline/PipelineManager.h"
-#include "Graphics/Resource/Texture.h"
+#include "Manager/TextureManager.h"
 
 // === RenderCore ===
 #include "RenderCore/Lighting.h"
 
 // === Audio ===
-#include "Audio/AudioManager.h"
+#include "Manager/AudioManager.h"
 
 // === Input ===
 #include "Input/Keyboard.h"
 #include "Input/Mouse.h"
 #include "Input/GamePad.h"
+
+#include "Manager/PrimitiveManager.h"
+#include "Manager/ModelManager.h"
 
 namespace Kizuna {
 
@@ -95,7 +98,7 @@ namespace Kizuna {
             return directXCommon_->GetCommandList();
         }
 
-        Texture *GetTextureManager() const {
+        TextureManager *GetTextureManager() const {
             return textureManager_.get();
         }
 
@@ -121,6 +124,14 @@ namespace Kizuna {
 
         Lighting *GetLight() const {
             return lighting_.get();
+        }
+
+        PrimitiveManager *GetPrimitiveManager() const {
+            return primitiveManager_.get();
+        }
+
+        ModelManager *GetModelManager() const {
+            return modelManager_.get();
         }
 
     public:
@@ -160,10 +171,13 @@ namespace Kizuna {
         std::unique_ptr<Lighting> lighting_;
 
         /// テクスチャ管理クラス
-        std::unique_ptr<Texture> textureManager_;
+        std::unique_ptr<TextureManager> textureManager_;
 
         /// オーディオ管理クラス
         std::unique_ptr<AudioManager> audioManager_;
+
+        std::unique_ptr<PrimitiveManager> primitiveManager_;
+        std::unique_ptr<ModelManager> modelManager_;
     };
 
 }

@@ -103,11 +103,8 @@
     <Filter Include="Source\Object\Sprite">
       <UniqueIdentifier>{3deaf17e-8c6c-4d84-95ad-3d75de8230d6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Object\ThroughWall">
-      <UniqueIdentifier>{869f1ee1-3361-4155-ae69-2871f22159bc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Object\Manager">
-      <UniqueIdentifier>{48c385f0-bf15-438d-b90c-8b26f0bcbb0a}</UniqueIdentifier>
+    <Filter Include="Source\Manager">
+      <UniqueIdentifier>{4935ee49-9d12-4079-8ded-8b46b1f1020b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -134,9 +131,6 @@
     </ClCompile>
     <ClCompile Include="Source\Audio\Audio.cpp">
       <Filter>Source\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Core\DebugManager.cpp">
-      <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="Source\Core\Logger.cpp">
       <Filter>Source\Core</Filter>
@@ -208,9 +202,6 @@
     <ClCompile Include="Source\Audio\AudioLoader.cpp">
       <Filter>Source\Audio</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Audio\AudioManager.cpp">
-      <Filter>Source\Audio</Filter>
-    </ClCompile>
     <ClCompile Include="Source\RenderCore\Camera\CameraManager.cpp">
       <Filter>Source\RenderCore\Camera</Filter>
     </ClCompile>
@@ -265,11 +256,23 @@
     <ClCompile Include="Source\Object\Sprite\Sprite.cpp">
       <Filter>Source\Object\Sprite</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Object\ThroughWall\ThroughWallObject.cpp">
-      <Filter>Source\Object\ThroughWall</Filter>
+    <ClCompile Include="Source\Manager\AudioManager.cpp">
+      <Filter>Source\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Object\Manager\ThroughWallManager.cpp">
-      <Filter>Source\Object\Manager</Filter>
+    <ClCompile Include="Source\Manager\DebugManager.cpp">
+      <Filter>Source\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Manager\TextureManager.cpp">
+      <Filter>Source\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Resource\TextureLoader.cpp">
+      <Filter>Source\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Manager\PrimitiveManager.cpp">
+      <Filter>Source\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Manager\ModelManager.cpp">
+      <Filter>Source\Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -347,9 +350,6 @@
       <Filter>Source\Audio</Filter>
     </ClInclude>
     <ClInclude Include="Source\Core\WinApp.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Core\DebugManager.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
     <ClInclude Include="Source\Core\Logger.h">
@@ -451,9 +451,6 @@
     <ClInclude Include="Source\Audio\AudioLoader.h">
       <Filter>Source\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Audio\AudioManager.h">
-      <Filter>Source\Audio</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Audio\AudioFormat.h">
       <Filter>Source\Audio</Filter>
     </ClInclude>
@@ -526,14 +523,23 @@
     <ClInclude Include="Source\Object\Sprite\Sprite.h">
       <Filter>Source\Object\Sprite</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Object\ThroughWall\ThroughWallObject.h">
-      <Filter>Source\Object\ThroughWall</Filter>
+    <ClInclude Include="Source\Manager\AudioManager.h">
+      <Filter>Source\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Object\ThroughWall\ThroughWallStyle.h">
-      <Filter>Source\Object\ThroughWall</Filter>
+    <ClInclude Include="Source\Manager\DebugManager.h">
+      <Filter>Source\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Object\Manager\ThroughWallManager.h">
-      <Filter>Source\Object\Manager</Filter>
+    <ClInclude Include="Source\Manager\TextureManager.h">
+      <Filter>Source\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics\Resource\TextureLoader.h">
+      <Filter>Source\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Manager\PrimitiveManager.h">
+      <Filter>Source\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Manager\ModelManager.h">
+      <Filter>Source\Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

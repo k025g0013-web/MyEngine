@@ -2,7 +2,6 @@
 #include "RenderCore/Camera/CameraManager.h"
 #include "RenderCore/Lighting.h"
 #include "Object/Common/Object3D.h"
-#include "Object/Manager/ThroughWallManager.h"
 #include "External/ImGuiManager.h"
 
 #include "Object/Primitive/TriangleObject.h"
@@ -19,165 +18,135 @@
 using namespace Kizuna;
 
 namespace {
-    // 球モデル分割数
-    constexpr int32_t kSubdivision = 16;
+	// 球モデル分割数
+	constexpr int32_t kSubdivision = 16;
 
-    // クライアント領域のサイズ
-    constexpr int32_t kClientWidth = 1280;
-    constexpr int32_t kClientHeight = 720;
+	// クライアント領域のサイズ
+	constexpr int32_t kClientWidth = 1280;
+	constexpr int32_t kClientHeight = 720;
 
-    // ライトバインド用の定数バッファレジスタ番号
-    constexpr UINT kLightRegisterIndex = 3;
+	// ライトバインド用の定数バッファレジスタ番号
+	constexpr UINT kLightRegisterIndex = 3;
 }
 
 // Windowsアプリでのエントリーポイント
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
-    //-------------------------------------------------------------------------
-    // 基盤初期化
-    //-------------------------------------------------------------------------
-    auto engine = std::make_unique<KizunaEngine>();
+	//-------------------------------------------------------------------------
+	// 基盤初期化
+	//-------------------------------------------------------------------------
+	auto engine = std::make_unique<KizunaEngine>();
 
-    engine->Initialize(L"CG2", kClientWidth, kClientHeight);
+	engine->Initialize(L"CG2", kClientWidth, kClientHeight);
 
-    ID3D12Device *device = engine->GetDevice();
+	ID3D12Device *device = engine->GetDevice();
 
-    ID3D12GraphicsCommandList *commandList = engine->GetCommandList();
+	ID3D12GraphicsCommandList *commandList = engine->GetCommandList();
 
-    //-------------------------------------------------------------------------
-    // データ生成・初期リソースのセットアップ
-    //-------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
+	// データ生成・初期リソースのセットアップ
+	//-------------------------------------------------------------------------
+	PrimitiveManager *primitiveManager = engine->GetPrimitiveManager();
 
-    // 壁越し描画
-    ThroughWallManager throughWallManager;
+    ModelManager *modelManager = engine->GetModelManager();
 
-    static bool isThroughWall = true;
+	//-------------------------------------------------------------------------
+	// テクスチャの読み込み
+	//-------------------------------------------------------------------------
+	TextureManager *textureManager =
+		engine->GetTextureManager();
 
-    //-------------------------------------------------------------------------
-    // テクスチャの読み込み
-    //-------------------------------------------------------------------------
-    Texture *textureManager =
-        engine->GetTextureManager();
+	// 外部テクスチャとして使用するもの
+	TextureData textures[6];
 
-    // 外部テクスチャとして使用するもの
-    TextureData textures[6];
+	textures[0] = textureManager->LoadTexture(
+		commandList, "resources/uvChecker.png");
 
-    textures[0] =
-        textureManager->LoadTexture(
-            commandList,
-            "resources/uvChecker.png");
+	textures[1] = textureManager->LoadTexture(
+		commandList, "resources/monsterBall.png");
 
-    textures[1] =
-        textureManager->LoadTexture(
-            commandList,
-            "resources/monsterBall.png");
+	textures[2] = textureManager->LoadTexture(
+		commandList, "resources/cube.jpg");
 
-    textures[2] =
-        textureManager->LoadTexture(
-            commandList,
-            "resources/cube.jpg");
+	textures[3] =
+		textureManager->LoadTexture(
+			commandList,
+			"resources/axis.jpg");
 
-    textures[3] =
-        textureManager->LoadTexture(
-            commandList,
-            "resources/axis.jpg");
+	textures[4] =
+		textureManager->LoadTexture(
+			commandList,
+			"resources/checkerBoard.png");
 
-    textures[4] =
-        textureManager->LoadTexture(
-            commandList,
-            "resources/checkerBoard.png");
+	textures[5] =
+		textureManager->LoadTexture(
+			commandList,
+			"resources/white1x1.png");
 
-    textures[5] =
-        textureManager->LoadTexture(
-            commandList,
-            "resources/white1x1.png");
+	//-------------------------------------------------------------------------
+	// 初期オブジェクト
+	//-------------------------------------------------------------------------
+	// スプライト
+	std::vector<std::unique_ptr<Sprite>> sprites;
+	std::vector<int> spriteTextureIndices;
 
-    //-------------------------------------------------------------------------
-    // 初期オブジェクト
-    //-------------------------------------------------------------------------
+	// 初期モデル
+    modelManager->CreateModel("fence");
 
-    // プリミティブ
-    std::vector<std::unique_ptr<Object3D>> primitives;
+	//-------------------------------------------------------------------------
+	// ライト / カメラ
+	//-------------------------------------------------------------------------
 
-    // モデル
-    std::vector<std::unique_ptr<Model>> models;
+	Lighting lighting;
+	lighting.Initialize(device);
 
-    std::vector<Transform> primitiveTransforms;
-    std::vector<Transform> modelTransforms;
+	CameraManager camera;
 
-    {
-        auto object =
-            std::make_unique<Model>(
-                "fence",
-                textureManager);
+	camera.Initialize(
+		float(kClientWidth),
+		float(kClientHeight),
+		engine->GetKeyboard(),
+		engine->GetMouse(),
+		engine->GetGamePad());
 
-        object->Create(
-            device,
-            commandList,
-            0xFFFFFFFF,
-            true);
+	Transform cameraTransform = {
+		.scale = {1.0f, 1.0f, 1.0f},
+		.rotate = {0.3f, 0.0f, 0.0f},
+		.translate = {0.0f, 1.5f, -5.0f}
+	};
 
-        models.push_back(
-            std::move(object));
+	//-------------------------------------------------------------------------
+	// オーディオ
+	//-------------------------------------------------------------------------
 
-        modelTransforms.push_back({
-            .scale = {1.0f, 1.0f, 1.0f},
-            .rotate = {0.0f, 0.0f, 0.0f},
-            .translate = {0.0f, 0.0f, 0.0f}
-            });
+	engine->GetAudioManager()->Load(
+		"fanfare",
+		"Resources/fanfare.wav");
 
-    }
+	engine->GetAudioManager()->Load(
+		"bgm_music",
+		"Resources/music.mp3");
 
-    //-------------------------------------------------------------------------
-    // ライト / カメラ
-    //-------------------------------------------------------------------------
+	engine->GetAudioManager()->Play(
+		"fanfare",
+		false,
+		1.0f);
 
-    Lighting lighting;
-    lighting.Initialize(device);
-
-    CameraManager camera;
-
-    camera.Initialize(
-        float(kClientWidth),
-        float(kClientHeight),
-        engine->GetKeyboard(),
-        engine->GetMouse(),
-        engine->GetGamePad());
-
-    Transform cameraTransform = {
-        .scale = {1.0f, 1.0f, 1.0f},
-        .rotate = {0.3f, 0.0f, 0.0f},
-        .translate = {0.0f, 1.5f, -5.0f}
-    };
-
-    //-------------------------------------------------------------------------
-    // オーディオ
-    //-------------------------------------------------------------------------
-
-    engine->GetAudioManager()->Load(
-        "fanfare",
-        "Resources/fanfare.wav");
-
-    engine->GetAudioManager()->Load(
-        "bgm_music",
-        "Resources/music.mp3");
-
-    engine->GetAudioManager()->Play(
-        "fanfare",
-        false,
-        1.0f);
-
-    //-------------------------------------------------------------------------
-    // メインループ
-    //-------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
+	// メインループ
+	//-------------------------------------------------------------------------
 
     while (engine->ProcessMessage()) {
 
+        //=========================================================================
+        // 入力更新
+        //=========================================================================
+
         engine->UpdateInput();
 
-        //===============
-        // 更新処理
-        //===============
+        //=========================================================================
+        // カメラ更新
+        //=========================================================================
 
 #ifdef _DEBUG
 
@@ -190,14 +159,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 #endif
 
-        // カメラ更新
         camera.Update(cameraTransform);
 
-        //-------------------------------------------------------------------------
-        // ImGui
-        //-------------------------------------------------------------------------
-
+		//-------------------------------------------------------------------------
+		// ImGui
+		//-------------------------------------------------------------------------
 #ifdef USE_IMGUI
+
+        //=========================================================================
+        // ImGui Begin
+        //=========================================================================
 
         ImGuiManager::GetInstance()->BeginFrame();
 
@@ -208,14 +179,43 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
         ImGui::Begin("Setting");
 
+        //=========================================================================
+        // ImGui State
+        //=========================================================================
+
+        enum class SelectedObjectType {
+            Model,
+            Primitive
+        };
+
+        struct SelectedObject {
+            SelectedObjectType type = SelectedObjectType::Model;
+            int index = 0;
+        };
+
+        static SelectedObject selectedObject;
+
+        static int createType = 0;
+        static int currentSpriteIndex = 0;
+
+        //=========================================================================
+        // Camera
+        //=========================================================================
+
+        ImGui::SeparatorText("Camera");
+
         ImGui::Text(
-            "Camera Mode : %s (Q:KeyBoad or A:GamePad to Toggle)",
+            "Camera Mode : %s",
             camera.GetStateName());
 
-        ImGui::Separator();
+        ImGui::Text(
+            "Q : Keyboard / A : GamePad");
 
-        static int currentObjectIndex = 0;
-        static int createType = 0;
+        //=========================================================================
+        // Create Object
+        //=========================================================================
+
+        ImGui::SeparatorText("Create Object");
 
         const char *createItems[] = {
             "Triangle",
@@ -228,368 +228,461 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
         };
 
         ImGui::Combo(
-            "Model",
+            "Type",
             &createType,
             createItems,
             IM_ARRAYSIZE(createItems));
 
-        ImGui::Checkbox(
-            "Enable Through-Wall",
-            &isThroughWall);
-
-        //-------------------------------------------------------------------------
-        // Create Model
-        //-------------------------------------------------------------------------
-
-        if (ImGui::Button("Create Model")) {
+        if (ImGui::Button("Create Object")) {
 
             switch (createType) {
 
-            case 0: {
+                //=================================================================
                 // Triangle
-                auto object =
-                    std::make_unique<TriangleObject>(
-                        Vector3{ -0.5f, -0.5f, 0.0f },
-                        Vector3{ 0.0f, 0.5f, 0.0f },
-                        Vector3{ 0.5f, -0.5f, 0.0f });
+                //=================================================================
 
-                object->Create(
-                    device,
-                    commandList,
-                    0xFFFFFFFF,
-                    true);
+            case 0: {
 
-                primitives.push_back(
-                    std::move(object));
+                primitiveManager->CreateTriangle(
+                    Vector3{ -0.5f, -0.5f, 0.0f },
+                    Vector3{ 0.0f,  0.5f, 0.0f },
+                    Vector3{ 0.5f, -0.5f, 0.0f },
+                    textures[0]);
 
-                primitiveTransforms.push_back({
-                    {1, 1, 1},
-                    {0, 0, 0},
-                    {0, 0, 0}
-                    });
+                // 作成したPrimitiveを選択
+                selectedObject.type =
+                    SelectedObjectType::Primitive;
+
+                selectedObject.index =
+                    static_cast<int>(
+                        primitiveManager->GetObjectCount()) - 1;
 
                 break;
             }
+
+                  //=================================================================
+                  // Plane
+                  //=================================================================
 
             case 1: {
-                // Plane
-                auto model =
-                    std::make_unique<Model>(
-                        "plane",
-                        textureManager,
-                        textures[0]);
 
-                model->Create(
-                    device,
-                    commandList,
-                    0xFFFFFFFF,
-                    true);
+                modelManager->CreateModel("plane", textures[0]);
 
-                models.push_back(
-                    std::move(model));
+                // 作成したModelを選択
+                selectedObject.type =
+                    SelectedObjectType::Model;
 
-                modelTransforms.push_back({
-                    {1, 1, 1},
-                    {0, 0, 0},
-                    {0, 0, 0}
-                    });
+                selectedObject.index =
+                    static_cast<int>(
+                        modelManager->GetModelCount()) - 1;
 
                 break;
             }
+
+                  //=================================================================
+                  // Cube
+                  //=================================================================
 
             case 2: {
-                // Cube
-                auto model =
-                    std::make_unique<Model>(
-                        "cube",
-                        textureManager);
 
-                model->Create(
-                    device,
-                    commandList,
-                    0xFFFFFFFF,
-                    true);
+                modelManager->CreateModel("cube", textures[2]);
 
-                models.push_back(
-                    std::move(model));
+                // 作成したModelを選択
+                selectedObject.type =
+                    SelectedObjectType::Model;
 
-                modelTransforms.push_back({
-                    {1, 1, 1},
-                    {0, 0, 0},
-                    {0, 0, 0}
-                    });
+                selectedObject.index =
+                    static_cast<int>(
+                        modelManager->GetModelCount()) - 1;
 
                 break;
             }
+
+                  //=================================================================
+                  // Sphere
+                  //=================================================================
 
             case 3: {
-                // Sphere
-                auto object =
-                    std::make_unique<SphereObject>(
-                        kSubdivision);
 
-                object->Create(
-                    device,
-                    commandList,
-                    0xFFFFFFFF,
-                    true);
+                primitiveManager->CreateSphere(
+                    kSubdivision,
+                    textures[0]);
 
-                primitives.push_back(
-                    std::move(object));
+                // 作成したPrimitiveを選択
+                selectedObject.type =
+                    SelectedObjectType::Primitive;
 
-                primitiveTransforms.push_back({
-                    {1, 1, 1},
-                    {0, 0, 0},
-                    {0, 0, 0}
-                    });
+                selectedObject.index =
+                    static_cast<int>(
+                        primitiveManager->GetObjectCount()) - 1;
 
                 break;
             }
+
+                  //=================================================================
+                  // Teapot
+                  //=================================================================
 
             case 4: {
-                // Teapot
-                auto model =
-                    std::make_unique<Model>(
-                        "teapot",
-                        textureManager,
-                        textures[0]);
+                modelManager->CreateModel("teapot", textures[4]);
 
-                model->Create(
-                    device,
-                    commandList,
-                    0xFFFFFFFF,
-                    true);
+                // 作成したModelを選択
+                selectedObject.type =
+                    SelectedObjectType::Model;
 
-                models.push_back(
-                    std::move(model));
-
-                modelTransforms.push_back({
-                    {1, 1, 1},
-                    {0, 0, 0},
-                    {0, 0, 0}
-                    });
+                selectedObject.index =
+                    static_cast<int>(
+                        modelManager->GetModelCount()) - 1;
 
                 break;
             }
+
+                  //=================================================================
+                  // Bunny
+                  //=================================================================
 
             case 5: {
-                // Bunny
-                auto model =
-                    std::make_unique<Model>(
-                        "bunny",
-                        textureManager,
-                        textures[0]);
 
-                model->Create(
-                    device,
-                    commandList,
-                    0xFFFFFFFF,
-                    true);
+                modelManager->CreateModel("bunny", textures[0]);
 
-                models.push_back(
-                    std::move(model));
+                // 作成したModelを選択
+                selectedObject.type =
+                    SelectedObjectType::Model;
 
-                modelTransforms.push_back({
-                    {1, 1, 1},
-                    {0, 0, 0},
-                    {0, 0, 0}
-                    });
+                selectedObject.index =
+                    static_cast<int>(
+                        modelManager->GetModelCount()) - 1;
 
                 break;
             }
 
+                  //=================================================================
+                  // Suzanne
+                  //=================================================================
+
             case 6: {
-                // Suzanne
-                auto model =
-                    std::make_unique<Model>(
-                        "suzanne",
-                        textureManager,
-                        textures[5]);
+                modelManager->CreateModel("suzanne", textures[5]);
 
-                model->Create(
-                    device,
-                    commandList,
-                    0xFFFFFFFF,
-                    true);
+                // 作成したModelを選択
+                selectedObject.type =
+                    SelectedObjectType::Model;
 
-                models.push_back(
-                    std::move(model));
-
-                modelTransforms.push_back({
-                    {1, 1, 1},
-                    {0, 0, 0},
-                    {0, 0, 0}
-                    });
-
+                selectedObject.index =
+                    static_cast<int>(
+                        modelManager->GetModelCount()) - 1;
                 break;
             }
             }
         }
 
+        //=========================================================================
+        // Objects
+        //=========================================================================
+
+        ImGui::SeparatorText("Objects");
+
         //-------------------------------------------------------------------------
         // Object List
         //-------------------------------------------------------------------------
 
-        if (ImGui::BeginListBox("Objects")) {
+        if (ImGui::BeginListBox(
+            "Object List",
+            ImVec2(-FLT_MIN, 150.0f))) {
+
+            //=====================================================================
+            // Models
+            //=====================================================================
 
             for (int i = 0;
-                i < static_cast<int>(models.size());
-                i++) {
+                i < static_cast<int>(
+                    modelManager->GetModelCount());
+                    ++i) {
 
-                char label[32];
+                char label[64];
 
                 sprintf_s(
                     label,
-                    "Object %d",
+                    "Model %d",
                     i);
 
                 bool selected =
-                    currentObjectIndex == i;
+                    selectedObject.type ==
+                    SelectedObjectType::Model &&
+                    selectedObject.index == i;
 
                 if (ImGui::Selectable(
                     label,
                     selected)) {
 
-                    currentObjectIndex = i;
+                    selectedObject.type =
+                        SelectedObjectType::Model;
+
+                    selectedObject.index = i;
+                }
+            }
+
+            //=====================================================================
+            // Primitives
+            //=====================================================================
+
+            for (int i = 0;
+                i < static_cast<int>(
+                    primitiveManager->GetObjectCount());
+                ++i) {
+
+                char label[64];
+
+                sprintf_s(
+                    label,
+                    "Primitive %d",
+                    i);
+
+                bool selected =
+                    selectedObject.type ==
+                    SelectedObjectType::Primitive &&
+                    selectedObject.index == i;
+
+                if (ImGui::Selectable(
+                    label,
+                    selected)) {
+
+                    selectedObject.type =
+                        SelectedObjectType::Primitive;
+
+                    selectedObject.index = i;
                 }
             }
 
             ImGui::EndListBox();
         }
 
+        //=========================================================================
+        // Selected Object
+        //=========================================================================
+
+        bool hasSelectedObject = false;
+
         //-------------------------------------------------------------------------
-        // 選択中オブジェクト
+        // 選択状態の補正
         //-------------------------------------------------------------------------
 
-        if (!models.empty()) {
+        if (selectedObject.type ==
+            SelectedObjectType::Model) {
 
-            currentObjectIndex =
-                std::clamp(
-                    currentObjectIndex,
-                    0,
-                    static_cast<int>(models.size()) - 1);
+            if (modelManager->GetModelCount() > 0) {
+
+                selectedObject.index =
+                    std::clamp(
+                        selectedObject.index,
+                        0,
+                        static_cast<int>(
+                            modelManager->GetModelCount()) - 1);
+
+                hasSelectedObject = true;
+            }
+
+        } else {
+
+            if (primitiveManager->GetObjectCount() > 0) {
+
+                selectedObject.index =
+                    std::clamp(
+                        selectedObject.index,
+                        0,
+                        static_cast<int>(
+                            primitiveManager->GetObjectCount()) - 1);
+
+                hasSelectedObject = true;
+            }
+        }
+
+        //-------------------------------------------------------------------------
+        // Transform
+        //-------------------------------------------------------------------------
+
+        if (hasSelectedObject) {
+
+            Transform *transform = nullptr;
+
+            if (selectedObject.type ==
+                SelectedObjectType::Model) {
+
+                transform =
+                    &modelManager->GetTransforms()[
+                        selectedObject.index];
+
+            } else {
+
+                transform =
+                    &primitiveManager->GetTransforms()[
+                        selectedObject.index];
+            }
 
             if (ImGui::CollapsingHeader(
-                "Model",
+                "Transform",
                 ImGuiTreeNodeFlags_DefaultOpen)) {
-
-                Transform &transform =
-                    modelTransforms[currentObjectIndex];
 
                 ImGui::DragFloat3(
                     "Translate",
-                    &transform.translate.x,
+                    &transform->translate.x,
                     0.1f);
 
                 ImGui::DragFloat3(
                     "Rotate",
-                    &transform.rotate.x,
+                    &transform->rotate.x,
                     0.01f);
 
                 ImGui::DragFloat3(
                     "Scale",
-                    &transform.scale.x,
+                    &transform->scale.x,
                     0.01f);
+            }
 
-                // Delete
-                if (models.size() > 1) {
+            //=====================================================================
+            // Material
+            //=====================================================================
 
-                    if (ImGui::Button("Delete")) {
+            if (ImGui::CollapsingHeader(
+                "Material",
+                ImGuiTreeNodeFlags_DefaultOpen)) {
 
-                        models.erase(
-                            models.begin() + currentObjectIndex);
+                Material *material = nullptr;
 
-                        modelTransforms.erase(
-                            modelTransforms.begin() + currentObjectIndex);
+                if (selectedObject.type ==
+                    SelectedObjectType::Model) {
 
-                        if (!models.empty()) {
-
-                            currentObjectIndex =
-                                (std::min)(
-                                    currentObjectIndex,
-                                    static_cast<int>(models.size()) - 1);
-
-                        } else {
-
-                            currentObjectIndex = 0;
-                        }
-                    }
+                    material =
+                        &modelManager
+                        ->GetModels()[selectedObject.index]
+                        ->GetMaterial();
 
                 } else {
 
-                    ImGui::BeginDisabled();
-                    ImGui::Button("Delete");
-                    ImGui::EndDisabled();
+                    material =
+                        &primitiveManager
+                        ->GetObjects()[selectedObject.index]
+                        ->GetMaterial();
                 }
 
-                // Material
+                ImGui::ColorEdit4(
+                    "Color",
+                    &material
+                    ->GetMaterialData()
+                    ->color.x);
+            }
+
+            //=====================================================================
+            // UV Transform
+            //=====================================================================
+
+            if (selectedObject.type ==
+                SelectedObjectType::Model) {
+
+                Model &model =
+                    *modelManager->GetModels()[selectedObject.index];
+
                 if (ImGui::CollapsingHeader(
-                    "Material",
+                    "UV Transform",
                     ImGuiTreeNodeFlags_DefaultOpen)) {
 
-                    auto &model =
-                        models[currentObjectIndex];
-
-                    auto &material =
-                        model->GetMaterial();
-
-                    ImGui::ColorEdit4(
-                        "Color",
-                        &material.GetMaterialData()->color.x);
-
                     Transform &uv =
-                        model->GetUVTransform();
+                        model.GetUVTransform();
 
                     ImGui::DragFloat2(
-                        "UV-Translate",
+                        "UV Translate",
                         &uv.translate.x,
                         0.01f);
 
                     ImGui::SliderAngle(
-                        "UV-Rotate",
+                        "UV Rotate",
                         &uv.rotate.z);
 
                     ImGui::DragFloat2(
-                        "UV-Scale",
+                        "UV Scale",
                         &uv.scale.x,
                         0.01f);
-
-                    // Lighting
-                    Lighting::LightingType currentType =
-                        lighting.GetLightType();
-
-                    const char *lightTypeNames[] = {
-                        "None",
-                        "Lambert",
-                        "Half-Lambert"
-                    };
-
-                    int currentItem =
-                        static_cast<int>(currentType);
-
-                    if (ImGui::Combo(
-                        "Light Type",
-                        &currentItem,
-                        lightTypeNames,
-                        IM_ARRAYSIZE(lightTypeNames))) {
-
-                        lighting.SetLightType(
-                            static_cast<Lighting::LightingType>(
-                                currentItem));
-                    }
                 }
             }
+            //=====================================================================
+            // Lighting
+            //=====================================================================
+
+            if (ImGui::CollapsingHeader(
+                "Lighting",
+                ImGuiTreeNodeFlags_DefaultOpen)) {
+
+                Lighting::LightingType currentType =
+                    lighting.GetLightType();
+
+                const char *lightTypeNames[] = {
+                    "None",
+                    "Lambert",
+                    "Half-Lambert"
+                };
+
+                int currentItem =
+                    static_cast<int>(currentType);
+
+                if (ImGui::Combo(
+                    "Light Type",
+                    &currentItem,
+                    lightTypeNames,
+                    IM_ARRAYSIZE(lightTypeNames))) {
+
+                    lighting.SetLightType(
+                        static_cast<Lighting::LightingType>(
+                            currentItem));
+                }
+            }
+
+            //=====================================================================
+            // Delete
+            //=====================================================================
+            if (modelManager->GetModelCount() > 1) {
+
+                if (ImGui::Button(
+                    "Delete Model")) {
+
+                    modelManager->DeleteModel(
+                        selectedObject.index);
+
+                    if (modelManager->GetModelCount() > 0) {
+
+                        selectedObject.index =
+                            (std::min)(
+                                selectedObject.index,
+                                static_cast<int>(
+                                    modelManager->GetModelCount()) - 1);
+
+                    } else {
+
+                        selectedObject.index = 0;
+                    }
+                }
+
+            } else {
+
+                ImGui::BeginDisabled();
+
+                ImGui::Button(
+                    "Delete Model");
+
+                ImGui::EndDisabled();
+            }
         }
-        //-------------------------------------------------------------------------
+
+        //=========================================================================
         // Light
-        //-------------------------------------------------------------------------
+        //=========================================================================
+
+        ImGui::SeparatorText("Light");
 
         if (ImGui::CollapsingHeader(
-            "Light",
+            "Directional Light",
             ImGuiTreeNodeFlags_DefaultOpen)) {
 
             ImGui::ColorEdit4(
-                "LightColor",
+                "Light Color",
                 &lighting.GetLightingData()->color.x);
 
             ImGui::SliderFloat3(
@@ -606,18 +699,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                 10.0f);
         }
 
-        lighting.Update();
+        //=========================================================================
+        // Sprites
+        //=========================================================================
 
-        ImGui::Separator();
+        ImGui::SeparatorText("Sprites");
 
         //-------------------------------------------------------------------------
-        // Sprite
+        // Create Sprite
         //-------------------------------------------------------------------------
 
-        static std::vector<std::unique_ptr<Sprite>> sprites;
-        static std::vector<int> spriteTextureIndices;
-
-        if (ImGui::Button("Create Sprite")) {
+        if (ImGui::Button(
+            "Create Sprite")) {
 
             auto sprite =
                 std::make_unique<Sprite>();
@@ -634,17 +727,25 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                 std::move(sprite));
 
             spriteTextureIndices.push_back(0);
+
+            currentSpriteIndex =
+                static_cast<int>(
+                    sprites.size()) - 1;
         }
 
-        static int currentSpriteIndex = 0;
+        //-------------------------------------------------------------------------
+        // Sprite List
+        //-------------------------------------------------------------------------
 
-        if (ImGui::BeginListBox("Sprites")) {
+        if (ImGui::BeginListBox(
+            "Sprite List",
+            ImVec2(-FLT_MIN, 120.0f))) {
 
             for (int i = 0;
                 i < static_cast<int>(sprites.size());
-                i++) {
+                ++i) {
 
-                char label[32];
+                char label[64];
 
                 sprintf_s(
                     label,
@@ -662,16 +763,25 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
             ImGui::EndListBox();
         }
 
+        //-------------------------------------------------------------------------
+        // Selected Sprite
+        //-------------------------------------------------------------------------
+
         if (!sprites.empty()) {
 
             currentSpriteIndex =
                 std::clamp(
                     currentSpriteIndex,
                     0,
-                    static_cast<int>(sprites.size()) - 1);
+                    static_cast<int>(
+                        sprites.size()) - 1);
 
             Sprite &sprite =
                 *sprites[currentSpriteIndex];
+
+            //=====================================================================
+            // Texture
+            //=====================================================================
 
             const char *textureItems[] = {
                 "UVChecker",
@@ -681,119 +791,108 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
             ImGui::Combo(
                 "Texture",
-                &spriteTextureIndices[currentSpriteIndex],
-                textureItems,
-                IM_ARRAYSIZE(textureItems));
+                &spriteTextureIndices[
+                    currentSpriteIndex],
+                    textureItems,
+                    IM_ARRAYSIZE(textureItems));
+
+            //=====================================================================
+            // Transform
+            //=====================================================================
 
             if (ImGui::CollapsingHeader(
-                "Sprite",
+                "Sprite Transform",
                 ImGuiTreeNodeFlags_DefaultOpen)) {
 
                 Transform &transform =
                     sprite.GetTransform();
 
                 ImGui::DragFloat3(
-                    "Translate Sprite",
+                    "Translate##Sprite",
                     &transform.translate.x,
                     0.1f);
 
                 ImGui::DragFloat3(
-                    "Rotate Sprite",
+                    "Rotate##Sprite",
                     &transform.rotate.x,
                     0.01f);
 
                 ImGui::DragFloat3(
-                    "Scale Sprite",
+                    "Scale##Sprite",
                     &transform.scale.x,
                     0.01f);
+            }
 
-                if (ImGui::Button("Delete Sprite")) {
+            //=====================================================================
+            // Material
+            //=====================================================================
 
-                    sprites.erase(
-                        sprites.begin() + currentSpriteIndex);
+            if (ImGui::CollapsingHeader(
+                "Sprite Material",
+                ImGuiTreeNodeFlags_DefaultOpen)) {
 
-                    spriteTextureIndices.erase(
-                        spriteTextureIndices.begin() + currentSpriteIndex);
+                auto &material =
+                    sprite.GetMaterial();
 
-                    if (!sprites.empty()) {
+                ImGui::ColorEdit4(
+                    "Sprite Color",
+                    &material
+                    .GetMaterialData()
+                    ->color.x);
 
-                        currentSpriteIndex =
-                            (std::min)(
-                                currentSpriteIndex,
-                                static_cast<int>(sprites.size()) - 1);
-                    } else {
+                Transform &uv =
+                    sprite.GetUVTransform();
 
-                        currentSpriteIndex = 0;
-                    }
-                }
+                ImGui::DragFloat2(
+                    "UV Translate##Sprite",
+                    &uv.translate.x,
+                    0.01f);
 
-                if (ImGui::CollapsingHeader(
-                    "Sprite Material",
-                    ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::SliderAngle(
+                    "UV Rotate##Sprite",
+                    &uv.rotate.z);
 
-                    auto &material =
-                        sprite.GetMaterial();
+                ImGui::DragFloat2(
+                    "UV Scale##Sprite",
+                    &uv.scale.x,
+                    0.01f);
+            }
 
-                    ImGui::ColorEdit4(
-                        "Sprite Color",
-                        &material.GetMaterialData()->color.x);
+            //=====================================================================
+            // Delete
+            //=====================================================================
 
-                    Transform &uv =
-                        sprite.GetUVTransform();
+            ImGui::Separator();
 
-                    ImGui::DragFloat2(
-                        "Sprite UV-Translate",
-                        &uv.translate.x,
-                        0.01f);
+            if (ImGui::Button(
+                "Delete Sprite")) {
 
-                    ImGui::SliderAngle(
-                        "Sprite UV-Rotate",
-                        &uv.rotate.z);
+                sprites.erase(
+                    sprites.begin() +
+                    currentSpriteIndex);
 
-                    ImGui::DragFloat2(
-                        "Sprite UV-Scale",
-                        &uv.scale.x,
-                        0.01f);
+                spriteTextureIndices.erase(
+                    spriteTextureIndices.begin() +
+                    currentSpriteIndex);
+
+                if (!sprites.empty()) {
+
+                    currentSpriteIndex =
+                        (std::min)(
+                            currentSpriteIndex,
+                            static_cast<int>(
+                                sprites.size()) - 1);
+
+                } else {
+
+                    currentSpriteIndex = 0;
                 }
             }
         }
 
-        ImGui::Separator();
-
-        //-------------------------------------------------------------------------
-        // ThroughWall
-        //-------------------------------------------------------------------------
-
-        if (!throughWallManager.Empty()) {
-
-            ImGui::ColorEdit4(
-                "ThroughWall-Object Color",
-                &throughWallManager.GetObject(0).GetColor().x);
-
-            const char *styleNames[] = {
-                "Solid",
-                "Dot",
-                "Stripe"
-            };
-
-            int style0 =
-                static_cast<int>(
-                    throughWallManager.GetObject(0).GetStyle());
-
-            if (ImGui::Combo(
-                "ThroughWall Style",
-                &style0,
-                styleNames,
-                IM_ARRAYSIZE(styleNames))) {
-
-                throughWallManager.GetObject(0).SetStyle(
-                    static_cast<Style>(style0));
-            }
-        }
-
-        //-------------------------------------------------------------------------
+        //=========================================================================
         // Pipeline
-        //-------------------------------------------------------------------------
+        //=========================================================================
 
         ImGui::SeparatorText("Pipeline");
 
@@ -811,7 +910,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
         };
 
         int blendMode =
-            static_cast<int>(pipelineConfig.blend);
+            static_cast<int>(
+                pipelineConfig.blend);
 
         if (ImGui::Combo(
             "Blend Mode",
@@ -820,97 +920,84 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
             IM_ARRAYSIZE(blendModeNames))) {
 
             pipelineConfig.blend =
-                static_cast<BlendMode>(blendMode);
+                static_cast<BlendMode>(
+                    blendMode);
 
             engine->RebuildPipeline(
                 PipelineType::Object3dOpaque);
         }
+
+        //=========================================================================
+        // ImGui End
+        //=========================================================================
 
         ImGui::End();
 
         ImGuiManager::GetInstance()->EndFrame();
 
 #endif
+        lighting.Update();
 
-        //-------------------------------------------------------------------------
-        // 描画処理
-        //-------------------------------------------------------------------------
+		//-------------------------------------------------------------------------
+		// 描画処理
+		//-------------------------------------------------------------------------
 
-        engine->BeginFrame();
+		engine->BeginFrame();
 
-        // 3Dオブジェクト
-        {
-            engine->SetPipeline(
-                PipelineType::Object3dOpaque);
+		// 3Dオブジェクト
+		{
+			engine->SetPipeline(
+				PipelineType::Object3dOpaque);
 
-            lighting.Bind(
-                kLightRegisterIndex,
-                commandList);
+			lighting.Bind(
+				kLightRegisterIndex,
+				commandList);
 
-            // プリミティブ
-            for (size_t i = 0; i < primitives.size(); ++i) {
+			// プリミティブ
+			primitiveManager->Update(
+				&camera);
 
-                primitives[i]->Update(
-                    &camera,
-                    primitiveTransforms[i]);
+			primitiveManager->Draw(
+				commandList);
 
-                primitives[i]->Draw(
-                    commandList);
-            }
 
-            // モデル
-            for (size_t i = 0; i < models.size(); ++i) {
+			// モデル
+            modelManager->Update(&camera);
+            modelManager->Draw(commandList);
+		}
 
-                models[i]->Update(
-                    &camera,
-                    modelTransforms[i]);
+		// 2Dオブジェクト
+		{
+			engine->SetPipeline(
+				PipelineType::Object2dOpaque);
 
-                models[i]->Draw(
-                    commandList);
-            }
-        }
+			for (size_t i = 0;
+				i < sprites.size();
+				++i) {
 
-        // 壁越し3Dオブジェクト
-        {
-            engine->SetPipeline(
-                PipelineType::Object3dThroughWall);
+				sprites[i]->Update(
+					kClientWidth,
+					kClientHeight);
 
-            throughWallManager.Draw(
-                commandList);
-        }
+				sprites[i]->Draw(
+					commandList,
+					textures[spriteTextureIndices[i]]);
+			}
+		}
 
-        // 2Dオブジェクト
-        {
-            engine->SetPipeline(
-                PipelineType::Object2dOpaque);
+		engine->EndFrame();
 
-            for (size_t i = 0;
-                i < sprites.size();
-                ++i) {
+		// ESC
+		if (engine->GetKeyboard()->PushKey(DIK_ESCAPE)) {
+			break;
+		}
+	}
 
-                sprites[i]->Update(
-                    kClientWidth,
-                    kClientHeight);
+	//-------------------------------------------------------------------------
+	// 後処理
+	//-------------------------------------------------------------------------
 
-                sprites[i]->Draw(
-                    commandList,
-                    textures[spriteTextureIndices[i]]);
-            }
-        }
+	engine->Finalize();
 
-        engine->EndFrame();
-
-        // ESC
-        if (engine->GetKeyboard()->PushKey(DIK_ESCAPE)) {
-            break;
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    // 後処理
-    //-------------------------------------------------------------------------
-
-    engine->Finalize();
-
-    return 0;
+	return 0;
 }

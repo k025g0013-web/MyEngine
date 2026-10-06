@@ -12,6 +12,8 @@
 #include "Graphics/Resource/Texture.h"
 #include "Graphics/Resource/TransformationMatrix.h"
 
+#include "Manager/TextureManager.h"
+
 #include "RenderCore/Camera/CameraManager.h"
 
 namespace Kizuna {
@@ -21,24 +23,25 @@ namespace Kizuna {
     /// </summary>
     class Model {
     public:
+
         /// <summary>
         /// モデル付属のテクスチャを使用するモデル
         /// </summary>
         Model(
             std::string fileName,
-            Texture *texture)
+            TextureManager *textureManager)
             : fileName_(std::move(fileName)),
-            texture_(texture) {}
+            textureManager_(textureManager) {}
 
         /// <summary>
         /// 外部から指定したテクスチャを使用するモデル
         /// </summary>
         Model(
             std::string fileName,
-            Texture *texture,
+            TextureManager *textureManager,
             const TextureData &textureData)
             : fileName_(std::move(fileName)),
-            texture_(texture),
+            textureManager_(textureManager),
             textureData_(textureData),
             useExternalTexture_(true) {}
 
@@ -86,12 +89,14 @@ namespace Kizuna {
         }
 
     private:
+
         /// <summary>
         /// モデルと同名のテクスチャファイルを探す
         /// </summary>
         std::string FindTexturePath() const;
 
     private:
+
         // モデルファイル名
         std::string fileName_;
 
@@ -99,7 +104,7 @@ namespace Kizuna {
         ModelData modelData_;
 
         // テクスチャ管理
-        Texture *texture_ = nullptr;
+        TextureManager *textureManager_ = nullptr;
 
         // 使用するテクスチャ
         TextureData textureData_{};

@@ -3,8 +3,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "Audio.h"
-#include "AudioLoader.h"
+#include "Audio/Audio.h"
+#include "Audio/AudioLoader.h"
 
 namespace Kizuna {
 	/// <summary>

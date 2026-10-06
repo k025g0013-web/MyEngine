@@ -18,10 +18,11 @@ namespace Kizuna {
             device,
             color,
             enableLighting);
-
+        /*
         throughWallMaterial_.Initialize(
             device,
             color);
+        */
     }
 
     void Object3D::Update(
@@ -75,9 +76,18 @@ namespace Kizuna {
             1,
             transformationMatrixBuffer_.GetGPUVirtualAddress());
 
+        assert(
+            textureData_.gpuHandle.ptr != 0 &&
+            "Object3Dに有効なテクスチャが設定されていません");
+
+        commandList->SetGraphicsRootDescriptorTable(
+            2,
+            textureData_.gpuHandle);
+
         mesh_.Bind(commandList);
     }
 
+    /*
     void Object3D::DrawThroughWall(
         ID3D12GraphicsCommandList *commandList) {
 
@@ -91,4 +101,5 @@ namespace Kizuna {
 
         mesh_.Bind(commandList);
     }
+    */
 }
