@@ -60,7 +60,7 @@ namespace Kizuna {
         //-------------------------------------------------------------------------
 
         // テクスチャ
-        textureManager_ = std::make_unique<Texture>();
+        textureManager_ = std::make_unique<TextureManager>();
 
         textureManager_->Initialize(
             device,
@@ -70,6 +70,14 @@ namespace Kizuna {
         // オーディオ
         audioManager_ = std::make_unique<AudioManager>();
         audioManager_->Initialize();
+
+        // 頂点生成オブジェクト
+        primitiveManager_ = std::make_unique<PrimitiveManager>();
+        primitiveManager_->Initialize(device, GetCommandList());
+
+        // モデルオブジェクト
+        modelManager_ = std::make_unique<ModelManager>();
+        modelManager_->Initialize(device, GetCommandList(), textureManager_.get());
 
         //-------------------------------------------------------------------------
         // 入力デバイスの初期化
