@@ -26,6 +26,7 @@
 // === Object ===
 #include "Manager/PrimitiveManager.h"
 #include "Manager/ModelManager.h"
+#include "Manager/SpriteManager.h"
 
 namespace Kizuna {
 
@@ -129,6 +130,10 @@ namespace Kizuna {
             return modelManager_.get();
         }
 
+        SpriteManager *GetSpriteManager() const {
+            return spriteManager_.get();
+        }
+
     public:
         KizunaEngine() = default;
         ~KizunaEngine() = default;
@@ -167,6 +172,7 @@ namespace Kizuna {
 
         std::unique_ptr<PrimitiveManager> primitiveManager_;
         std::unique_ptr<ModelManager> modelManager_;
+        std::unique_ptr<SpriteManager> spriteManager_;
     };
 
 }

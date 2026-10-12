@@ -67,6 +67,10 @@ namespace Kizuna {
         modelManager_ = std::make_unique<ModelManager>();
         modelManager_->Initialize(device, GetCommandList(), textureManager_.get());
 
+        // スプライトマネージャー
+        spriteManager_ = std::make_unique<SpriteManager>();
+        spriteManager_->Initialize(device);
+
         // 入力デバイスの初期化
         inputManager_ = std::make_unique<InputManager>();
         inputManager_->Initialize(winApp_.get());

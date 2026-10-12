@@ -265,6 +265,9 @@
     <ClCompile Include="Source\Manager\CameraManager.cpp">
       <Filter>Source\Manager</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Manager\SpriteManager.cpp">
+      <Filter>Source\Manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="exclusion.dic" />
@@ -521,6 +524,9 @@
       <Filter>Source\Manager</Filter>
     </ClInclude>
     <ClInclude Include="Source\Manager\CameraManager.h">
+      <Filter>Source\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Manager\SpriteManager.h">
       <Filter>Source\Manager</Filter>
     </ClInclude>
   </ItemGroup>

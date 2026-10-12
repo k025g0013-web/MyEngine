@@ -48,6 +48,12 @@ namespace Kizuna {
                 transformationMatrixBuffer_.Map()
                 );
 
+        assert(transformationMatrixData_ != nullptr);
+
+        if (transformationMatrixData_ == nullptr) {
+            return;
+        }
+
         transformationMatrixData_->WVP =
             Math::MakeIdentity<Matrix4x4>();
 

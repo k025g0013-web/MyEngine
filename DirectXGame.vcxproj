@@ -211,6 +211,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\Manager\InputManager.cpp" />
     <ClCompile Include="Source\Manager\ModelManager.cpp" />
     <ClCompile Include="Source\Manager\PrimitiveManager.cpp" />
+    <ClCompile Include="Source\Manager\SpriteManager.cpp" />
     <ClCompile Include="Source\Manager\TextureManager.cpp" />
     <ClCompile Include="Source\Math\Easing.cpp" />
     <ClCompile Include="Source\Object\Common\Object3D.cpp" />
@@ -346,6 +347,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Manager\InputManager.h" />
     <ClInclude Include="Source\Manager\ModelManager.h" />
     <ClInclude Include="Source\Manager\PrimitiveManager.h" />
+    <ClInclude Include="Source\Manager\SpriteManager.h" />
     <ClInclude Include="Source\Manager\TextureManager.h" />
     <ClInclude Include="Source\Math\Easing.h" />
     <ClInclude Include="Source\Math\FunctionMatrix.h" />
