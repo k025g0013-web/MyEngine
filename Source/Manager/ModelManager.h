@@ -44,10 +44,6 @@ namespace Kizuna {
             return models_;
         }
 
-        std::vector<Transform> &GetTransforms() {
-            return transforms_;
-        }
-
         size_t GetModelCount() const {
             return models_.size();
         }
@@ -58,6 +54,5 @@ namespace Kizuna {
         TextureManager *textureManager_ = nullptr;
 
         std::vector<std::unique_ptr<Model>> models_;
-        std::vector<Transform> transforms_;
     };
 }

@@ -40,7 +40,7 @@ namespace Kizuna {
         /// <summary>
         /// ゲームパッド入力システムを終了する
         /// </summary>
-        void Finalize() {}
+        void Finalize() const;
 
         /// <summary>
         /// ゲームパッドが接続されているか取得する
@@ -115,6 +115,20 @@ namespace Kizuna {
         float GetRightTrigger() const {
             return static_cast<float>(state_.Gamepad.bRightTrigger) / 255.0f;
         }
+
+        /// <summary>
+        /// ゲームパッドの振動を設定する
+        /// </summary>
+        /// <param name="leftMotorSpeed">左モーターの強度（0～65535）</param>
+        /// <param name="rightMotorSpeed">右モーターの強度（0～65535）</param>
+        /// <returns>振動設定に成功した場合はtrue</returns>
+        bool SetVibration(WORD leftMotorSpeed, WORD rightMotorSpeed) const;
+
+        /// <summary>
+        /// ゲームパッドの振動を停止する
+        /// </summary>
+        /// <returns>停止指示に成功した場合はtrue</returns>
+        bool StopVibration() const;
 
     private:
         /// 使用するプレイヤー番号

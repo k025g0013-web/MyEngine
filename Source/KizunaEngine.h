@@ -21,10 +21,9 @@
 #include "Manager/AudioManager.h"
 
 // === Input ===
-#include "Input/Keyboard.h"
-#include "Input/Mouse.h"
-#include "Input/GamePad.h"
+#include "Manager/InputManager.h"
 
+// === Object ===
 #include "Manager/PrimitiveManager.h"
 #include "Manager/ModelManager.h"
 
@@ -106,16 +105,12 @@ namespace Kizuna {
             return audioManager_.get();
         }
 
-        Keyboard *GetKeyboard() const {
-            return keyboard_.get();
+        InputManager &Input() {
+            return *inputManager_;
         }
 
-        Mouse *GetMouse() const {
-            return mouse_.get();
-        }
-
-        GamePad *GetGamePad() const {
-            return gamePad_.get();
+        const InputManager &Input() const {
+            return *inputManager_;
         }
 
         PipelineManager *GetPipelineManager() const {
@@ -155,14 +150,8 @@ namespace Kizuna {
         /// DirectX12共通管理クラス
         std::unique_ptr<DirectXCommon> directXCommon_;
 
-        /// キーボード入力管理クラス
-        std::unique_ptr<Keyboard> keyboard_;
-
-        /// マウス入力管理クラス
-        std::unique_ptr<Mouse> mouse_;
-
-        /// ゲームパッド入力管理クラス
-        std::unique_ptr<GamePad> gamePad_;
+        /// 入力管理クラス
+        std::unique_ptr<InputManager> inputManager_;
 
         /// パイプライン管理クラス
         std::unique_ptr<PipelineManager> pipelineManager_;
