@@ -11,19 +11,13 @@ namespace Kizuna {
         int32_t width,
         int32_t height
     ) {
-        //-------------------------------------------------------------------------
         // 最優先システムの構築
-        //-------------------------------------------------------------------------
-
         debugManager_ = std::make_unique<DebugManager>();
 
         logger_ = std::make_unique<Logger>();
         logger_->Initialize();
 
-        //-------------------------------------------------------------------------
         // アプリケーションウィンドウの生成
-        //-------------------------------------------------------------------------
-
         winApp_ = std::make_unique<WinApp>();
         winApp_->Initialize(
             title.c_str(),
@@ -36,10 +30,7 @@ namespace Kizuna {
         debugManager_->EnableDebugLayer();
 #endif
 
-        //-------------------------------------------------------------------------
         // DirectX12 コアグラフィックス環境の構築
-        //-------------------------------------------------------------------------
-
         directXCommon_ = std::make_unique<DirectXCommon>();
 
         directXCommon_->Initialize(
@@ -55,10 +46,7 @@ namespace Kizuna {
         HWND hwnd =
             winApp_->GetHWND();
 
-        //-------------------------------------------------------------------------
         // 各種リソース・情報マネージャの初期化
-        //-------------------------------------------------------------------------
-
         // テクスチャ
         textureManager_ = std::make_unique<TextureManager>();
 
@@ -79,30 +67,15 @@ namespace Kizuna {
         modelManager_ = std::make_unique<ModelManager>();
         modelManager_->Initialize(device, GetCommandList(), textureManager_.get());
 
-        //-------------------------------------------------------------------------
         // 入力デバイスの初期化
-        //-------------------------------------------------------------------------
-
-        // キーボード
-        keyboard_ = std::make_unique<Keyboard>();
-        keyboard_->Initialize(winApp_.get());
-
-        // マウス
-        mouse_ = std::make_unique<Mouse>();
-        mouse_->Initialize(hwnd);
+        inputManager_ = std::make_unique<InputManager>();
+        inputManager_->Initialize(winApp_.get());
 
         winApp_->SetInputMouse(
-            mouse_.get()
+            inputManager_.get()->GetMouse()
         );
 
-        // GamePad
-        gamePad_ = std::make_unique<GamePad>();
-        gamePad_->Initialize(winApp_.get());
-
-        //-------------------------------------------------------------------------
         // レンダリング環境・パイプラインの構築
-        //-------------------------------------------------------------------------
-
         pipelineManager_ =
             std::make_unique<PipelineManager>();
 
@@ -111,20 +84,13 @@ namespace Kizuna {
             logger_.get()
         );
 
-        //-------------------------------------------------------------------------
         // グローバルライト
-        //-------------------------------------------------------------------------
-
         lighting_ = std::make_unique<Lighting>();
 
         lighting_->Initialize(device);
 
-        //-------------------------------------------------------------------------
-        // ImGui
-        //-------------------------------------------------------------------------
-
 #ifdef USE_IMGUI
-
+        // ImGui
         ImGuiManager::GetInstance()->Initialize(
             hwnd,
             device,
@@ -152,26 +118,23 @@ namespace Kizuna {
 
 #endif
 
-        //-------------------------------------------------------------------------
-        // テクスチャ
-        //-------------------------------------------------------------------------
+        // 入力
+        if (inputManager_) {
+            inputManager_->Finalize();
+            inputManager_.reset();
+        }
 
+        // テクスチャ
         if (textureManager_) {
             textureManager_->Finalize();
         }
 
-        //-------------------------------------------------------------------------
         // オーディオ
-        //-------------------------------------------------------------------------
-
         if (audioManager_) {
             audioManager_->Finalize();
         }
 
-        //-------------------------------------------------------------------------
         // ウィンドウ
-        //-------------------------------------------------------------------------
-
         if (winApp_) {
             winApp_->Finalize();
         }
@@ -202,24 +165,15 @@ namespace Kizuna {
 
         directXCommon_->EndFrame();
 
-        if (mouse_) {
-            mouse_->EndFrame();
+        if (inputManager_) {
+            inputManager_->EndFrame();
         }
     }
 
 
     void KizunaEngine::UpdateInput() {
-
-        if (keyboard_) {
-            keyboard_->Update();
-        }
-
-        if (mouse_) {
-            mouse_->Update();
-        }
-
-        if (gamePad_) {
-            gamePad_->Update();
+        if (inputManager_) {
+            inputManager_->Update();
         }
     }
 
@@ -235,26 +189,17 @@ namespace Kizuna {
         ID3D12GraphicsCommandList *commandList =
             directXCommon_->GetCommandList();
 
-        //-------------------------------------------------------------------------
         // RootSignature
-        //-------------------------------------------------------------------------
-
         commandList->SetGraphicsRootSignature(
             pipeline->rootSignature->GetRootSignature()
         );
 
-        //-------------------------------------------------------------------------
         // Pipeline State
-        //-------------------------------------------------------------------------
-
         commandList->SetPipelineState(
             pipeline->pipeline->GetPipelineState()
         );
 
-        //-------------------------------------------------------------------------
         // Primitive Topology
-        //-------------------------------------------------------------------------
-
         commandList->IASetPrimitiveTopology(
             D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST
         );

@@ -54,14 +54,13 @@ namespace Kizuna {
     }
 
     void Model::Update(
-        CameraManager *camera,
-        Transform transform) {
+        CameraManager *camera) {
 
         Matrix4x4 worldMatrix =
             Math::MakeAffineMatrix(
-                transform.scale,
-                transform.rotate,
-                transform.translate);
+                transform_.scale,
+                transform_.rotate,
+                transform_.translate);
 
         Matrix4x4 wvp =
             Math::Multiply(
@@ -74,6 +73,7 @@ namespace Kizuna {
         transformationMatrixData_->WVP =
             wvp;
 
+        // UV Transform
         Matrix4x4 uvTransformMatrix{};
 
         uvTransformMatrix =

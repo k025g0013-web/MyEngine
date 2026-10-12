@@ -119,11 +119,7 @@ namespace Kizuna {
         auto rootSignature =
             std::make_unique<RootSignature>();
 
-        rootSignature->CreateSkinny3D(
-            device,
-            logger
-        );
-
+        rootSignature->Create(device, logger, RootSignature::Type::Skinny3D);
 
         //====================
         // Pipeline生成
@@ -202,11 +198,7 @@ namespace Kizuna {
         auto rootSignature =
             std::make_unique<RootSignature>();
 
-        rootSignature->CreateSkinny3D(
-            device,
-            logger
-        );
-
+        rootSignature->Create(device, logger, RootSignature::Type::Skinny3D);
 
         //====================
         // Pipeline生成
@@ -285,10 +277,7 @@ namespace Kizuna {
         auto rootSignature =
             std::make_unique<RootSignature>();
 
-        rootSignature->CreateSkinny3D(
-            device,
-            logger
-        );
+        rootSignature->Create(device, logger, RootSignature::Type::Skinny3D);
 
 
         //====================
@@ -370,10 +359,7 @@ namespace Kizuna {
         auto rootSignature =
             std::make_unique<RootSignature>();
 
-        rootSignature->CreateSkinny3D(
-            device,
-            logger
-        );
+        rootSignature->Create(device, logger, RootSignature::Type::Skinny3D);
 
 
         //====================
@@ -459,10 +445,7 @@ namespace Kizuna {
         auto rootSignature =
             std::make_unique<RootSignature>();
 
-        rootSignature->CreateSkinny2D(
-            device,
-            logger
-        );
+        rootSignature->Create(device, logger, RootSignature::Type::Skinny2D);
 
 
         //====================
@@ -547,10 +530,7 @@ namespace Kizuna {
         auto rootSignature =
             std::make_unique<RootSignature>();
 
-        rootSignature->CreateSkinny3D(
-            device,
-            logger
-        );
+        rootSignature->Create(device, logger, RootSignature::Type::Skinny3D);
 
 
         //====================
@@ -652,6 +632,4 @@ namespace Kizuna {
             break;
         }
     }
-
-
 }

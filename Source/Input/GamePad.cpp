@@ -50,6 +50,10 @@ namespace Kizuna {
         SecureZeroMemory(&state_, sizeof(XINPUT_STATE));
     }
 
+    void GamePad::Finalize() const{
+        StopVibration();
+    }
+
     void GamePad::GetLeftStick(float &x, float &y) const {
         // 未接続の場合は入力なし
         if (!isConnected_) {
@@ -96,5 +100,31 @@ namespace Kizuna {
             x = sX / 32767.0f;
             y = sY / 32767.0f;
         }
+    }
+
+    bool GamePad::SetVibration(WORD leftMotorSpeed, WORD rightMotorSpeed) const {
+        // ゲームパッドが接続されていなければ設定できない
+        if (!isConnected_) {
+            return false;
+        }
+
+        XINPUT_VIBRATION vibration = {};
+        vibration.wLeftMotorSpeed = leftMotorSpeed;
+        vibration.wRightMotorSpeed = rightMotorSpeed;
+
+        return XInputSetState(playerIndex_, &vibration) == ERROR_SUCCESS;
+    }
+
+    bool GamePad::StopVibration() const {
+        // 未接続の場合は停止指示を送れない
+        if (!isConnected_) {
+            return false;
+        }
+
+        XINPUT_VIBRATION vibration = {};
+        vibration.wLeftMotorSpeed = 0;
+        vibration.wRightMotorSpeed = 0;
+
+        return XInputSetState(playerIndex_, &vibration) == ERROR_SUCCESS;
     }
 }

@@ -14,7 +14,7 @@
 
 #include "Manager/TextureManager.h"
 
-#include "RenderCore/Camera/CameraManager.h"
+#include "Manager/CameraManager.h"
 
 namespace Kizuna {
 
@@ -58,8 +58,7 @@ namespace Kizuna {
         /// ワールド行列とWVP行列を更新する
         /// </summary>
         void Update(
-            CameraManager *camera,
-            Transform transform);
+            CameraManager *camera);
 
         /// <summary>
         /// モデルを描画する

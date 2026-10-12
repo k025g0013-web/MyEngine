@@ -7,7 +7,7 @@
 #include "Graphics/Resource/MeshBuffer.h"
 #include "Graphics/Resource/Texture.h"
 #include "Graphics/Resource/TransformationMatrix.h"
-#include "RenderCore/Camera/CameraManager.h"
+#include "Manager/CameraManager.h"
 
 namespace Kizuna {
 

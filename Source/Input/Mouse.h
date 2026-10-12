@@ -40,26 +40,38 @@ namespace Kizuna {
         // 左クリック
         //=========================================================
 
-        /// <summary>左ボタンが押されているか取得する。</summary>
+        /// <summary>
+        /// 左ボタンが押されているか取得する
+        /// </summary>
         bool PushLeft() const { return left_; }
 
-        /// <summary>左ボタンが押された瞬間か取得する。</summary>
+        /// <summary>
+        /// 左ボタンが押された瞬間か取得する
+        /// </summary>
         bool TriggerLeft() const { return left_ && !preLeft_; }
 
-        /// <summary>左ボタンが離された瞬間か取得する。</summary>
+        /// <summary>
+        /// 左ボタンが離された瞬間か取得する
+        /// </summary>
         bool ReleaseLeft() const { return !left_ && preLeft_; }
 
         //=========================================================
         // 右クリック
         //=========================================================
 
-        /// <summary>右ボタンが押されているか取得する。</summary>
+        /// <summary>
+        /// 右ボタンが押されているか取得する。
+        /// </summary>
         bool PushRight() const { return right_; }
 
-        /// <summary>右ボタンが押された瞬間か取得する。</summary>
+        /// <summary>
+        /// 右ボタンが押された瞬間か取得する。
+        /// </summary>
         bool TriggerRight() const { return right_ && !preRight_; }
 
-        /// <summary>右ボタンが離された瞬間か取得する。</summary>
+        /// <summary>
+        /// 右ボタンが離された瞬間か取得する。
+        /// </summary>
         bool ReleaseRight() const { return !right_ && preRight_; }
 
         //=========================================================

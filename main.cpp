@@ -1,5 +1,5 @@
 #include "KizunaEngine.h"
-#include "RenderCore/Camera/CameraManager.h"
+#include "Manager/CameraManager.h"
 #include "RenderCore/Lighting.h"
 #include "Object/Common/Object3D.h"
 #include "External/ImGuiManager.h"
@@ -105,9 +105,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	camera.Initialize(
 		float(kClientWidth),
 		float(kClientHeight),
-		engine->GetKeyboard(),
-		engine->GetMouse(),
-		engine->GetGamePad());
+        &engine->Input());
 
 	Transform cameraTransform = {
 		.scale = {1.0f, 1.0f, 1.0f},
@@ -150,10 +148,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 #ifdef _DEBUG
 
-        if (engine->GetKeyboard()->TriggerKey(DIK_Q) ||
-            engine->GetGamePad()->TriggerButton(
-                XINPUT_GAMEPAD_A)) {
-
+        if (engine->Input().TriggerKey(DIK_Q) ||
+            engine->Input().TriggerButton(XINPUT_GAMEPAD_A)) {
             camera.ToggleCamera();
         }
 
@@ -508,9 +504,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                 SelectedObjectType::Model) {
 
                 transform =
-                    &modelManager->GetTransforms()[
-                        selectedObject.index];
-
+                    &modelManager->GetModels()
+                    [selectedObject.index]
+                    ->GetTransform();
+            
             } else {
 
                 transform =
@@ -988,9 +985,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		engine->EndFrame();
 
 		// ESC
-		if (engine->GetKeyboard()->PushKey(DIK_ESCAPE)) {
-			break;
-		}
+        if (engine->Input().PushKey(DIK_ESCAPE)) {
+            break;
+        }
 	}
 
 	//-------------------------------------------------------------------------

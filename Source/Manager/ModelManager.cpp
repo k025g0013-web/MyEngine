@@ -43,11 +43,6 @@ namespace Kizuna {
         models_.push_back(
             std::move(model));
 
-        transforms_.push_back({
-            {1.0f, 1.0f, 1.0f},
-            {0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f}
-            });
     }
 
     void ModelManager::CreateModel(
@@ -72,24 +67,15 @@ namespace Kizuna {
 
         models_.push_back(
             std::move(model));
-
-        transforms_.push_back({
-            {1.0f, 1.0f, 1.0f},
-            {0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f}
-            });
     }
 
     void ModelManager::Update(
         CameraManager *camera) {
 
-        for (size_t i = 0;
-            i < models_.size();
-            ++i) {
+        for (auto &model : models_) {
 
-            models_[i]->Update(
-                camera,
-                transforms_[i]);
+            model->Update(
+                camera);
         }
     }
 
@@ -107,12 +93,8 @@ namespace Kizuna {
         size_t index) {
 
         assert(index < models_.size());
-        assert(index < transforms_.size());
 
         models_.erase(
             models_.begin() + index);
-
-        transforms_.erase(
-            transforms_.begin() + index);
     }
 }
