@@ -58,4 +58,16 @@ namespace Kizuna {
             commandList->DrawInstanced(vertexCount_, 1, 0, 0);
         }
     }
+
+    void Mesh::BindBuffers(ID3D12GraphicsCommandList *commandList) {
+        commandList->IASetVertexBuffers(
+            0, 1, vertexBuffer_.GetVertexBufferView()
+        );
+
+        if (hasIndexBuffer_) {
+            commandList->IASetIndexBuffer(
+                indexBuffer_.GetIndexBufferView()
+            );
+        }
+    }
 }

@@ -64,6 +64,12 @@ namespace Kizuna {
             .inputLayout = InputLayoutMode::Model3d
         };
 
+        configs_[PipelineType::Particle] = {
+            .rasterizer = RasterizerMode::NoCull,
+            .depth = DepthMode::Default,
+            .blend = BlendMode::Alpha,
+            .inputLayout = InputLayoutMode::Model3d
+        };
 
         //====================
         // Pipeline生成
@@ -77,6 +83,8 @@ namespace Kizuna {
         CreateObject2dOpaque(device, logger);
 
         CreateModel3dOpaque(device, logger);
+
+        CreateParticle(device, logger);
     }
 
 
@@ -574,6 +582,84 @@ namespace Kizuna {
         };
     }
 
+    void PipelineList::CreateParticle(
+        ID3D12Device *device,
+        Logger *logger
+    ) {
+        //====================
+        // Config
+        //====================
+
+        PipelineConfig &config =
+            configs_[PipelineType::Particle];
+
+        //====================
+        // HLSL読み込み
+        //====================
+
+        Shader vs, ps;
+
+        vs.Compile(
+            L"Resources/Shader/Particle.VS.hlsl",
+            L"vs_6_0"
+        );
+
+        ps.Compile(
+            L"Resources/Shader/Particle.PS.hlsl",
+            L"ps_6_0"
+        );
+
+        //====================
+        // RootSignature生成
+        //====================
+
+        auto rootSignature =
+            std::make_unique<RootSignature>();
+
+        rootSignature->Create(
+            device,
+            logger,
+            RootSignature::Type::Particles
+        );
+
+        //====================
+        // Pipeline生成
+        //====================
+
+        auto pipeline =
+            std::make_unique<GraphicsPipeline>();
+
+        auto inputLayout =
+            PipelineElements::CreateInputLayout(
+                config.inputLayout
+            );
+
+        pipeline->Initialize(
+            device,
+            rootSignature->GetRootSignature(),
+            vs,
+            ps,
+            inputLayout,
+            PipelineElements::CreateRasterizer(
+                config.rasterizer
+            ),
+            PipelineElements::CreateDepthStencil(
+                config.depth
+            ),
+            PipelineElements::CreateBlendState(
+                config.blend
+            )
+        );
+
+        //====================
+        // Pipeline登録
+        //====================
+
+        pipelines_[PipelineType::Particle] = {
+            std::move(rootSignature),
+            std::move(pipeline)
+        };
+    }
 
     //==================================================
     // Get Pipeline
@@ -629,6 +715,10 @@ namespace Kizuna {
 
         case PipelineType::Model3dOpaque:
             CreateModel3dOpaque(device_, logger_);
+            break;
+
+        case PipelineType::Particle:
+            CreateParticle(device_, logger_);
             break;
         }
     }

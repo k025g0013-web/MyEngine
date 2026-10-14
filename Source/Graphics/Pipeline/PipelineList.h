@@ -25,6 +25,8 @@ namespace Kizuna {
 		Object2dOpaque,
 
 		Model3dOpaque,
+
+		Particle,
 	};
 
 
@@ -101,6 +103,10 @@ namespace Kizuna {
 			Logger *logger
 		);
 
+		void CreateParticle(
+			ID3D12Device *device,
+			Logger *logger
+		);
 
 	private:
 

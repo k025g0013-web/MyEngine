@@ -199,6 +199,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\Graphics\Resource\Mesh.cpp" />
     <ClCompile Include="Source\Graphics\Resource\MeshBuffer.cpp" />
     <ClCompile Include="Source\Graphics\Resource\Shader.cpp" />
+    <ClCompile Include="Source\Graphics\Resource\StructuredBuffer.cpp" />
     <ClCompile Include="Source\Graphics\Resource\Texture.cpp" />
     <ClCompile Include="Source\Graphics\Resource\TextureLoader.cpp" />
     <ClCompile Include="Source\Input\GamePad.cpp" />
@@ -210,6 +211,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\Manager\DebugManager.cpp" />
     <ClCompile Include="Source\Manager\InputManager.cpp" />
     <ClCompile Include="Source\Manager\ModelManager.cpp" />
+    <ClCompile Include="Source\Manager\ParticleManager.cpp" />
     <ClCompile Include="Source\Manager\PrimitiveManager.cpp" />
     <ClCompile Include="Source\Manager\SpriteManager.cpp" />
     <ClCompile Include="Source\Manager\TextureManager.cpp" />
@@ -217,6 +219,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\Object\Common\Object3D.cpp" />
     <ClCompile Include="Source\Object\Model\ModelLoader.cpp" />
     <ClCompile Include="Source\Object\Model\Model.cpp" />
+    <ClCompile Include="Source\Object\Particle\Particle.cpp" />
     <ClCompile Include="Source\Object\Primitive\PlaneObject.cpp" />
     <ClCompile Include="Source\Object\Primitive\SphereObject.cpp" />
     <ClCompile Include="Source\Object\Primitive\TriangleObject.cpp" />
@@ -298,6 +301,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="Resources\Shader\Particle.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h" />
@@ -334,6 +340,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Graphics\Resource\Mesh.h" />
     <ClInclude Include="Source\Graphics\Resource\MeshBuffer.h" />
     <ClInclude Include="Source\Graphics\Resource\Shader.h" />
+    <ClInclude Include="Source\Graphics\Resource\StructuredBuffer.h" />
     <ClInclude Include="Source\Graphics\Resource\Texture.h" />
     <ClInclude Include="Source\Graphics\Resource\TextureLoader.h" />
     <ClInclude Include="Source\Graphics\Resource\TransformationMatrix.h" />
@@ -346,6 +353,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Manager\DebugManager.h" />
     <ClInclude Include="Source\Manager\InputManager.h" />
     <ClInclude Include="Source\Manager\ModelManager.h" />
+    <ClInclude Include="Source\Manager\ParticleManager.h" />
     <ClInclude Include="Source\Manager\PrimitiveManager.h" />
     <ClInclude Include="Source\Manager\SpriteManager.h" />
     <ClInclude Include="Source\Manager\TextureManager.h" />
@@ -360,6 +368,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Object\Model\ModelData.h" />
     <ClInclude Include="Source\Object\Model\ModelLoader.h" />
     <ClInclude Include="Source\Object\Model\Model.h" />
+    <ClInclude Include="Source\Object\Particle\Particle.h" />
     <ClInclude Include="Source\Object\Primitive\PlaneObject.h" />
     <ClInclude Include="Source\Object\Primitive\SphereObject.h" />
     <ClInclude Include="Source\Object\Primitive\TriangleObject.h" />
@@ -460,6 +469,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Particle.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Particle.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resources\Shader\ThroughWall3d.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

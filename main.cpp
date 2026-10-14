@@ -8,6 +8,8 @@
 #include "Object/Primitive/PlaneObject.h"
 #include "Object/Primitive/SphereObject.h"
 
+#include "Manager/ParticleManager.h"
+
 #include <cstdint>
 #include <algorithm>
 
@@ -33,7 +35,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//-------------------------------------------------------------------------
 	auto engine = std::make_unique<KizunaEngine>();
 
-	engine->Initialize(L"CG2", kClientWidth, kClientHeight);
+	engine->Initialize(L"KizunaEngine", kClientWidth, kClientHeight);
 
 	ID3D12Device *device = engine->GetDevice();
 
@@ -82,6 +84,47 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		textureManager->LoadTexture(
 			commandList,
 			"resources/white1x1.png");
+
+    ParticleManager particleManager;
+
+    particleManager.Initialize(
+        device,
+        commandList,
+        engine->GetDirectXCommon()->GetSRVHeap(),
+        engine->GetTextureManager()
+    );
+
+
+
+    constexpr uint32_t kNumInstance = 10;
+
+    Transform particleTransform{};
+    particleTransform.scale = { 1.0f, 1.0f, 1.0f };
+    particleTransform.rotate = { 0.0f, 0.0f, 0.0f };
+    particleTransform.translate = { 0.0f, 0.0f, 0.0f };
+
+    Vector3 particleVelocity = { 0.0f, 0.0f, 0.0f };
+
+    // 基準となる位置から斜め方向にずらして生成する
+    for (uint32_t index = 0; index < kNumInstance; ++index) {
+        Transform transform = particleTransform;
+
+        const float offset = static_cast<float>(index) * 0.1f;
+
+        transform.translate.x += offset;
+        transform.translate.y += offset;
+        transform.translate.z += offset;
+
+        particleManager.Emit(
+            "resources/uvChecker.png",
+            1,
+            transform,
+            particleVelocity,
+            1000.0f
+        );
+    }
+
+
 
 	//-------------------------------------------------------------------------
 	// 初期オブジェクト
@@ -156,6 +199,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #endif
 
         camera.Update(cameraTransform);
+
+        constexpr float kDeltaTime = 1.0f / 60.0f;
+        particleManager.Update(kDeltaTime, &camera);
 
 		//-------------------------------------------------------------------------
 		// ImGui
@@ -930,6 +976,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
             modelManager->Update(&camera);
             modelManager->Draw(commandList);
 		}
+
+        // パーティクル（板ポリ10枚）
+        {
+            engine->SetPipeline(PipelineType::Particle);
+
+            lighting.Bind(3, commandList);
+
+            particleManager.Draw(commandList);
+        }
 
 		// 2Dオブジェクト
 		{
