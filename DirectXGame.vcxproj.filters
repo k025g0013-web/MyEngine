@@ -103,6 +103,9 @@
     <Filter Include="Source\Manager">
       <UniqueIdentifier>{4935ee49-9d12-4079-8ded-8b46b1f1020b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Object\Particle">
+      <UniqueIdentifier>{c1c03955-c6db-4ddd-90e6-30784eb4315f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externals\imgui\imgui_widgets.cpp">
@@ -265,6 +268,18 @@
     <ClCompile Include="Source\Manager\CameraManager.cpp">
       <Filter>Source\Manager</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Manager\SpriteManager.cpp">
+      <Filter>Source\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Resource\StructuredBuffer.cpp">
+      <Filter>Source\Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Object\Particle\Particle.cpp">
+      <Filter>Source\Object\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Manager\ParticleManager.cpp">
+      <Filter>Source\Manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="exclusion.dic" />
@@ -311,6 +326,9 @@
       <Filter>Resources\Shader</Filter>
     </None>
     <None Include=".gitignore" />
+    <None Include="Resources\Shader\Particle.hlsli">
+      <Filter>Resources\Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imstb_rectpack.h">
@@ -523,6 +541,18 @@
     <ClInclude Include="Source\Manager\CameraManager.h">
       <Filter>Source\Manager</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Manager\SpriteManager.h">
+      <Filter>Source\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics\Resource\StructuredBuffer.h">
+      <Filter>Source\Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Particle\Particle.h">
+      <Filter>Source\Object\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Manager\ParticleManager.h">
+      <Filter>Source\Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -603,6 +633,12 @@
       <Filter>Resources\Shader</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shader\Model3d.PS.hlsl">
+      <Filter>Resources\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Particle.VS.hlsl">
+      <Filter>Resources\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shader\Particle.PS.hlsl">
       <Filter>Resources\Shader</Filter>
     </FxCompile>
   </ItemGroup>

@@ -59,6 +59,12 @@ namespace Kizuna {
         /// </summary>
         bool HasIndexBuffer() const { return hasIndexBuffer_; }
 
+        /// <summary>
+        /// 描画せずバッファだけ設定する
+        /// </summary>
+        /// <param name="commandList">描画コマンドリスト</param>
+        void BindBuffers(ID3D12GraphicsCommandList *commandList);
+
     private:
 
         /// 頂点バッファ

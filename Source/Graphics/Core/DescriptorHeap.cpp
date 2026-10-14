@@ -26,6 +26,9 @@ namespace Kizuna {
 		// DirectX12ではDescriptorは連続したメモリ領域に配置されるため、
 		// このサイズを利用して任意のDescriptor位置を計算する
 		descriptorSize_ = device->GetDescriptorHandleIncrementSize(heapType);
+
+		descriptorCount_ = numDescriptors;
+		nextDescriptorIndex_ = 1;
 	}
 
 	// getter
@@ -46,5 +49,11 @@ namespace Kizuna {
 		// 指定されたDescriptor位置までoffsetを加算する
 		handle.ptr += descriptorSize_ * index;
 		return handle;
+	}
+
+	uint32_t DescriptorHeap::AllocateDescriptor() {
+		assert(nextDescriptorIndex_ < descriptorCount_);
+
+		return nextDescriptorIndex_++;
 	}
 }

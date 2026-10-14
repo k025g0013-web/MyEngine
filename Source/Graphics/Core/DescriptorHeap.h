@@ -72,12 +72,19 @@ namespace Kizuna {
             return descriptorSize_;
         }
 
+        // 次に割り当てるDescriptor番号を取得する
+        uint32_t AllocateDescriptor();
+
+        // 次に割り当てるDescriptor番号
+        uint32_t nextDescriptorIndex_ = 1;
+
+        // 作成したDescriptorの総数
+        uint32_t descriptorCount_ = 0;
 
     private:
 
         /// Descriptor1つあたりのサイズ
         uint32_t descriptorSize_ = 0;
-
 
         /// Descriptorを管理するHeap
         Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap_;

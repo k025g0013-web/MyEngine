@@ -181,10 +181,7 @@ namespace Kizuna {
 
     void TextureLoader::CreateSRV(LoadContext &context) {
 
-        // 使用するディスクリプタ番号を取得する
-        uint32_t descriptorIndex = nextDescriptorIndex_;
-
-        nextDescriptorIndex_++;
+        uint32_t descriptorIndex = srvHeap_->AllocateDescriptor();
 
         // CPU/GPUディスクリプタハンドルを取得する
         context.cpuHandle = srvHeap_->GetCPUDescriptorHandle(descriptorIndex);

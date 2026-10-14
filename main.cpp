@@ -8,9 +8,7 @@
 #include "Object/Primitive/PlaneObject.h"
 #include "Object/Primitive/SphereObject.h"
 
-#include "Object/Model/Model.h"
-
-#include "Object/Sprite/Sprite.h"
+#include "Manager/ParticleManager.h"
 
 #include <cstdint>
 #include <algorithm>
@@ -37,7 +35,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//-------------------------------------------------------------------------
 	auto engine = std::make_unique<KizunaEngine>();
 
-	engine->Initialize(L"CG2", kClientWidth, kClientHeight);
+	engine->Initialize(L"KizunaEngine", kClientWidth, kClientHeight);
 
 	ID3D12Device *device = engine->GetDevice();
 
@@ -49,6 +47,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	PrimitiveManager *primitiveManager = engine->GetPrimitiveManager();
 
     ModelManager *modelManager = engine->GetModelManager();
+
+    SpriteManager *spriteManager = engine->GetSpriteManager();
+    assert(engine != nullptr);
+    assert(spriteManager != nullptr);
 
 	//-------------------------------------------------------------------------
 	// テクスチャの読み込み
@@ -82,6 +84,47 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		textureManager->LoadTexture(
 			commandList,
 			"resources/white1x1.png");
+
+    ParticleManager particleManager;
+
+    particleManager.Initialize(
+        device,
+        commandList,
+        engine->GetDirectXCommon()->GetSRVHeap(),
+        engine->GetTextureManager()
+    );
+
+
+
+    constexpr uint32_t kNumInstance = 10;
+
+    Transform particleTransform{};
+    particleTransform.scale = { 1.0f, 1.0f, 1.0f };
+    particleTransform.rotate = { 0.0f, 0.0f, 0.0f };
+    particleTransform.translate = { 0.0f, 0.0f, 0.0f };
+
+    Vector3 particleVelocity = { 0.0f, 0.0f, 0.0f };
+
+    // 基準となる位置から斜め方向にずらして生成する
+    for (uint32_t index = 0; index < kNumInstance; ++index) {
+        Transform transform = particleTransform;
+
+        const float offset = static_cast<float>(index) * 0.1f;
+
+        transform.translate.x += offset;
+        transform.translate.y += offset;
+        transform.translate.z += offset;
+
+        particleManager.Emit(
+            "resources/uvChecker.png",
+            1,
+            transform,
+            particleVelocity,
+            1000.0f
+        );
+    }
+
+
 
 	//-------------------------------------------------------------------------
 	// 初期オブジェクト
@@ -156,6 +199,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #endif
 
         camera.Update(cameraTransform);
+
+        constexpr float kDeltaTime = 1.0f / 60.0f;
+        particleManager.Update(kDeltaTime, &camera);
 
 		//-------------------------------------------------------------------------
 		// ImGui
@@ -706,28 +752,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
         // Create Sprite
         //-------------------------------------------------------------------------
 
-        if (ImGui::Button(
-            "Create Sprite")) {
+        if (ImGui::Button("Create Sprite")) {
 
-            auto sprite =
-                std::make_unique<Sprite>();
-
-            sprite->Initialize(
-                device,
-                0.0f,
-                0.0f,
-                float(kClientWidth / 2),
-                float(kClientHeight / 2),
-                0xFFFFFFFF);
-
-            sprites.push_back(
-                std::move(sprite));
-
-            spriteTextureIndices.push_back(0);
+            spriteManager->CreateSprite(
+                0.0f, 0.0f, float(kClientWidth / 2), float(kClientHeight / 2), textures[0], 0);
 
             currentSpriteIndex =
                 static_cast<int>(
-                    sprites.size()) - 1;
+                    spriteManager->GetSpriteCount()) - 1;
         }
 
         //-------------------------------------------------------------------------
@@ -738,21 +770,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
             "Sprite List",
             ImVec2(-FLT_MIN, 120.0f))) {
 
-            for (int i = 0;
-                i < static_cast<int>(sprites.size());
-                ++i) {
-
+            for (int i = 0; i < static_cast<int>(spriteManager->GetSpriteCount()); ++i) {
                 char label[64];
 
-                sprintf_s(
-                    label,
-                    "Sprite %d",
-                    i);
+                sprintf_s(label, "Sprite %d", i);
 
-                if (ImGui::Selectable(
-                    label,
-                    currentSpriteIndex == i)) {
-
+                if (ImGui::Selectable(label, currentSpriteIndex == i)) {
                     currentSpriteIndex = i;
                 }
             }
@@ -764,39 +787,49 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
         // Selected Sprite
         //-------------------------------------------------------------------------
 
-        if (!sprites.empty()) {
+        if (spriteManager->GetSpriteCount() > 0) {
 
-            currentSpriteIndex =
-                std::clamp(
-                    currentSpriteIndex,
-                    0,
-                    static_cast<int>(
-                        sprites.size()) - 1);
+            currentSpriteIndex = std::clamp(
+                currentSpriteIndex,
+                0,
+                static_cast<int>(
+                    spriteManager->GetSpriteCount()) - 1);
 
             Sprite &sprite =
-                *sprites[currentSpriteIndex];
+                *spriteManager->GetSprite(
+                    currentSpriteIndex);
 
-            //=====================================================================
             // Texture
-            //=====================================================================
-
             const char *textureItems[] = {
                 "UVChecker",
                 "Cube",
                 "MonsterBall",
             };
 
-            ImGui::Combo(
+            // 選択肢の順番から実際のテクスチャ配列のインデックスへの対応
+            const int textureMap[] = {
+                0, // UVChecker
+                2, // Cube
+                1, // MonsterBall
+            };
+
+            int textureIndex =
+                spriteManager->GetTextureIndex(
+                    currentSpriteIndex);
+
+            if (ImGui::Combo(
                 "Texture",
-                &spriteTextureIndices[
-                    currentSpriteIndex],
-                    textureItems,
-                    IM_ARRAYSIZE(textureItems));
+                &textureIndex,
+                textureItems,
+                IM_ARRAYSIZE(textureItems))) {
 
-            //=====================================================================
+                spriteManager->SetTexture(
+                    currentSpriteIndex,
+                    textures[textureMap[textureIndex]],
+                    textureIndex);
+            }
+
             // Transform
-            //=====================================================================
-
             if (ImGui::CollapsingHeader(
                 "Sprite Transform",
                 ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -820,25 +853,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                     0.01f);
             }
 
-            //=====================================================================
             // Material
-            //=====================================================================
-
             if (ImGui::CollapsingHeader(
                 "Sprite Material",
                 ImGuiTreeNodeFlags_DefaultOpen)) {
 
-                auto &material =
+                Material &material =
                     sprite.GetMaterial();
 
                 ImGui::ColorEdit4(
                     "Sprite Color",
-                    &material
-                    .GetMaterialData()
-                    ->color.x);
+                    &material.GetMaterialData()->color.x);
 
-                Transform &uv =
-                    sprite.GetUVTransform();
+                Transform &uv = sprite.GetUVTransform();
 
                 ImGui::DragFloat2(
                     "UV Translate##Sprite",
@@ -855,33 +882,20 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                     0.01f);
             }
 
-            //=====================================================================
             // Delete
-            //=====================================================================
-
             ImGui::Separator();
 
-            if (ImGui::Button(
-                "Delete Sprite")) {
+            if (ImGui::Button("Delete Sprite")) {
 
-                sprites.erase(
-                    sprites.begin() +
+                spriteManager->DeleteSprite(
                     currentSpriteIndex);
 
-                spriteTextureIndices.erase(
-                    spriteTextureIndices.begin() +
-                    currentSpriteIndex);
-
-                if (!sprites.empty()) {
-
-                    currentSpriteIndex =
-                        (std::min)(
-                            currentSpriteIndex,
-                            static_cast<int>(
-                                sprites.size()) - 1);
-
+                if (spriteManager->GetSpriteCount() > 0) {
+                    currentSpriteIndex = (std::min)(
+                        currentSpriteIndex,
+                        static_cast<int>(
+                            spriteManager->GetSpriteCount()) - 1);
                 } else {
-
                     currentSpriteIndex = 0;
                 }
             }
@@ -963,23 +977,24 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
             modelManager->Draw(commandList);
 		}
 
+        // パーティクル（板ポリ10枚）
+        {
+            engine->SetPipeline(PipelineType::Particle);
+
+            lighting.Bind(3, commandList);
+
+            particleManager.Draw(commandList);
+        }
+
 		// 2Dオブジェクト
 		{
-			engine->SetPipeline(
-				PipelineType::Object2dOpaque);
+            engine->SetPipeline(PipelineType::Object2dOpaque);
 
-			for (size_t i = 0;
-				i < sprites.size();
-				++i) {
+            spriteManager->Update(
+                kClientWidth,
+                kClientHeight);
 
-				sprites[i]->Update(
-					kClientWidth,
-					kClientHeight);
-
-				sprites[i]->Draw(
-					commandList,
-					textures[spriteTextureIndices[i]]);
-			}
+            spriteManager->Draw(commandList);
 		}
 
 		engine->EndFrame();
