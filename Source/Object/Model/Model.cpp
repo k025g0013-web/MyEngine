@@ -100,19 +100,15 @@ namespace Kizuna {
         ID3D12GraphicsCommandList *commandList) {
 
         commandList->SetGraphicsRootConstantBufferView(
-            0,
-            material_.GetGPUVirtualAddress());
+            0, material_.GetGPUVirtualAddress());
 
         commandList->SetGraphicsRootConstantBufferView(
-            1,
-            transformationMatrixBuffer_.GetGPUVirtualAddress());
+            1, transformationMatrixBuffer_.GetGPUVirtualAddress());
 
         // テクスチャが存在する場合のみ設定
-        if (!textureData_.gpuHandle.ptr == false) {
-
+        if (textureData_.gpuHandle.ptr != 0) {
             commandList->SetGraphicsRootDescriptorTable(
-                2,
-                textureData_.gpuHandle);
+                2, textureData_.gpuHandle);
         }
 
         mesh_.Bind(commandList);

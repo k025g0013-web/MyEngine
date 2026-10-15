@@ -105,6 +105,11 @@ namespace Kizuna {
 		/// </remarks>
 		bool IsPlaying(const std::string &name) const;
 
+		/// <summary>
+		/// 再生終了したボイスを破棄する (中継用)
+		/// </summary>
+		void ClearFinishedVoices() { audio_.ClearFinishedVoices(); }
+
 	private:
 		// === Getter ===
 
@@ -130,11 +135,6 @@ namespace Kizuna {
 		/// 登録されていない場合はアサートで停止する。
 		/// </remarks>
 		const AudioData &GetAudioData(const std::string &name) const;
-
-		/// <summary>
-		/// 再生終了したボイスを破棄する (中継用)
-		/// </summary>
-		void ClearFinishedVoices() { audio_.ClearFinishedVoices(); }
 
 	private:
 		/// 読み込み済み音声

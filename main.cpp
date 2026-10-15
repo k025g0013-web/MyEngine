@@ -116,7 +116,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
         transform.translate.z += offset;
 
         particleManager.Emit(
-            "resources/uvChecker.png",
+            "resources/circle.png",
             1,
             transform,
             particleVelocity,
@@ -178,6 +178,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//-------------------------------------------------------------------------
 
     while (engine->ProcessMessage()) {
+        engine.get()->GetAudioManager()->ClearFinishedVoices();
+
 
         //=========================================================================
         // 入力更新

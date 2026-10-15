@@ -52,20 +52,21 @@ namespace Kizuna {
     // ウィンドウ生成
     void WinApp::Initialize(LPCWSTR title, uint32_t width, uint32_t height) {
         // ウィンドウクラス情報を設定する
-        wc_.lpfnWndProc = WinApp::WindowProc;           // ウィンドウプロシージャ
-        wc_.lpszClassName = L"CG2WindowClass";          // ウィンドウクラス名
-        wc_.hInstance = GetModuleHandle(nullptr);       // アプリケーションインスタンス
-        wc_.hCursor = LoadCursor(nullptr, IDC_ARROW);   // 標準カーソル
+        wc_.lpfnWndProc = WinApp::WindowProc;
+        wc_.lpszClassName = kWindowClassName;
+        wc_.hInstance = GetModuleHandle(nullptr);
+        wc_.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
         // ウィンドウクラスをWindowsへ登録する
         RegisterClass(&wc_);
 
         // クライアント領域のサイズを設定する
-        const int32_t kClientWidth = width;
-        const int32_t kClientHeight = height;
-
-        // クライアントサイズを保持する矩形を作成する
-        RECT wrc = { 0, 0, kClientWidth, kClientHeight };
+        RECT wrc = {
+            0,
+            0,
+            static_cast<LONG>(width),
+            static_cast<LONG>(height)
+        };
 
         // タイトルバーや枠を含めたウィンドウサイズへ変換する
         AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
@@ -90,9 +91,18 @@ namespace Kizuna {
     }
 
     // ウィンドウ終了
-    void WinApp::Finalize() const {
-        // ウィンドウを閉じる
-        CloseWindow(hwnd_);
+    void WinApp::Finalize() {
+        // ウィンドウを破棄する
+        if (hwnd_ != nullptr) {
+            DestroyWindow(hwnd_);
+            hwnd_ = nullptr;
+        }
+
+        // 登録したウィンドウクラスを解除する
+        if (wc_.lpszClassName != nullptr && wc_.hInstance != nullptr) {
+            UnregisterClass(wc_.lpszClassName, wc_.hInstance);
+            wc_ = {};
+        }
     }
 
     // Windowsメッセージ処理
