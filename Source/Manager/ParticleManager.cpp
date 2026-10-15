@@ -29,6 +29,9 @@ namespace Kizuna {
         srvHeap_ = srvHeap;
         textureManager_ = textureManager;
 
+        // パーティクル用テクスチャローダーを初期化
+        textureLoader_.Initialize(device_, srvHeap_);
+
         // パーティクル用の四角形メッシュを作成する。
         std::vector<VertexData> vertices(4);
 
@@ -99,12 +102,8 @@ namespace Kizuna {
             return;
         }
 
-        // 指定されたテクスチャがTextureManagerに登録済みであることが前提。
-        // GetGPUHandleをここで呼ぶことで、未登録テクスチャの指定ミスも発見しやすくする。
         const D3D12_GPU_DESCRIPTOR_HANDLE textureHandle =
-            textureManager_->GetGPUHandle(texturePath);
-
-        assert(textureHandle.ptr != 0);
+            LoadParticleTexture(texturePath);
 
         for (uint32_t i = 0; i < count; ++i) {
             Particle particle;
@@ -179,8 +178,12 @@ namespace Kizuna {
 
             drawnTextures.insert(texturePath);
 
+            const auto textureIt = particleTextures_.find(texturePath);
+
+            assert(textureIt != particleTextures_.end());
+
             const D3D12_GPU_DESCRIPTOR_HANDLE textureHandle =
-                textureManager_->GetGPUHandle(texturePath);
+                textureIt->second.gpuHandle;
 
             std::vector<TransformationMatrix> matrices;
             matrices.reserve(particles_.size());
@@ -247,4 +250,38 @@ namespace Kizuna {
         return static_cast<uint32_t>(particles_.size());
     }
 
+    D3D12_GPU_DESCRIPTOR_HANDLE ParticleManager::LoadParticleTexture(
+        const std::string &texturePath) {
+
+        // すでに読み込まれている場合は再利用する
+        auto it = particleTextures_.find(texturePath);
+
+        if (it != particleTextures_.end()) {
+            return it->second.gpuHandle;
+        }
+
+        // 新しいテクスチャを読み込む
+        ParticleTexture particleTexture;
+        particleTexture.texture = std::make_unique<Texture>();
+
+        TextureData textureData = textureLoader_.LoadTexture(
+            commandList_,
+            texturePath,
+            *particleTexture.texture
+        );
+
+        particleTexture.gpuHandle = textureData.gpuHandle;
+
+        assert(particleTexture.gpuHandle.ptr != 0);
+
+        // 読み込み済みテクスチャとして登録
+        auto [insertedIt, inserted] = particleTextures_.emplace(
+            texturePath,
+            std::move(particleTexture)
+        );
+
+        assert(inserted);
+
+        return insertedIt->second.gpuHandle;
+    }
 }
