@@ -1,24 +1,38 @@
 #include "particle.hlsli"
 
-struct TransformationMatrix {
+struct TransformationMatrix
+{
     float32_t4x4 WVP;
     float32_t4x4 World;
+    float32_t4 color;
 };
 
 StructuredBuffer<TransformationMatrix> gTransformationMatrix : register(t0);
 
-struct VertexShaderInput {
+struct VertexShaderInput
+{
     float32_t4 position : POSITION0;
     float32_t2 texcoord : TEXCOORD0;
     float32_t3 normal : NORMAL0;
 };
 
-VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID) {
+VertexShaderOutput main(
+    VertexShaderInput input,
+    uint instanceId : SV_InstanceID)
+{
     VertexShaderOutput output;
-    
-    output.position = mul(input.position, gTransformationMatrix[instanceId].WVP);
+
+    output.position = mul(
+        input.position,
+        gTransformationMatrix[instanceId].WVP);
+
     output.texcoord = input.texcoord;
-    output.normal = normalize(mul(input.normal, (float32_t3x3) gTransformationMatrix[instanceId].World));
-    
+
+    output.normal = normalize(
+        mul(input.normal,
+            (float32_t3x3) gTransformationMatrix[instanceId].World));
+
+    output.color = gTransformationMatrix[instanceId].color;
+
     return output;
 }

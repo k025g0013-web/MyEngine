@@ -49,9 +49,6 @@
     <Filter Include="Source\Graphics">
       <UniqueIdentifier>{e92dd568-dd01-4544-b89f-1daa974dc6eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Graphics\Pipeline">
-      <UniqueIdentifier>{c1882e2d-6b2a-424a-82d0-a5a830bfe333}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Graphics\Core">
       <UniqueIdentifier>{3fb99e23-dc1e-4192-9674-8f92a5e5dd22}</UniqueIdentifier>
     </Filter>
@@ -105,6 +102,9 @@
     </Filter>
     <Filter Include="Source\Object\Particle">
       <UniqueIdentifier>{c1c03955-c6db-4ddd-90e6-30784eb4315f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Graphics\Pipeline">
+      <UniqueIdentifier>{c1882e2d-6b2a-424a-82d0-a5a830bfe333}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

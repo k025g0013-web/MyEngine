@@ -10,6 +10,8 @@
 
 #include "Manager/ParticleManager.h"
 
+#include "Utils/RandomHelper.h"
+
 #include <cstdint>
 #include <algorithm>
 
@@ -94,36 +96,39 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
         engine->GetTextureManager()
     );
 
-
-
-    constexpr uint32_t kNumInstance = 10;
-
-    Transform particleTransform{};
-    particleTransform.scale = { 1.0f, 1.0f, 1.0f };
-    particleTransform.rotate = { 0.0f, 0.0f, 0.0f };
-    particleTransform.translate = { 0.0f, 0.0f, 0.0f };
-
-    Vector3 particleVelocity = { 0.0f, 0.0f, 0.0f };
-
     // 基準となる位置から斜め方向にずらして生成する
-    for (uint32_t index = 0; index < kNumInstance; ++index) {
-        Transform transform = particleTransform;
+    for (int i = 0; i < 100; ++i) {
+        Transform transform{};
+        transform.translate = {
+            RandHelperFloat(-1.0f, 1.0f),
+            RandHelperFloat(-1.0f, 1.0f),
+            RandHelperFloat(-1.0f, 1.0f)
+        };
 
-        const float offset = static_cast<float>(index) * 0.1f;
+        // ランダムな移動速度
+        Vector3 particleVelocity = {
+            RandHelperFloat(-2.0f, 2.0f),
+            RandHelperFloat(-2.0f, 2.0f),
+            RandHelperFloat(-2.0f, 2.0f)
+        };
 
-        transform.translate.x += offset;
-        transform.translate.y += offset;
-        transform.translate.z += offset;
+        // ランダムな色
+        Vector4 color = {
+            RandHelperFloat(0.0f, 1.0f),
+            RandHelperFloat(0.0f, 1.0f),
+            RandHelperFloat(0.0f, 1.0f),
+            1.0f
+        };
 
         particleManager.Emit(
-            "resources/uvChecker.png",
+            "resources/circle.png",
             1,
             transform,
             particleVelocity,
-            1000.0f
+            3.0f,
+            color
         );
     }
-
 
 
 	//-------------------------------------------------------------------------
@@ -178,6 +183,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//-------------------------------------------------------------------------
 
     while (engine->ProcessMessage()) {
+        engine.get()->GetAudioManager()->ClearFinishedVoices();
+
 
         //=========================================================================
         // 入力更新

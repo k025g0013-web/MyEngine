@@ -1,5 +1,6 @@
 #include "AudioLoader.h"
 #include "AudioFormat.h"
+#include "Utils/ConvertString.h"
 
 #include <cassert>
 #include <cstring>
@@ -31,7 +32,7 @@ namespace Kizuna {
 
 		// MP3ファイル
 		if (path.extension() == kExtMp3) {
-			std::wstring wpath(filename.begin(), filename.end());
+			std::wstring wpath = ConvertString(filename);
 			return LoadMp3(wpath.c_str());
 		}
 

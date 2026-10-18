@@ -66,8 +66,8 @@ namespace Kizuna {
 
         configs_[PipelineType::Particle] = {
             .rasterizer = RasterizerMode::NoCull,
-            .depth = DepthMode::Default,
-            .blend = BlendMode::Alpha,
+            .depth = DepthMode::Alpha,
+            .blend = BlendMode::Add,
             .inputLayout = InputLayoutMode::Model3d
         };
 
