@@ -16,7 +16,8 @@ namespace Kizuna {
         void Initialize(
             const Transform &transform,
             const Vector3 &velocity,
-            float lifeTime
+            float lifeTime,
+            const Vector4 &color
         );
 
         /// <summary>
@@ -59,6 +60,13 @@ namespace Kizuna {
             return lifeTime_;
         }
 
+        /// <summary>
+        /// 色を取得する
+        /// </summary>
+        Vector4 GetColor() const {
+            return color_;
+        }
+
     private:
 
         // パーティクルのTransform
@@ -71,8 +79,12 @@ namespace Kizuna {
         // 移動速度
         Vector3 velocity_{};
 
-        // 残り寿命（秒）
+        // 残り寿命と初期寿命
         float lifeTime_ = 0.0f;
+        float initialLifeTime_ = 0.0f;
+
+        // RGBは生成時の色、Aは経過時間で変化
+        Vector4 color_{ 1.0f, 1.0f, 1.0f, 1.0f };
 
         // 生存フラグ
         bool isAlive_ = false;

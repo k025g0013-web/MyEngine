@@ -8,20 +8,22 @@ namespace Kizuna {
     void Particle::Initialize(
         const Transform &transform,
         const Vector3 &velocity,
-        float lifeTime
+        float lifeTime,
+        const Vector4 &color
     ) {
-        // 初期状態を設定
         transform_ = transform;
         velocity_ = velocity;
-        lifeTime_ = lifeTime;
 
-        // 寿命が正の場合のみ生存させる
+        lifeTime_ = lifeTime;
+        initialLifeTime_ = lifeTime;
+
+        color_ = color;
+        color_.w = 1.0f;
+
         isAlive_ = lifeTime_ > 0.0f;
     }
 
     void Particle::Update(float deltaTime) {
-
-        // 死亡済みのパーティクルは更新しない
         if (!isAlive_) {
             return;
         }
@@ -38,7 +40,12 @@ namespace Kizuna {
         transform_.translate.z += velocity_.z * deltaTime;
 
         // 残り寿命を更新
-        lifeTime_ = std::max(0.0f, lifeTime_ - deltaTime);
+        lifeTime_ = (std::max)(0.0f, lifeTime_ - deltaTime);
+
+        // 残り寿命の割合を透明度に反映
+        if (initialLifeTime_ > 0.0f) {
+            color_.w = lifeTime_ / initialLifeTime_;
+        }
 
         // 寿命が尽きたら死亡
         if (lifeTime_ <= 0.0f) {

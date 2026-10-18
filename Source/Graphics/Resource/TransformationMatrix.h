@@ -17,5 +17,8 @@ namespace Kizuna {
 
 		/// ワールド行列
 		Matrix4x4 World;
+
+		// 色と透明度
+		Vector4 color;
 	};
 }

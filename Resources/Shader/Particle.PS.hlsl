@@ -46,7 +46,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     }
 
     float32_t4 baseColor =
-        gMaterial.color * textureColor;
+    gMaterial.color * textureColor * input.color;
     
     if (gMaterial.enableLighting == 0 ||
         gDirectionalLight.lightType == 0)

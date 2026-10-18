@@ -39,7 +39,8 @@ namespace Kizuna {
             uint32_t count,
             const Transform &transform,
             const Vector3 &velocity,
-            float lifeTime
+            float lifeTime,
+            const Vector4 &color
         );
 
         void Update(float deltaTime, CameraManager *camera);

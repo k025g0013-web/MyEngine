@@ -81,7 +81,8 @@ namespace Kizuna {
         uint32_t count,
         const Transform &transform,
         const Vector3 &velocity,
-        float lifeTime) {
+        float lifeTime,
+        const Vector4 &color) {
 
         assert(textureManager_);
 
@@ -112,7 +113,8 @@ namespace Kizuna {
             particle.Initialize(
                 transform,
                 velocity,
-                lifeTime
+                lifeTime,
+                color
             );
 
             if (particle.IsAlive()) {
@@ -209,6 +211,8 @@ namespace Kizuna {
                     matrix.World,
                     camera_->GetViewProjectionMatrix()
                 );
+
+                matrix.color = particles_[i].GetColor();
 
                 matrices.push_back(matrix);
             }
