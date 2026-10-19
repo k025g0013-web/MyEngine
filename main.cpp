@@ -14,6 +14,7 @@
 
 #include <cstdint>
 #include <algorithm>
+#include <chrono>
 
 using namespace Kizuna;
 
@@ -139,7 +140,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	std::vector<int> spriteTextureIndices;
 
 	// 初期モデル
-    modelManager->CreateModel("fence");
+    modelManager->CreateModel(commandList, "fence");
 
 	//-------------------------------------------------------------------------
 	// ライト / カメラ
@@ -178,6 +179,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		false,
 		1.0f);
 
+    using Clock = std::chrono::steady_clock;
+    auto previousFrameTime = Clock::now();
+
 	//-------------------------------------------------------------------------
 	// メインループ
 	//-------------------------------------------------------------------------
@@ -205,10 +209,21 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 #endif
 
-        camera.Update(cameraTransform);
+        // 実際のフレーム経過時間を計算
+        const auto currentFrameTime = Clock::now();
 
-        constexpr float kDeltaTime = 1.0f / 60.0f;
-        particleManager.Update(kDeltaTime, &camera);
+        float deltaTime =
+            std::chrono::duration<float>(
+                currentFrameTime - previousFrameTime).count();
+
+        previousFrameTime = currentFrameTime;
+
+        // デバッグ停止などによる極端な時間経過を制限
+        deltaTime = (std::min)(deltaTime, 0.1f);
+
+        // カメラ・パーティクル更新
+        camera.Update(cameraTransform);
+        particleManager.Update(deltaTime, &camera);
 
 		//-------------------------------------------------------------------------
 		// ImGui
@@ -315,7 +330,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
             case 1: {
 
-                modelManager->CreateModel("plane", textures[0]);
+                modelManager->CreateModel(commandList, "plane", textures[0]);
 
                 // 作成したModelを選択
                 selectedObject.type =
@@ -334,7 +349,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
             case 2: {
 
-                modelManager->CreateModel("cube", textures[2]);
+                modelManager->CreateModel(commandList, "cube", textures[2]);
 
                 // 作成したModelを選択
                 selectedObject.type =
@@ -373,7 +388,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                   //=================================================================
 
             case 4: {
-                modelManager->CreateModel("teapot", textures[4]);
+                modelManager->CreateModel(commandList, "teapot", textures[4]);
 
                 // 作成したModelを選択
                 selectedObject.type =
@@ -392,7 +407,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
             case 5: {
 
-                modelManager->CreateModel("bunny", textures[0]);
+                modelManager->CreateModel(commandList, "bunny", textures[0]);
 
                 // 作成したModelを選択
                 selectedObject.type =
@@ -410,7 +425,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
                   //=================================================================
 
             case 6: {
-                modelManager->CreateModel("suzanne", textures[5]);
+                modelManager->CreateModel(commandList, "suzanne", textures[5]);
 
                 // 作成したModelを選択
                 selectedObject.type =

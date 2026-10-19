@@ -2,7 +2,7 @@
 
 #include "Core/Logger.h"
 #include "Utils/ConvertString.h"
-
+#include "Utils/AssertHelper.h"
 #include <cassert>
 #include <format>
 
@@ -14,8 +14,7 @@ namespace Kizuna {
         // DXGI Factoryを生成する
         // Adapter列挙やSwapChain生成など、DXGI関連機能を利用するために必要
         HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory_));
-        assert(SUCCEEDED(hr));
-        (void)hr;
+        CheckHRESULT(hr, "CreateDXGIFactory");
 
         // 使用するGPUを決定する
         // Device生成前に利用可能なAdapterを選択する必要がある
@@ -46,9 +45,9 @@ namespace Kizuna {
 
             // Adapterの詳細情報を取得する
             DXGI_ADAPTER_DESC3 adapterDesc{};
+
             HRESULT hr = useAdapter_->GetDesc3(&adapterDesc);
-            assert(SUCCEEDED(hr));
-            (void)hr;
+            CheckHRESULT(hr, "IDXGIAdapter4::GetDesc3");
 
 
             // Software Adapter(WARPなど)は実際のGPUではないため除外する
@@ -78,8 +77,6 @@ namespace Kizuna {
     void DirectXDevice::CreateDevice() {
 
         // 対応可能なFeatureLevelを高い順に定義する
-        // 新しいDirectX機能を優先的に利用し、
-        // 対応していない環境では低いFeatureLevelへフォールバックする
         D3D_FEATURE_LEVEL featureLevels[] = {
             D3D_FEATURE_LEVEL_12_2,
             D3D_FEATURE_LEVEL_12_1,
@@ -92,10 +89,7 @@ namespace Kizuna {
             "12.0"
         };
 
-
-        // GPUが対応しているFeatureLevelを確認しながらDevice生成を試行する
-        // PC環境によって対応するDirectX12機能が異なるため、
-        // 最も高性能な設定から順番に確認する
+        // 対応するFeatureLevelを確認しながらDevice生成を試行する
         for (size_t i = 0; i < _countof(featureLevels); ++i) {
 
             HRESULT hr = D3D12CreateDevice(
@@ -104,21 +98,21 @@ namespace Kizuna {
                 IID_PPV_ARGS(&device_)
             );
 
-
             // Device生成に成功した場合は採用して終了する
             if (SUCCEEDED(hr)) {
-
                 logger_->Log(
-                    std::format("FeatureLevel : {}\n", featureLevelStrings[i])
+                    std::format(
+                        "FeatureLevel : {}\n",
+                        featureLevelStrings[i]
+                    )
                 );
 
                 break;
             }
         }
 
-
-        // Device生成失敗時はDirectX12を利用できないため終了する
-        assert(device_ != nullptr);
+        // すべてのFeatureLevelで失敗した場合は終了する
+        CheckCondition(device_ != nullptr, "DirectX12 Deviceの生成に失敗しました。");
 
         logger_->Log("Complete create D3D12Device!!!\n");
     }
@@ -126,16 +120,14 @@ namespace Kizuna {
 
     // デバッグレイヤー生成
     void DirectXDevice::SetupDebugLayer() {
-
-        ID3D12InfoQueue *infoQueue = nullptr;
+        // InfoQueueをComPtrで管理する
+        Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue;
 
         // InfoQueueを取得できる場合のみデバッグ設定を行う
-        // GPUやAPI使用時の警告・エラーを検出するために利用する
-        if (SUCCEEDED(device_->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+        if (SUCCEEDED(
+            device_->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
 
-
-            // 致命的な問題発生時はデバッグ実行を停止する
-            // 原因追跡を容易にするため、重要度の高いエラーをブレーク対象にする
+            // 重大なエラーが発生した場合はデバッグ実行を停止する
             infoQueue->SetBreakOnSeverity(
                 D3D12_MESSAGE_SEVERITY_CORRUPTION,
                 true
@@ -146,20 +138,14 @@ namespace Kizuna {
                 true
             );
 
-
-            // 無視する警告メッセージを指定する
-            // DirectX12では環境依存で発生する既知の警告が存在するため、
-            // 本当に必要な警告を確認しやすくするため抑制する
+            // 無視するメッセージを指定する
             D3D12_MESSAGE_ID denyIds[] = {
                 D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
             };
 
-
-            // 抑制対象となるメッセージレベル
             D3D12_MESSAGE_SEVERITY severities[] = {
                 D3D12_MESSAGE_SEVERITY_INFO
             };
-
 
             D3D12_INFO_QUEUE_FILTER filter{};
 
@@ -169,13 +155,8 @@ namespace Kizuna {
             filter.DenyList.NumSeverities = _countof(severities);
             filter.DenyList.pSeverityList = severities;
 
-
-            // 指定したメッセージをログ表示対象から除外する
+            // 指定したメッセージを除外する
             infoQueue->PushStorageFilter(&filter);
-
-
-            // QueryInterfaceで取得したインターフェースを解放する
-            infoQueue->Release();
         }
     }
 }
