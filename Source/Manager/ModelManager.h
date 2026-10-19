@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <d3d12.h>
@@ -18,25 +19,24 @@ namespace Kizuna {
     public:
         void Initialize(
             ID3D12Device *device,
-            ID3D12GraphicsCommandList *commandList,
             TextureManager *textureManager);
 
         void CreateModel(
+            ID3D12GraphicsCommandList *commandList,
             const std::string &modelName,
             const TextureData &texture,
             uint32_t color = 0xFFFFFFFF,
             bool enableLighting = true);
 
         void CreateModel(
+            ID3D12GraphicsCommandList *commandList,
             const std::string &modelName,
             uint32_t color = 0xFFFFFFFF,
             bool enableLighting = true);
 
-        void Update(
-            CameraManager *camera);
+        void Update(CameraManager *camera);
 
-        void Draw(
-            ID3D12GraphicsCommandList *commandList);
+        void Draw(ID3D12GraphicsCommandList *commandList);
 
         void DeleteModel(size_t index);
 
@@ -50,7 +50,6 @@ namespace Kizuna {
 
     private:
         ID3D12Device *device_ = nullptr;
-        ID3D12GraphicsCommandList *commandList_ = nullptr;
         TextureManager *textureManager_ = nullptr;
 
         std::vector<std::unique_ptr<Model>> models_;

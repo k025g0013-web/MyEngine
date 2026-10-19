@@ -376,6 +376,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\RenderCore\Camera\Camera.h" />
     <ClInclude Include="Source\RenderCore\Camera\DebugCamera.h" />
     <ClInclude Include="Source\RenderCore\Lighting.h" />
+    <ClInclude Include="Source\Utils\AssertHelper.h" />
     <ClInclude Include="Source\Utils\ColorHelper.h" />
     <ClInclude Include="Source\Utils\ConvertString.h" />
     <ClInclude Include="Source\Utils\RandomHelper.h" />

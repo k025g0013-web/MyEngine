@@ -65,7 +65,7 @@ namespace Kizuna {
 
         // モデルオブジェクト
         modelManager_ = std::make_unique<ModelManager>();
-        modelManager_->Initialize(device, GetCommandList(), textureManager_.get());
+        modelManager_->Initialize(device, textureManager_.get());
 
         // スプライトマネージャー
         spriteManager_ = std::make_unique<SpriteManager>();

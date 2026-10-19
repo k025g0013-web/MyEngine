@@ -3,7 +3,7 @@
 #include "Core/WinApp.h"
 #include "Graphics/Core/DirectXDevice.h"
 #include "Graphics/Core/CommandContext.h"
-
+#include "Utils/AssertHelper.h"
 #include <cassert>
 
 namespace Kizuna {
@@ -27,38 +27,37 @@ namespace Kizuna {
         swapChainDesc_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
         // コマンドキュー、ウィンドウハンドル、設定を渡して生成する
+        Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain1;
+
         HRESULT hr = device->GetDXGIFactory()->CreateSwapChainForHwnd(
             commandContext->GetCommandQueue(), winApp->GetHWND(),
-            &swapChainDesc_, nullptr, nullptr,
-            reinterpret_cast<IDXGISwapChain1 **>(swapChain_.GetAddressOf()));
+            &swapChainDesc_, nullptr, nullptr, &swapChain1);
         assert(SUCCEEDED(hr));
+
+        hr = swapChain1.As(&swapChain_);
+        CheckHRESULT(hr);
 
         // SwapChainが保持するバックバッファを取得する
         // 取得したResourceをRTV作成時に使用する
         for (uint32_t i = 0; i < kBufferCount; ++i) {
             hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(backBuffers_[i].GetAddressOf()));
-            assert(SUCCEEDED(hr));
+            CheckHRESULT(hr);
         }
 
         //====================
         // RTV生成
         //====================
-        // 描画結果を書き込むRenderTargetViewを生成する。
-        // SRGB形式を指定することで、最終出力時に色空間変換を行う。
-        rtvDesc_.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;	// 出力結果をSRGBに変換して書き込む
+        rtvDesc_.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
         rtvDesc_.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
-        // 2つのディスクリプタハンドルを得る 
         for (uint32_t i = 0; i < kBufferCount; ++i) {
-            // スワップチェーンからリソースを取得
-            hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(backBuffers_[i].GetAddressOf()));
-            assert(SUCCEEDED(hr));
-
-            // ディスクリプタの先頭を取得する
+            // ディスクリプタハンドルを取得
             rtvHandles_[i] = descriptorHeap->GetCPUDescriptorHandle(i);
 
-            // 2つ目のディスクリプタハンドルを得る
-            d3d12Device->CreateRenderTargetView(backBuffers_[i].Get(), &rtvDesc_, rtvHandles_[i]);
+            // RTVを作成
+            d3d12Device->CreateRenderTargetView(
+                backBuffers_[i].Get(), &rtvDesc_, rtvHandles_[i]
+            );
         }
 
         //====================
@@ -67,7 +66,6 @@ namespace Kizuna {
         // 3D描画で使用する深度情報管理用リソースを生成する
         CreateDepthStencil(d3d12Device, width, height);
 
-        (void)hr;
     }
 
     void RenderOutput::CreateDepthStencil(ID3D12Device *device, uint32_t width, uint32_t height) {
@@ -117,8 +115,9 @@ namespace Kizuna {
             &resourceDesc,
             D3D12_RESOURCE_STATE_DEPTH_WRITE,
             &depthClearValue,
-            IID_PPV_ARGS(&depthStencilResource_));
-        assert(SUCCEEDED(hr));
+            IID_PPV_ARGS(&depthStencilResource_)
+        );
+        CheckHRESULT(hr);
 
         //====================
         // DSV記述子の生成と保持
@@ -130,11 +129,10 @@ namespace Kizuna {
         device->CreateDepthStencilView(
             depthStencilResource_.Get(), &dsvDesc_, dsvHeap_.GetCPUDescriptorHandle(0)
         );
-
-        (void)hr;
     }
 
     void RenderOutput::Present() {
-        swapChain_->Present(1, 0);
+        HRESULT hr = swapChain_->Present(1, 0);
+        CheckHRESULT(hr);
     }
 }
