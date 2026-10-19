@@ -1,36 +1,21 @@
 #pragma once
 
 #include <wrl.h>
+#include <d3d12.h>
+#include <cstdint>
+#include <vector>
 
 #pragma comment(lib, "d3d12.lib")
-#include <d3d12.h>
-
-#include <cstdint>
 
 namespace Kizuna {
+
     class DirectXDevice;
 
     /// <summary>
     /// DirectX12のDescriptorHeapを管理するクラス
     /// </summary>
-    /// <remarks>
-    /// CBV、SRV、UAV、RTV、DSVなどのDescriptorを管理するHeapを生成し、
-    /// CPUおよびGPUからアクセスするためのDescriptorHandleを提供する。
-    /// </remarks>
     class DescriptorHeap {
     public:
-
-        /// <summary>
-        /// DescriptorHeapを初期化する
-        /// </summary>
-        /// <remarks>
-        /// 指定された種類のDescriptorHeapを生成し、
-        /// Descriptorのサイズを取得して保持する。
-        /// </remarks>
-        /// <param name="device">DirectX12デバイス</param>
-        /// <param name="heapType">生成するDescriptorHeapの種類</param>
-        /// <param name="numDescriptors">作成するDescriptor数</param>
-        /// <param name="shaderVisible">シェーダーから参照可能にするか</param>
         void Initialize(
             ID3D12Device *device,
             D3D12_DESCRIPTOR_HEAP_TYPE heapType,
@@ -38,55 +23,45 @@ namespace Kizuna {
             bool shaderVisible
         );
 
-
-        /// <summary>
-        /// DescriptorHeapを取得する
-        /// </summary>
-        /// <returns>DescriptorHeap</returns>
         ID3D12DescriptorHeap *GetDescriptorHeap() const {
             return descriptorHeap_.Get();
         }
 
+        D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(
+            uint32_t index
+        ) const;
 
-        /// <summary>
-        /// 指定した位置のCPU用DescriptorHandleを取得する
-        /// </summary>
-        /// <param name="index">取得するDescriptor番号</param>
-        /// <returns>CPU DescriptorHandle</returns>
-        D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t index) const;
+        D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(
+            uint32_t index
+        ) const;
 
-
-        /// <summary>
-        /// 指定した位置のGPU用DescriptorHandleを取得する
-        /// </summary>
-        /// <param name="index">取得するDescriptor番号</param>
-        /// <returns>GPU DescriptorHandle</returns>
-        D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t index) const;
-
-
-        /// <summary>
-        /// Descriptor1つ分のサイズを取得する
-        /// </summary>
-        /// <returns>Descriptorサイズ</returns>
         uint32_t GetDescriptorSize() const {
             return descriptorSize_;
         }
 
-        // 次に割り当てるDescriptor番号を取得する
+        // Descriptorを割り当てる
         uint32_t AllocateDescriptor();
 
-        // 次に割り当てるDescriptor番号
+        // Descriptorを解放して再利用可能にする
+        void FreeDescriptor(uint32_t index);
+
+        // 次に新規割り当てするDescriptor番号
         uint32_t nextDescriptorIndex_ = 1;
 
         // 作成したDescriptorの総数
         uint32_t descriptorCount_ = 0;
 
     private:
-
-        /// Descriptor1つあたりのサイズ
+        // Descriptor1つあたりのサイズ
         uint32_t descriptorSize_ = 0;
 
-        /// Descriptorを管理するHeap
+        // Descriptorを管理するHeap
         Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap_;
+
+        // 解放済みDescriptorのインデックスを管理する
+        std::vector<uint32_t> freeDescriptorIndices_;
+
+        // 各インデックスが現在割り当て済みかどうか
+        std::vector<bool> isDescriptorAllocated_;
     };
 }

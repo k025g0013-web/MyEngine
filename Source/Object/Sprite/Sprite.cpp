@@ -144,9 +144,36 @@ namespace Kizuna {
             uvTransformMatrix;
     }
 
+    void Sprite::SetTextureRect(
+        float x,
+        float y,
+        float width,
+        float height,
+        const TextureData &texture) {
+
+        // テクスチャのサイズを取得
+        const float textureWidth =
+            static_cast<float>(texture.metadata.width);
+
+        const float textureHeight =
+            static_cast<float>(texture.metadata.height);
+
+        // テクスチャサイズが不正なら処理しない
+        if (textureWidth <= 0.0f || textureHeight <= 0.0f) {
+            return;
+        }
+
+        // ピクセル座標をUV座標に変換
+        uvTransform_.translate.x = x / textureWidth;
+        uvTransform_.translate.y = y / textureHeight;
+
+        uvTransform_.scale.x = width / textureWidth;
+        uvTransform_.scale.y = height / textureHeight;
+    }
+
     void Sprite::Draw(
         ID3D12GraphicsCommandList *commandList,
-        TextureData &texture) {
+        const TextureData &texture) {
 
         // マテリアル
         commandList->SetGraphicsRootConstantBufferView(

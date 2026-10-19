@@ -982,9 +982,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			engine->SetPipeline(
 				PipelineType::Object3dOpaque);
 
-			lighting.Bind(
-				kLightRegisterIndex,
-				commandList);
+			lighting.Bind(kLightRegisterIndex, commandList);
 
 			// プリミティブ
 			primitiveManager->Update(
@@ -1003,7 +1001,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
         {
             engine->SetPipeline(PipelineType::Particle);
 
-            lighting.Bind(3, commandList);
+            lighting.Bind(kLightRegisterIndex, commandList);
 
             particleManager.Draw(commandList);
         }

@@ -144,7 +144,7 @@
     <ClCompile Include="Source\Graphics\DirectXCommon.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Core\CommandContext.cpp">
+    <ClCompile Include="Source\Graphics\Core\CommandCommon.cpp">
       <Filter>Source\Graphics\Core</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\Core\DescriptorHeap.cpp">
@@ -370,7 +370,7 @@
     <ClInclude Include="Source\Graphics\DirectXCommon.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\Core\CommandContext.h">
+    <ClInclude Include="Source\Graphics\Core\CommandCommon.h">
       <Filter>Source\Graphics\Core</Filter>
     </ClInclude>
     <ClInclude Include="Source\Graphics\Core\DescriptorHeap.h">

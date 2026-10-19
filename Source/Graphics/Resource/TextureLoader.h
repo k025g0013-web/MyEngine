@@ -1,7 +1,7 @@
 #pragma once
 
+#include <cstdint>
 #include <d3d12.h>
-
 #include <DirectXTex/DirectXTex.h>
 #include <wrl.h>
 
@@ -45,6 +45,8 @@ namespace Kizuna {
 
             D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle{};
             D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle{};
+
+            uint32_t descriptorIndex = UINT32_MAX;
         };
 
         bool LoadWICAndGenerateMips(
@@ -65,7 +67,5 @@ namespace Kizuna {
 
         ID3D12Device *device_ = nullptr;
         DescriptorHeap *srvHeap_ = nullptr;
-
-        static uint32_t nextDescriptorIndex_;
     };
 }
