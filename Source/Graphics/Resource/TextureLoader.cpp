@@ -9,10 +9,6 @@
 #include "Utils/ResourceHelper.h"
 
 namespace Kizuna {
-
-    // 次に割り当てるSRVディスクリプタ番号
-    uint32_t TextureLoader::nextDescriptorIndex_ = 1;
-
     void TextureLoader::Initialize(
         ID3D12Device *device, DescriptorHeap *srvHeap) {
         
@@ -51,6 +47,9 @@ namespace Kizuna {
 
         // ShaderResourceViewを生成する
         CreateSRV(context);
+
+        // 割り当てたディスクリプタをTextureに登録する
+        texture.SetDescriptor(srvHeap_, context.descriptorIndex);
 
         // 作成したGPUリソースをTextureへ渡す
         texture.SetResource(std::move(context.resource));
@@ -180,21 +179,27 @@ namespace Kizuna {
     }
 
     void TextureLoader::CreateSRV(LoadContext &context) {
+        context.descriptorIndex = srvHeap_->AllocateDescriptor();
 
-        uint32_t descriptorIndex = srvHeap_->AllocateDescriptor();
+        assert(context.descriptorIndex != UINT32_MAX);
 
-        // CPU/GPUディスクリプタハンドルを取得する
-        context.cpuHandle = srvHeap_->GetCPUDescriptorHandle(descriptorIndex);
-        context.gpuHandle = srvHeap_->GetGPUDescriptorHandle(descriptorIndex);
+        context.cpuHandle =
+            srvHeap_->GetCPUDescriptorHandle(context.descriptorIndex);
 
-        // SRV情報を設定する
+        context.gpuHandle =
+            srvHeap_->GetGPUDescriptorHandle(context.descriptorIndex);
+
         D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
         srvDesc.Format = context.metadata.format;
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Shader4ComponentMapping =
+            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-        srvDesc.Texture2D.MipLevels = UINT(context.metadata.mipLevels);
+        srvDesc.Texture2D.MipLevels =
+            UINT(context.metadata.mipLevels);
 
-        // ShaderResourceViewを生成する
-        device_->CreateShaderResourceView(context.resource.Get(), &srvDesc, context.cpuHandle);
+        device_->CreateShaderResourceView(
+            context.resource.Get(),
+            &srvDesc,
+            context.cpuHandle);
     }
 }

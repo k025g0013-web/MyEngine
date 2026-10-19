@@ -2,7 +2,7 @@
 
 // Graphic/Core
 #include "Graphics/Core/DirectXDevice.h"
-#include "Graphics/Core/CommandContext.h"
+#include "Graphics/Core/CommandCommon.h"
 #include "Graphics/Core/Fence.h"
 #include "Graphics/Core/DescriptorHeap.h"
 
@@ -109,7 +109,7 @@ namespace Kizuna {
         DirectXDevice directXDevice_;
 
         /// コマンド管理
-        CommandContext commandContext_;
+        CommandCommon commandContext_;
 
         /// RTV用DescriptorHeap
         DescriptorHeap rtvDescriptorHeap_;

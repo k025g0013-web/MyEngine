@@ -182,7 +182,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Source\Core\Logger.cpp" />
     <ClCompile Include="Source\Core\WinApp.cpp" />
     <ClCompile Include="Source\External\ImGuiManager.cpp" />
-    <ClCompile Include="Source\Graphics\Core\CommandContext.cpp" />
+    <ClCompile Include="Source\Graphics\Core\CommandCommon.cpp" />
     <ClCompile Include="Source\Graphics\Core\DescriptorHeap.cpp" />
     <ClCompile Include="Source\Graphics\Core\DirectXDevice.cpp" />
     <ClCompile Include="Source\Graphics\Core\Fence.cpp" />
@@ -321,7 +321,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Source\Core\Logger.h" />
     <ClInclude Include="Source\Core\WinApp.h" />
     <ClInclude Include="Source\External\ImGuiManager.h" />
-    <ClInclude Include="Source\Graphics\Core\CommandContext.h" />
+    <ClInclude Include="Source\Graphics\Core\CommandCommon.h" />
     <ClInclude Include="Source\Graphics\Core\DescriptorHeap.h" />
     <ClInclude Include="Source\Graphics\Core\DirectXDevice.h" />
     <ClInclude Include="Source\Graphics\Core\Fence.h" />

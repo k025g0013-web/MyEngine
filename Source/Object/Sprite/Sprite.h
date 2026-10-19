@@ -66,6 +66,21 @@ namespace Kizuna {
         );
 
         /// <summary>
+        /// テクスチャの切り抜き範囲をピクセル座標で指定する
+        /// </summary>
+        /// <param name="x">切り抜き範囲の左上X座標</param>
+        /// <param name="y">切り抜き範囲の左上Y座標</param>
+        /// <param name="width">切り抜き範囲の幅</param>
+        /// <param name="height">切り抜き範囲の高さ</param>
+        void SetTextureRect(
+            float x,
+            float y,
+            float width,
+            float height,
+            const TextureData &texture
+        );
+
+        /// <summary>
         /// スプライトを描画する
         /// </summary>
         /// <param name="commandList">
@@ -76,7 +91,7 @@ namespace Kizuna {
         /// </param>
         void Draw(
             ID3D12GraphicsCommandList *commandList,
-            TextureData &texture
+            const TextureData &texture
         );
 
         Transform &GetTransform() {

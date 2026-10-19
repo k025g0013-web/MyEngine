@@ -16,7 +16,7 @@ namespace Kizuna {
     /// コマンドを記録するCommandAllocator、CommandListの生成と制御を行う。
     /// フレームごとのコマンド記録、実行、リセット処理を担当する。
     /// </remarks>
-    class CommandContext {
+    class CommandCommon {
     public:
 
         /// <summary>

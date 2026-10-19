@@ -2,13 +2,13 @@
 
 #include "Core/WinApp.h"
 #include "Graphics/Core/DirectXDevice.h"
-#include "Graphics/Core/CommandContext.h"
+#include "Graphics/Core/CommandCommon.h"
 #include "Utils/AssertHelper.h"
 #include <cassert>
 
 namespace Kizuna {
     void RenderOutput::Initialize(
-        DirectXDevice *device, CommandContext *commandContext, WinApp *winApp,
+        DirectXDevice *device, CommandCommon *commandContext, WinApp *winApp,
         DescriptorHeap *descriptorHeap, uint32_t width, uint32_t height
     ) {
         ID3D12Device *d3d12Device = device->GetDevice();
@@ -73,7 +73,7 @@ namespace Kizuna {
         // DSVHeap生成
         //====================
         // DepthStencilViewを管理するDescriptorHeapを作成する。
-        dsvHeap_.Initialize(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+        dsvHeap_.Initialize(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 2, false);
 
         //====================
         // Resource
