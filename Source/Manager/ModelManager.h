@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "Object/Model/Model.h"
+#include "Object/Model/ModelLoader.h"
 #include "Graphics/Resource/Texture.h"
 #include "Math/Transform.h"
 
@@ -40,6 +41,8 @@ namespace Kizuna {
 
         void DeleteModel(size_t index);
 
+        void Finalize();
+
         std::vector<std::unique_ptr<Model>> &GetModels() {
             return models_;
         }
@@ -49,9 +52,21 @@ namespace Kizuna {
         }
 
     private:
+        // モデルリソースを取得する
+        std::shared_ptr<ModelData> LoadModelResource(
+            const std::string &modelName);
+
+    private:
+        // モデル名ごとの共有リソース
+        std::map<
+            std::string,
+            std::shared_ptr<ModelData>
+        > modelResources_;
+
         ID3D12Device *device_ = nullptr;
         TextureManager *textureManager_ = nullptr;
 
+        // シーン上の個別インスタンス
         std::vector<std::unique_ptr<Model>> models_;
     };
 }

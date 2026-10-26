@@ -13,26 +13,18 @@ namespace Kizuna {
         uint32_t color,
         bool enableLighting) {
 
-        // モデルを読み込む
-        modelData_ =
-            ModelLoader::LoadObjFile(fileName_);
-
-        // メッシュを生成
-        mesh_.Create(
-            device,
-            modelData_.vertices);
+        assert(device);
+        assert(commandList);
+        assert(modelData_);
 
         // 外部テクスチャを指定していない場合、
         // モデルと同名のテクスチャを読み込む
         if (!useExternalTexture_) {
-
             assert(textureManager_ != nullptr);
 
-            std::string texturePath =
-                FindTexturePath();
+            std::string texturePath = FindTexturePath();
 
             if (!texturePath.empty()) {
-
                 textureData_ =
                     textureManager_->LoadTexture(
                         commandList,
@@ -100,18 +92,21 @@ namespace Kizuna {
         ID3D12GraphicsCommandList *commandList) {
 
         commandList->SetGraphicsRootConstantBufferView(
-            0, material_.GetGPUVirtualAddress());
+            0,
+            material_.GetGPUVirtualAddress());
 
         commandList->SetGraphicsRootConstantBufferView(
-            1, transformationMatrixBuffer_.GetGPUVirtualAddress());
+            1,
+            transformationMatrixBuffer_.GetGPUVirtualAddress());
 
-        // テクスチャが存在する場合のみ設定
         if (textureData_.gpuHandle.ptr != 0) {
             commandList->SetGraphicsRootDescriptorTable(
-                2, textureData_.gpuHandle);
+                2,
+                textureData_.gpuHandle);
         }
 
-        mesh_.Bind(commandList);
+        // 共有メッシュを描画
+        modelData_->mesh.Bind(commandList);
     }
 
     std::string Model::FindTexturePath() const {

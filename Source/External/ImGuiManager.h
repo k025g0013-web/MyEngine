@@ -1,9 +1,9 @@
 #pragma once
 
-#ifdef USE_IMGUI
-
 #include <d3d12.h>
 #include <imgui/imgui.h>
+
+#ifdef USE_IMGUI
 
 namespace Kizuna {
 	/// <summary>
@@ -67,5 +67,5 @@ namespace Kizuna {
 		ImGuiManager &operator=(const ImGuiManager &) = delete;
 	};
 
-#endif
 }
+#endif

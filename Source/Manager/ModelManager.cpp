@@ -26,10 +26,13 @@ namespace Kizuna {
         assert(commandList);
         assert(textureManager_);
 
+        auto modelData = LoadModelResource(modelName);
+
         auto model = std::make_unique<Model>(
             modelName,
             textureManager_,
-            texture);
+            texture,
+            modelData);
 
         model->Create(
             device_,
@@ -50,9 +53,12 @@ namespace Kizuna {
         assert(commandList);
         assert(textureManager_);
 
+        auto modelData = LoadModelResource(modelName);
+
         auto model = std::make_unique<Model>(
             modelName,
-            textureManager_);
+            textureManager_,
+            modelData);
 
         model->Create(
             device_,
@@ -81,10 +87,48 @@ namespace Kizuna {
         }
     }
 
+    void ModelManager::Finalize() {
+        // 先にインスタンスを破棄
+        models_.clear();
+
+        // 次に共有リソースを解放
+        modelResources_.clear();
+
+        device_ = nullptr;
+        textureManager_ = nullptr;
+    }
+
     void ModelManager::DeleteModel(size_t index) {
 
         assert(index < models_.size());
 
         models_.erase(models_.begin() + index);
+    }
+
+    std::shared_ptr<ModelData> ModelManager::LoadModelResource(
+        const std::string &modelName) {
+
+        // 読み込み済みなら再利用
+        auto it = modelResources_.find(modelName);
+
+        if (it != modelResources_.end()) {
+            return it->second;
+        }
+
+        // 初回だけOBJを読み込む
+        auto modelData = std::make_shared<ModelData>(
+            ModelLoader::LoadObjFile(modelName));
+
+        // GPUメッシュも初回だけ生成
+        modelData->mesh.Create(
+            device_,
+            modelData->vertices);
+
+        // キャッシュに登録
+        modelResources_.emplace(
+            modelName,
+            modelData);
+
+        return modelData;
     }
 }
