@@ -9,8 +9,6 @@
 
 namespace Kizuna {
 
-    class DirectXDevice;
-
     /// <summary>
     /// DirectX12のDescriptorHeapを管理するクラス
     /// </summary>
@@ -45,18 +43,18 @@ namespace Kizuna {
         // Descriptorを解放して再利用可能にする
         void FreeDescriptor(uint32_t index);
 
-        // 次に新規割り当てするDescriptor番号
-        uint32_t nextDescriptorIndex_ = 1;
-
-        // 作成したDescriptorの総数
-        uint32_t descriptorCount_ = 0;
-
     private:
         // Descriptor1つあたりのサイズ
         uint32_t descriptorSize_ = 0;
 
         // Descriptorを管理するHeap
         Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap_;
+
+        // 次に新規割り当てするDescriptor番号
+        uint32_t nextDescriptorIndex_ = 1;
+
+        // 作成したDescriptorの総数
+        uint32_t descriptorCount_ = 0;
 
         // 解放済みDescriptorのインデックスを管理する
         std::vector<uint32_t> freeDescriptorIndices_;

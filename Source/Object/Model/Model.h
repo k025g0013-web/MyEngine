@@ -29,9 +29,12 @@ namespace Kizuna {
         /// </summary>
         Model(
             std::string fileName,
-            TextureManager *textureManager)
+            TextureManager *textureManager,
+            std::shared_ptr<ModelData> modelData)
             : fileName_(std::move(fileName)),
-            textureManager_(textureManager) {}
+            textureManager_(textureManager),
+            useExternalTexture_(false),
+            modelData_(std::move(modelData)) {}
 
         /// <summary>
         /// 外部から指定したテクスチャを使用するモデル
@@ -39,11 +42,13 @@ namespace Kizuna {
         Model(
             std::string fileName,
             TextureManager *textureManager,
-            const TextureData &textureData)
+            const TextureData &textureData,
+            std::shared_ptr<ModelData> modelData)
             : fileName_(std::move(fileName)),
             textureManager_(textureManager),
             textureData_(textureData),
-            useExternalTexture_(true) {}
+            useExternalTexture_(true),
+            modelData_(std::move(modelData)) {}
 
         /// <summary>
         /// モデルを生成する
@@ -98,9 +103,9 @@ namespace Kizuna {
 
         // モデルファイル名
         std::string fileName_;
-
-        // モデルデータ
-        ModelData modelData_;
+        
+        // 共有するモデルリソース
+        std::shared_ptr<ModelData> modelData_;
 
         // テクスチャ管理
         TextureManager *textureManager_ = nullptr;
@@ -113,9 +118,6 @@ namespace Kizuna {
 
         // GPUリソース生成
         Renderer renderer_;
-
-        // 描画に使用するメッシュ
-        Mesh mesh_;
 
         // 通常描画用マテリアル
         Material material_;

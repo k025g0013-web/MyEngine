@@ -42,10 +42,7 @@ namespace Kizuna {
 
         ID3D12Device *device =
             directXCommon_->GetDevice();
-
-        HWND hwnd =
-            winApp_->GetHWND();
-
+      
         // 各種リソース・情報マネージャの初期化
         // テクスチャ
         textureManager_ = std::make_unique<TextureManager>();
@@ -96,7 +93,7 @@ namespace Kizuna {
 #ifdef USE_IMGUI
         // ImGui
         ImGuiManager::GetInstance()->Initialize(
-            hwnd,
+            winApp_.get()->GetHWND(),
             device,
             directXCommon_->GetRenderOutput()->GetBufferCount(),
             directXCommon_->GetRenderOutput()->GetRTVDesc().Format,

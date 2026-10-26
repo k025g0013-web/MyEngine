@@ -1,10 +1,10 @@
 #include "ImGuiManager.h"
 
-#ifdef USE_IMGUI
-
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_dx12.h>
 #include <imgui/imgui_impl_win32.h>
+
+#ifdef USE_IMGUI
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -79,5 +79,5 @@ namespace Kizuna {
 		ImGui::DestroyContext();
 	}
 
-#endif
 }
+#endif
